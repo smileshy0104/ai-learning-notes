@@ -33,6 +33,8 @@
 #upd-before:checked~.controls label[for=upd-before],#upd-after:checked~.controls label[for=upd-after]{background:var(--blue);color:#fff;border-color:var(--blue)}
 #upd-before:checked~.panel-upd-before,#upd-after:checked~.panel-upd-after{display:block}
 .def{background:#f2f9f3;border-left:4px solid #2e7d32;border-radius:8px;padding:12px 16px;margin:12px 0}
+#gen-1:checked~.controls label[for=gen-1],#gen-2:checked~.controls label[for=gen-2],#gen-3:checked~.controls label[for=gen-3],#gen-4:checked~.controls label[for=gen-4]{background:var(--blue);color:#fff;border-color:var(--blue)}
+#gen-1:checked~.panel-gen1,#gen-2:checked~.panel-gen2,#gen-3:checked~.panel-gen3,#gen-4:checked~.panel-gen4{display:block}
 @media(max-width:650px){section{padding:20px 16px}.grid{grid-template-columns:1fr}body{font-size:16px}main{padding:25px 12px 55px}th,td{padding:8px}}
 </style>
 </head>
@@ -44,7 +46,7 @@
 <p>沿着“文字 → 向量 → 读取上下文 → 预测下一个词元”这条路线，理解 Transformer。每次先看一个小例子，再展开公式。</p>
 <p class="source">对应所提供课件第 1–115 页。这里的数字、分词和向量是教学示例，并非真实模型的运行结果。页面可离线打开，无需安装依赖。</p>
 <div class="note small"><strong>切换按钮没有反应？</strong>这通常是因为文件在“快速预览”或编辑器内预览中打开，这类窗口会禁用脚本。请用 Chrome、Safari 或 Firefox 直接打开本文件。本页的所有切换都使用纯 CSS 实现，即使脚本被禁用也能点击；只有注意力滑块需要脚本。</div>
-<nav aria-label="知识点导航"><a href="#learning-map">学习地图</a><a href="#basics">⓿ 基础概念</a><a href="#background">前置动机</a><a href="#introduction">导读 · Introduction</a><a href="#tokens">① 分词</a><a href="#embedding">② 词元表示</a><a href="#neural-nets">②′ 神经网络</a><a href="#attention">③ 注意力实验</a><a href="#components">③′ 其他零件</a><a href="#mask">④ 因果掩码</a><a href="#architecture">⑤ 完整流程</a><a href="#beyond-lecture">补充展望</a><a href="#deep-dive">⑥ 深入补充</a></nav>
+<nav aria-label="知识点导航"><a href="#learning-map">学习地图</a><a href="#basics">⓿ 基础概念</a><a href="#introduction">导读 · Introduction</a><a href="#background">前置动机</a><a href="#tokens">① 分词</a><a href="#embedding">② 词元表示</a><a href="#neural-nets">②′ 神经网络</a><a href="#attention">③ 注意力实验</a><a href="#components">③′ 其他零件</a><a href="#architecture">④ 编码器/解码器</a><a href="#mask">⑤ 因果掩码</a><a href="#end-to-end">⑥ 端到端示例</a><a href="#beyond-lecture">⑦ 补充展望</a><a href="#deep-dive">⑧ 深入补充</a></nav>
 </header>
 <section id="learning-map">
 <div class="tag">学习地图 · 第一讲主线与补充阅读</div>
@@ -170,26 +172,7 @@
 <p class="source">本节为通用机器学习基础，不是课件内容。所有数字已用脚本计算核对；学习率取了便于观察的较大值，真实训练常用 1e−4 量级并配合 warmup 与衰减。</p>
 </section>
 
-<section id="background">
-<div class="tag">补充阅读 · 参考文档 1.1–1.3 节；不是第一讲独立课件章节</div>
-<h2>前置动机：从“数出现次数”到“学习表示”</h2>
-<p>语言模型的一个基本任务是：<strong>给定前文，为下一个 token 分配概率。</strong>最直接的办法，就是统计同样的前文后面出现过什么。</p>
-<div class="math">训练小语料（两句话，分别统计，不跨句连接）：<br>[BOS] agent learns [EOS]<br>[BOS] agent works [EOS]</div>
-<div class="flow"><span class="chip">前文：agent</span><span class="arrow">→ 数后继词 →</span><span class="chip">learns：1 次 → 1/2</span><span class="chip">works：1 次 → 1/2</span></div>
-<p>这叫 Bigram：只看前一个词。一般 N-gram 只看前 n−1 个词，用局部历史近似完整历史。这里的 n 是 N-gram 阶数，与后文表示序列长度的 n 属于不同语境。</p>
-<div class="math">P(下一个词 | 当前词) = 两词相邻出现次数 / 当前词作为前文的次数<br>P(agent | [BOS]) = 2/2 = 1<br>P(learns | agent) = 1/2<br>P([EOS] | learns) = 1/1 = 1<br>P(agent learns [EOS] | [BOS]) = 1 × 1/2 × 1 = 1/2</div>
-<div class="grid"><div class="layer"><strong>问题一：没见过的组合怎么办？</strong><br>若 robot 在训练语料里没出现，分母计数为 0，无法直接给出概率估计；即使见过 robot，新组合 robot learns 也可能计数为 0。平滑与回退能缓解，但需要额外规则。</div><div class="layer"><strong>问题二：相似词不能自然共享知识</strong><br>agent learns 出现过，不等于计数表就知道 robot learns 也合理。神经模型通过学习表示与共享参数，获得更多泛化机会。</div></div>
-<p>学习向量的动机因此很具体：把离散符号映射到能计算、能共享统计规律的空间。它不保证每个新组合都合理，但能避免只靠独立的词组计数。</p>
-<h3>从“学表示”到“用表示计算相似”</h3>
-<p>2003 年的神经语言模型（NNLM）把两件事合在一起：先给每个词一张稠密向量表，再用前馈网络根据前几个词预测下一个词。收益很直接：<strong>没见过的组合也能得到一个合理的概率</strong>，因为相似词共享相近的参数。</p>
-<div class="flow"><span class="chip">离散词 → 查表得到稠密向量</span><span class="arrow">→</span><span class="chip">拼接前 n−1 个词的向量</span><span class="arrow">→</span><span class="chip">前馈网络</span><span class="arrow">→</span><span class="chip">词表上的概率</span></div>
-<p>一旦词变成了向量，“意思接近”就能用数字衡量。常用<strong>余弦相似度</strong>，它只看方向、不看长度：</p>
-<div class="math">cos(a, b) = (a · b) / (|a| × |b|)<br>1 → 方向相同；0 → 正交；−1 → 方向相反</div>
-<p>用本页第 ② 节的示例嵌入表算一下（这些数字是教学示例，不是真实模型输出）：</p>
-<div class="table-wrap"><table><thead><tr><th>词对</th><th>余弦相似度</th><th>怎么读</th></tr></thead><tbody><tr><th>泰迪熊 · 可爱</th><td>0.981</td><td>方向几乎一致，意思接近</td></tr><tr><th>阅读 · 书</th><td>0.985</td><td>同为“阅读类”语境</td></tr><tr><th>泰迪熊 · 阅读</th><td>−0.333</td><td>方向偏反，关系疏远</td></tr><tr><th>可爱 · “.”</th><td>−0.784</td><td>符号类 token 与语义词差距大</td></tr></tbody></table></div>
-<div class="note">余弦只看方向。若把某个向量整体放大两倍，它与别的词的余弦相似度不变，但欧氏距离会变。这也是为什么相似度常优先用余弦。</div>
-<details><summary>与第一讲的联系</summary><p>课程从词表示与 RNN 讲起。这里补上它们之前的动机：计数模型难以充分共享知识 → 学习向量表示；静态向量没有当前语境 → 序列模型；循环传递路径很长 → 注意力直接读取相关位置。</p></details>
-</section>
+
 <section id="introduction">
 <div class="tag">Lecture outline · Introduction（课件第 1–22 页）</div>
 <h2>Introduction：我们为什么要学 Transformer？</h2>
@@ -217,6 +200,26 @@
 <details><summary>理解检查：ChatGPT、Transformer、Agent 是同一个东西吗？</summary><p>它们描述不同层面。Transformer 描述模型的架构；ChatGPT 是对话产品；Agent 描述围绕目标执行步骤的系统形式。一个产品可以使用 Transformer 架构的模型，也可以提供使用工具的代理功能。</p></details>
 <details><summary>理解检查：为什么第一讲先讲 2017 年的翻译架构？</summary><p>它提供了一个清晰的完整例子：源句进入编码器，解码器结合源句与已有输出生成译文。先理解嵌入、注意力和前馈网络怎样配合，后续再学习现代模型保留、修改或移除了哪些组件。</p></details>
 <p class="source">课件定位：第 1–16 页为课程开场；第 17–22 页为 Introduction 的发展脉络。例句、概念对照与代理循环为教学补充。课件还介绍后训练、AI Agents 和 Diffusion LLMs 等后续主题，本讲无需提前掌握。课程安排和考试信息以课程官方发布为准。</p>
+</section>
+<section id="background">
+<div class="tag">补充阅读 · 参考文档 1.1–1.3 节；不是第一讲独立课件章节</div>
+<h2>前置动机：从“数出现次数”到“学习表示”</h2>
+<p>语言模型的一个基本任务是：<strong>给定前文，为下一个 token 分配概率。</strong>最直接的办法，就是统计同样的前文后面出现过什么。</p>
+<div class="math">训练小语料（两句话，分别统计，不跨句连接）：<br>[BOS] agent learns [EOS]<br>[BOS] agent works [EOS]</div>
+<div class="flow"><span class="chip">前文：agent</span><span class="arrow">→ 数后继词 →</span><span class="chip">learns：1 次 → 1/2</span><span class="chip">works：1 次 → 1/2</span></div>
+<p>这叫 Bigram：只看前一个词。一般 N-gram 只看前 n−1 个词，用局部历史近似完整历史。这里的 n 是 N-gram 阶数，与后文表示序列长度的 n 属于不同语境。</p>
+<div class="math">P(下一个词 | 当前词) = 两词相邻出现次数 / 当前词作为前文的次数<br>P(agent | [BOS]) = 2/2 = 1<br>P(learns | agent) = 1/2<br>P([EOS] | learns) = 1/1 = 1<br>P(agent learns [EOS] | [BOS]) = 1 × 1/2 × 1 = 1/2</div>
+<div class="grid"><div class="layer"><strong>问题一：没见过的组合怎么办？</strong><br>若 robot 在训练语料里没出现，分母计数为 0，无法直接给出概率估计；即使见过 robot，新组合 robot learns 也可能计数为 0。平滑与回退能缓解，但需要额外规则。</div><div class="layer"><strong>问题二：相似词不能自然共享知识</strong><br>agent learns 出现过，不等于计数表就知道 robot learns 也合理。神经模型通过学习表示与共享参数，获得更多泛化机会。</div></div>
+<p>学习向量的动机因此很具体：把离散符号映射到能计算、能共享统计规律的空间。它不保证每个新组合都合理，但能避免只靠独立的词组计数。</p>
+<h3>从“学表示”到“用表示计算相似”</h3>
+<p>2003 年的神经语言模型（NNLM）把两件事合在一起：先给每个词一张稠密向量表，再用前馈网络根据前几个词预测下一个词。收益很直接：<strong>没见过的组合也能得到一个合理的概率</strong>，因为相似词共享相近的参数。</p>
+<div class="flow"><span class="chip">离散词 → 查表得到稠密向量</span><span class="arrow">→</span><span class="chip">拼接前 n−1 个词的向量</span><span class="arrow">→</span><span class="chip">前馈网络</span><span class="arrow">→</span><span class="chip">词表上的概率</span></div>
+<p>一旦词变成了向量，“意思接近”就能用数字衡量。常用<strong>余弦相似度</strong>，它只看方向、不看长度：</p>
+<div class="math">cos(a, b) = (a · b) / (|a| × |b|)<br>1 → 方向相同；0 → 正交；−1 → 方向相反</div>
+<p>用本页第 ② 节的示例嵌入表算一下（这些数字是教学示例，不是真实模型输出）：</p>
+<div class="table-wrap"><table><thead><tr><th>词对</th><th>余弦相似度</th><th>怎么读</th></tr></thead><tbody><tr><th>泰迪熊 · 可爱</th><td>0.981</td><td>方向几乎一致，意思接近</td></tr><tr><th>阅读 · 书</th><td>0.985</td><td>同为“阅读类”语境</td></tr><tr><th>泰迪熊 · 阅读</th><td>−0.333</td><td>方向偏反，关系疏远</td></tr><tr><th>可爱 · “.”</th><td>−0.784</td><td>符号类 token 与语义词差距大</td></tr></tbody></table></div>
+<div class="note">余弦只看方向。若把某个向量整体放大两倍，它与别的词的余弦相似度不变，但欧氏距离会变。这也是为什么相似度常优先用余弦。</div>
+<details><summary>与第一讲的联系</summary><p>课程从词表示与 RNN 讲起。这里补上它们之前的动机：计数模型难以充分共享知识 → 学习向量表示；静态向量没有当前语境 → 序列模型；循环传递路径很长 → 注意力直接读取相关位置。</p></details>
 </section>
 <section id="tokens" class="switch">
 <div class="tag">Lecture outline · Tokenization（课件第 24–31 页）</div>
@@ -455,6 +458,12 @@
 <section id="attention" class="switch">
 <div class="tag">Lecture outline · Self-attention mechanism（课件第 57–62 页）</div>
 <h2>③ 注意力：这一次，该从谁那里读取多少信息？</h2>
+<h3>注意力到底在做什么：一个通用框架</h3>
+<p>先不谈 Transformer。人在读句子时会<strong>有选择地分配注意力</strong>——“小明把书放在桌上，然后他去吃饭，因为他饿了”里的“他”显然指小明，而不是句子里的每个字都同等重要。注意力机制就是把这件事数学化：给每个位置算一个权重，权重高的信息保留得多。</p>
+<p>所有注意力都可以写成同一个框架：<strong>用 Query 去查 Key，取回 Value</strong>。</p>
+<div class="table-wrap"><table><thead><tr><th>角色</th><th>图书馆类比</th><th>含义</th></tr></thead><tbody><tr><th>Query（Q）</th><td>你的检索需求</td><td>我现在想找什么信息？</td></tr><tr><th>Key（K）</th><td>每本书的标签／索引</td><td>我能提供什么特征，供你匹配？</td></tr><tr><th>Value（V）</th><td>书里的实际内容</td><td>匹配上了，我实际给你什么信息？</td></tr></tbody></table></div>
+<div class="math">① Q 与所有 K 做点积 → 匹配分数<br>② 分数过 softmax → 权重（非负、和为 1）<br>③ 用权重加权求和 V → 本次的输出</div>
+<p class="small muted">记住这个框架，后面的多模态、检索增强（RAG）本质上都是同一套“查询—检索—汇总”。</p>
 <p>先把视线固定在“泰迪熊”这个位置。我们给它一个查询向量 <strong>Q</strong>，用 Q 与各位置的 <strong>K</strong> 计算匹配分数，再按权重汇总各位置的 <strong>V</strong>。</p>
 <div class="flow"><span class="chip">Q：用来匹配的信息需求</span><span class="chip">K：供匹配的特征</span><span class="chip">V：实际读取的信息</span></div>
 <p>点击不同的 Q，查看同一组 K 和 V 会得到什么结果。这一步先允许读取全部三个位置。Q 是查询，K 提供匹配特征，V 是被读取的信息。</p>
@@ -466,31 +475,42 @@
 <div class="controls" role="group" aria-label="选择查询向量"><span>选择 Q：</span><label for="qpreset-1">Q=[1,0]</label><label for="qpreset-2">Q=[2,−2]</label><label for="qpreset-3">Q=[0,0]</label><label for="qpreset-4">Q=[2,2]</label><label for="qpreset-5">Q=[−2,2]</label></div>
 <div class="panel panel-p1">
 <div class="table-wrap"><table><caption>单个查询的完整计算：Q = [1, 0]，d_k = 2</caption><thead><tr><th>位置</th><th>K</th><th>V</th><th>Q · K</th><th>除以 √2 后</th><th>softmax 权重</th></tr></thead><tbody><tr><th scope="row">泰迪熊</th><td>[1,0]</td><td>[1,0]</td><td>1.000</td><td>0.707</td><td>40.11%</td></tr><tr><th scope="row">可爱</th><td>[0,1]</td><td>[0,2]</td><td>0.000</td><td>0.000</td><td>19.78%</td></tr><tr><th scope="row">阅读</th><td>[1,1]</td><td>[1,1]</td><td>1.000</td><td>0.707</td><td>40.11%</td></tr></tbody></table></div>
-<div class="grid"><div><h3>读取比例</h3><div class="bars"><div class="barrow"><span>泰迪熊</span><div class="track"><div class="fill" style="width:40.11%"></div></div><span>40.1%</span></div><div class="barrow"><span>可爱</span><div class="track"><div class="fill" style="width:19.78%"></div></div><span>19.8%</span></div><div class="barrow"><span>阅读</span><div class="track"><div class="fill" style="width:40.11%"></div></div><span>40.1%</span></div></div></div><div><h3>汇总后的输出向量</h3><div class="math">0.401 × [1,0] + 0.198 × [0,2] + 0.401 × [1,1] ≈ [0.802, 0.797]</div><p class="small muted">每个维度都用相同权重求和。这里只展示一个头、一个查询位置。</p></div></div>
+<div class="grid"><div><h4>读取比例</h4><div class="bars"><div class="barrow"><span>泰迪熊</span><div class="track"><div class="fill" style="width:40.11%"></div></div><span>40.1%</span></div><div class="barrow"><span>可爱</span><div class="track"><div class="fill" style="width:19.78%"></div></div><span>19.8%</span></div><div class="barrow"><span>阅读</span><div class="track"><div class="fill" style="width:40.11%"></div></div><span>40.1%</span></div></div></div><div><h4>汇总后的输出向量</h4><div class="math">0.401 × [1,0] + 0.198 × [0,2] + 0.401 × [1,1] ≈ [0.802, 0.797]</div><p class="small muted">每个维度都用相同权重求和。这里只展示一个头、一个查询位置。</p></div></div>
 </div>
 <div class="panel panel-p2">
 <div class="table-wrap"><table><caption>单个查询的完整计算：Q = [2, −2]，d_k = 2</caption><thead><tr><th>位置</th><th>K</th><th>V</th><th>Q · K</th><th>除以 √2 后</th><th>softmax 权重</th></tr></thead><tbody><tr><th scope="row">泰迪熊</th><td>[1,0]</td><td>[1,0]</td><td>2.000</td><td>1.414</td><td>76.79%</td></tr><tr><th scope="row">可爱</th><td>[0,1]</td><td>[0,2]</td><td>-2.000</td><td>-1.414</td><td>4.54%</td></tr><tr><th scope="row">阅读</th><td>[1,1]</td><td>[1,1]</td><td>0.000</td><td>0.000</td><td>18.67%</td></tr></tbody></table></div>
-<div class="grid"><div><h3>读取比例</h3><div class="bars"><div class="barrow"><span>泰迪熊</span><div class="track"><div class="fill" style="width:76.79%"></div></div><span>76.8%</span></div><div class="barrow"><span>可爱</span><div class="track"><div class="fill" style="width:4.54%"></div></div><span>4.5%</span></div><div class="barrow"><span>阅读</span><div class="track"><div class="fill" style="width:18.67%"></div></div><span>18.7%</span></div></div></div><div><h3>汇总后的输出向量</h3><div class="math">0.768 × [1,0] + 0.045 × [0,2] + 0.187 × [1,1] ≈ [0.955, 0.277]</div><p class="small muted">每个维度都用相同权重求和。这里只展示一个头、一个查询位置。</p></div></div>
+<div class="grid"><div><h4>读取比例</h4><div class="bars"><div class="barrow"><span>泰迪熊</span><div class="track"><div class="fill" style="width:76.79%"></div></div><span>76.8%</span></div><div class="barrow"><span>可爱</span><div class="track"><div class="fill" style="width:4.54%"></div></div><span>4.5%</span></div><div class="barrow"><span>阅读</span><div class="track"><div class="fill" style="width:18.67%"></div></div><span>18.7%</span></div></div></div><div><h4>汇总后的输出向量</h4><div class="math">0.768 × [1,0] + 0.045 × [0,2] + 0.187 × [1,1] ≈ [0.955, 0.277]</div><p class="small muted">每个维度都用相同权重求和。这里只展示一个头、一个查询位置。</p></div></div>
 </div>
 <div class="panel panel-p3">
 <div class="table-wrap"><table><caption>单个查询的完整计算：Q = [0, 0]，d_k = 2</caption><thead><tr><th>位置</th><th>K</th><th>V</th><th>Q · K</th><th>除以 √2 后</th><th>softmax 权重</th></tr></thead><tbody><tr><th scope="row">泰迪熊</th><td>[1,0]</td><td>[1,0]</td><td>0.000</td><td>0.000</td><td>33.33%</td></tr><tr><th scope="row">可爱</th><td>[0,1]</td><td>[0,2]</td><td>0.000</td><td>0.000</td><td>33.33%</td></tr><tr><th scope="row">阅读</th><td>[1,1]</td><td>[1,1]</td><td>0.000</td><td>0.000</td><td>33.33%</td></tr></tbody></table></div>
-<div class="grid"><div><h3>读取比例</h3><div class="bars"><div class="barrow"><span>泰迪熊</span><div class="track"><div class="fill" style="width:33.33%"></div></div><span>33.3%</span></div><div class="barrow"><span>可爱</span><div class="track"><div class="fill" style="width:33.33%"></div></div><span>33.3%</span></div><div class="barrow"><span>阅读</span><div class="track"><div class="fill" style="width:33.33%"></div></div><span>33.3%</span></div></div></div><div><h3>汇总后的输出向量</h3><div class="math">0.333 × [1,0] + 0.333 × [0,2] + 0.333 × [1,1] ≈ [0.667, 1.000]</div><p class="small muted">每个维度都用相同权重求和。这里只展示一个头、一个查询位置。</p></div></div>
+<div class="grid"><div><h4>读取比例</h4><div class="bars"><div class="barrow"><span>泰迪熊</span><div class="track"><div class="fill" style="width:33.33%"></div></div><span>33.3%</span></div><div class="barrow"><span>可爱</span><div class="track"><div class="fill" style="width:33.33%"></div></div><span>33.3%</span></div><div class="barrow"><span>阅读</span><div class="track"><div class="fill" style="width:33.33%"></div></div><span>33.3%</span></div></div></div><div><h4>汇总后的输出向量</h4><div class="math">0.333 × [1,0] + 0.333 × [0,2] + 0.333 × [1,1] ≈ [0.667, 1.000]</div><p class="small muted">每个维度都用相同权重求和。这里只展示一个头、一个查询位置。</p></div></div>
 </div>
 <div class="panel panel-p4">
 <div class="table-wrap"><table><caption>单个查询的完整计算：Q = [2, 2]，d_k = 2</caption><thead><tr><th>位置</th><th>K</th><th>V</th><th>Q · K</th><th>除以 √2 后</th><th>softmax 权重</th></tr></thead><tbody><tr><th scope="row">泰迪熊</th><td>[1,0]</td><td>[1,0]</td><td>2.000</td><td>1.414</td><td>16.36%</td></tr><tr><th scope="row">可爱</th><td>[0,1]</td><td>[0,2]</td><td>2.000</td><td>1.414</td><td>16.36%</td></tr><tr><th scope="row">阅读</th><td>[1,1]</td><td>[1,1]</td><td>4.000</td><td>2.828</td><td>67.28%</td></tr></tbody></table></div>
-<div class="grid"><div><h3>读取比例</h3><div class="bars"><div class="barrow"><span>泰迪熊</span><div class="track"><div class="fill" style="width:16.36%"></div></div><span>16.4%</span></div><div class="barrow"><span>可爱</span><div class="track"><div class="fill" style="width:16.36%"></div></div><span>16.4%</span></div><div class="barrow"><span>阅读</span><div class="track"><div class="fill" style="width:67.28%"></div></div><span>67.3%</span></div></div></div><div><h3>汇总后的输出向量</h3><div class="math">0.164 × [1,0] + 0.164 × [0,2] + 0.673 × [1,1] ≈ [0.836, 1.000]</div><p class="small muted">每个维度都用相同权重求和。这里只展示一个头、一个查询位置。</p></div></div>
+<div class="grid"><div><h4>读取比例</h4><div class="bars"><div class="barrow"><span>泰迪熊</span><div class="track"><div class="fill" style="width:16.36%"></div></div><span>16.4%</span></div><div class="barrow"><span>可爱</span><div class="track"><div class="fill" style="width:16.36%"></div></div><span>16.4%</span></div><div class="barrow"><span>阅读</span><div class="track"><div class="fill" style="width:67.28%"></div></div><span>67.3%</span></div></div></div><div><h4>汇总后的输出向量</h4><div class="math">0.164 × [1,0] + 0.164 × [0,2] + 0.673 × [1,1] ≈ [0.836, 1.000]</div><p class="small muted">每个维度都用相同权重求和。这里只展示一个头、一个查询位置。</p></div></div>
 </div>
 <div class="panel panel-p5">
 <div class="table-wrap"><table><caption>单个查询的完整计算：Q = [-2, 2]，d_k = 2</caption><thead><tr><th>位置</th><th>K</th><th>V</th><th>Q · K</th><th>除以 √2 后</th><th>softmax 权重</th></tr></thead><tbody><tr><th scope="row">泰迪熊</th><td>[1,0]</td><td>[1,0]</td><td>-2.000</td><td>-1.414</td><td>4.54%</td></tr><tr><th scope="row">可爱</th><td>[0,1]</td><td>[0,2]</td><td>2.000</td><td>1.414</td><td>76.79%</td></tr><tr><th scope="row">阅读</th><td>[1,1]</td><td>[1,1]</td><td>0.000</td><td>0.000</td><td>18.67%</td></tr></tbody></table></div>
-<div class="grid"><div><h3>读取比例</h3><div class="bars"><div class="barrow"><span>泰迪熊</span><div class="track"><div class="fill" style="width:4.54%"></div></div><span>4.5%</span></div><div class="barrow"><span>可爱</span><div class="track"><div class="fill" style="width:76.79%"></div></div><span>76.8%</span></div><div class="barrow"><span>阅读</span><div class="track"><div class="fill" style="width:18.67%"></div></div><span>18.7%</span></div></div></div><div><h3>汇总后的输出向量</h3><div class="math">0.045 × [1,0] + 0.768 × [0,2] + 0.187 × [1,1] ≈ [0.232, 1.723]</div><p class="small muted">每个维度都用相同权重求和。这里只展示一个头、一个查询位置。</p></div></div>
+<div class="grid"><div><h4>读取比例</h4><div class="bars"><div class="barrow"><span>泰迪熊</span><div class="track"><div class="fill" style="width:4.54%"></div></div><span>4.5%</span></div><div class="barrow"><span>可爱</span><div class="track"><div class="fill" style="width:76.79%"></div></div><span>76.8%</span></div><div class="barrow"><span>阅读</span><div class="track"><div class="fill" style="width:18.67%"></div></div><span>18.7%</span></div></div></div><div><h4>汇总后的输出向量</h4><div class="math">0.045 × [1,0] + 0.768 × [0,2] + 0.187 × [1,1] ≈ [0.232, 1.723]</div><p class="small muted">每个维度都用相同权重求和。这里只展示一个头、一个查询位置。</p></div></div>
 </div>
 <div class="note small">在支持脚本的浏览器中，本页还会额外显示一组滑块，可以连续调出预设以外的 Q。当前窗口若禁用了脚本，预设按钮仍然完全可用。</div>
 <div id="slider-demo" hidden>
 <h3>连续调节 Q（需要脚本）</h3>
 <div class="controls"><label for="q1">Q 的第 1 维：<output id="q1-value">1.0</output></label><input id="q1" type="range" min="-2" max="2" step="0.1" value="1"><label for="q2">第 2 维：<output id="q2-value">0.0</output></label><input id="q2" type="range" min="-2" max="2" step="0.1" value="0"><button id="reset" type="button">重置</button></div>
 <div class="table-wrap"><table><caption>滑块结果：d_k = 2</caption><thead><tr><th>位置</th><th>K</th><th>V</th><th>Q · K</th><th>除以 √2 后</th><th>softmax 权重</th></tr></thead><tbody id="attention-table"></tbody></table></div>
-<div class="grid"><div><h3>读取比例</h3><div id="attention-bars" class="bars"></div></div><div><h3>汇总后的输出向量</h3><div id="attention-result" class="math" aria-live="polite"></div></div></div>
+<div class="grid"><div><h4>读取比例</h4><div id="attention-bars" class="bars"></div></div><div><h4>汇总后的输出向量</h4><div id="attention-result" class="math" aria-live="polite"></div></div></div>
 </div>
+<h3>自注意力的六个步骤（带形状）</h3>
+<p>设序列长度 n、模型维度 d_model、每个头的键维度 d_k。“自”是指 Q、K、V 都来自同一批输入。</p>
+<div class="table-wrap"><table><thead><tr><th>步骤</th><th>做什么</th><th>形状</th></tr></thead><tbody>
+<tr><td>①</td><td>输入 X 分别乘三个可学习矩阵，得到 Q、K、V</td><td>X: n×d_model → Q,K: n×d_k；V: n×d_v</td></tr>
+<tr><td>②</td><td>Q 与 K 转置相乘，得到每个查询对每个键的分数</td><td>QKᵀ: n×n</td></tr>
+<tr><td>③</td><td>除以 √d_k 控制数值尺度（维度过大时点积会很大，softmax 会过尖）</td><td>n×n</td></tr>
+<tr><td>④</td><td>按行做 softmax，每行和为 1</td><td>n×n 权重矩阵 A</td></tr>
+<tr><td>⑤</td><td>A 乘 V，按权重汇总信息</td><td>n×d_v</td></tr>
+<tr><td>⑥</td><td>多头时把各头结果拼接，再乘 W_O 回到 d_model</td><td>n×d_model</td></tr>
+</tbody></table></div>
+<p class="small muted">第 ② 步的 n×n 就是注意力开销随序列长度平方增长的原因；第 ③ 步的缩放不影响表达力，只影响优化是否稳定。</p>
 <details><summary>展开公式：为什么要做这几步？</summary><div class="math">分数 s_j = (q · k_j) / √d_k<br>权重 a_j = exp(s_j) / Σ exp(s_l)<br>输出 z = Σ a_j v_j</div><p>点积衡量经过学习的查询与键的匹配程度。缩放用来控制分数尺度；softmax 把分数变成非负且总和为 1 的权重。最后按权重混合 V。</p><p>把所有位置的查询一起计算，就是：</p><div class="math">Attention(Q,K,V) = softmax(QKᵀ / √d_k) V</div><p>如果共有 n 个位置，Q 与 K 都是 n × d_k，QKᵀ 就是 n × n。每一行对应一个查询，每一列对应一个被读取的位置。softmax 对每一行分别计算。</p></details>
 <details><summary>Q、K、V 从哪里来？</summary><p>真实模型通过不同的可学习矩阵对输入 X 做投影：Q = XW_Q，K = XW_K，V = XW_V。这里直接给定 K、V 并调整 Q，是为了隔离并看清匹配与汇总的过程。滑块不表示真实模型会让人手动设置查询。</p></details>
 <details><summary>试一试：把 Q 的两维都调成 0，会怎样？</summary><p>所有点积都等于 0，所以三个位置的权重均为 1/3。即使各个 V 不同，读取比例也相同。你可以再把 Q 改为 [2, −2]，观察它与 [1, 0]、[0, 1]、[1, 1] 三个键的匹配差异。</p></details>
@@ -500,6 +520,18 @@
 <div class="grid"><div><h4>读取比例</h4><div class="bars"><div class="barrow"><span>泰迪熊</span><div class="track"><div class="fill" style="width:15.2%"></div></div><span>15.2%</span></div><div class="barrow"><span>可爱</span><div class="track"><div class="fill" style="width:27.1%"></div></div><span>27.1%</span></div><div class="barrow"><span>阅读</span><div class="track"><div class="fill" style="width:15.2%"></div></div><span>15.2%</span></div><div class="barrow"><span>是</span><div class="track"><div class="fill" style="width:27.1%"></div></div><span>27.1%</span></div><div class="barrow"><span>现在分词</span><div class="track"><div class="fill" style="width:15.2%"></div></div><span>15.2%</span></div></div></div><div><h4>加权求和</h4><div class="math">0.152 × [0.6, 0.2, 0.1] + 0.271 × [0.5, 0.1, 0.3] + 0.152 × [0.1, 0.7, 0.4] + 0.271 × [0.2, 0.2, 0.2] + 0.152 × [0.1, 0.3, 0.8]<br>≈ [0.312, 0.264, 0.334]</div><p class="small muted">“现在分词”自己的 V 是 [0.1, 0.3, 0.8]，输出却被整句信息混合成了另一组数字。</p></div></div>
 <p class="small muted">这个例子的局限：分数只有两档，所以权重只有两种取值；真实模型的分数常为负数，分布可能非常悬殊。q 也是直接给定的，真实模型会现场计算。</p>
 </details>
+<h3>注意力权重长什么样</h3>
+<p>把整句一次算完，得到的是一个 n×n 矩阵：<strong>行是“谁在看”，列是“被看的是谁”，每行加起来等于 1</strong>。以 “The cat sat on the mat” 为例（示意数值，不是真实模型输出）：</p>
+<div class="table-wrap"><table><thead><tr><th>查询 ↓ / 被看 →</th><th>The</th><th>cat</th><th>sat</th><th>on</th><th>the</th><th>mat</th><th>行和</th></tr></thead><tbody>
+<tr><th>The</th><td>0.85</td><td>0.10</td><td>0.00</td><td>0.00</td><td>0.05</td><td>0.00</td><td>1.00</td></tr>
+<tr><th>cat</th><td>0.15</td><td>0.45</td><td>0.25</td><td>0.05</td><td>0.05</td><td>0.05</td><td>1.00</td></tr>
+<tr><th>sat</th><td>0.05</td><td>0.50</td><td>0.20</td><td>0.15</td><td>0.05</td><td>0.05</td><td>1.00</td></tr>
+<tr><th>on</th><td>0.00</td><td>0.05</td><td>0.55</td><td>0.15</td><td>0.05</td><td>0.20</td><td>1.00</td></tr>
+<tr><th>the</th><td>0.05</td><td>0.00</td><td>0.00</td><td>0.15</td><td>0.70</td><td>0.10</td><td>1.00</td></tr>
+<tr><th>mat</th><td>0.00</td><td>0.05</td><td>0.05</td><td>0.30</td><td>0.45</td><td>0.15</td><td>1.00</td></tr>
+</tbody></table></div>
+<p>怎么读：“sat”那一行在 “cat” 列权重最高（0.50），对应“sat 的主语是 cat”；“on” 行在 “sat” 列最高（0.55），对应“介词接前面的动词”。这些只是示意，真实模型的模式由训练决定，不同层、不同头差别很大。</p>
+<div class="note"><strong>两个提醒：</strong>① 权重高只说明信息流向，不等于因果解释；② 真实模型每层有多个头，叠起来远比一张表复杂。</div>
 <h3>一个更接近真实任务的直觉：代词到底指谁</h3>
 <p>经典例子：“The animal didn't cross the street because it was too tired.” 处理到 it 时，模型需要判断它指 animal 还是 street。注意力给出的权重分布可能是这样的（示意图，不是真实模型输出）：</p>
 <div class="table-wrap"><table><thead><tr><th>被读取的位置</th><th>分数（示意）</th><th>权重</th></tr></thead><tbody><tr><th>animal</th><td>8.2</td><td>0.982</td></tr><tr><th>tired</th><td>3.8</td><td>0.012</td></tr><tr><th>it</th><td>2.1</td><td>0.002</td></tr><tr><th>其他位置</th><td>0.2 ~ 0.9</td><td>合计约 0.004</td></tr></tbody></table></div>
@@ -511,16 +543,20 @@
 </section>
 <section id="components">
 <div class="tag">Transformer architecture · 课件第 68–78、100–104 页；补充推导参考文档 2.2、2.5 节</div>
-<h2>④′ 只有注意力还不够：其他零件怎样配合？</h2>
+<h2>③′ 只有注意力还不够：其他零件怎样配合？</h2>
 <h3>1. 位置信息：同样的词，顺序可能不同</h3>
 <p>“孩子抱着熊”和“熊抱着孩子”使用相同的词，却有不同的关系。基础全连接自注意力对重排具有置换等变性：重排输入会相应重排输出，它本身没有指定“谁在第几个位置”。</p>
 <div class="flow"><span class="chip">token embedding<br>[0.4, −0.2, 0.7, 0.1]</span><span class="arrow">＋</span><span class="chip">该位置的编码<br>[0.0, 1.0, 0.0, 1.0]</span><span class="arrow">＝</span><span class="chip">送入网络的向量<br>[0.4, 0.8, 0.7, 1.1]</span></div>
 <p>原始 Transformer 用不同频率的正弦与余弦给位置编码，向量与 token embedding 同维，因此可以逐项相加。</p>
 <div class="math">PE(pos, 2i) = sin(pos / 10000^(2i/d_model))<br>PE(pos, 2i+1) = cos(pos / 10000^(2i/d_model))</div>
+<div class="table-wrap"><table><thead><tr><th>方式</th><th>做法</th><th>优点</th><th>代价</th></tr></thead><tbody><tr><th>固定（正弦／余弦）</th><td>按公式直接算出，不参与训练</td><td>不增加参数；新位置也能算出编码</td><td>可塑性差，外推能力有限</td></tr><tr><th>可学习</th><td>每个位置一个可训练向量</td><td>灵活，能适配数据</td><td>受限于训练时见过的最大长度</td></tr></tbody></table></div>
+<p>现代模型多用相对位置方案：RoPE 把位置信息“旋转”进 Q、K，ALiBi 给远距离位置加负偏置。它们改善的是长文本表现，而不是取消位置建模的必要性。</p>
 <p>pos 是位置编号；i 是频率组编号。类比时钟：秒针、分针、时针变化速度不同，组合起来能区分更长时间范围。数学上可计算新位置的编码，<strong>不保证模型能可靠理解任意长度文本</strong>；编码差也不只由相对距离决定。</p>
 <h3>2. 多头注意力：并行使用多组投影</h3>
 <div class="flow"><span class="chip">同一输入 X</span><span class="arrow">→</span><span class="chip">头 1：Q₁/K₁/V₁ → Z₁<br>头 2：Q₂/K₂/V₂ → Z₂<br>… 各自计算注意力</span><span class="arrow">→</span><span class="chip">拼接各头输出</span><span class="arrow">→</span><span class="chip">乘 W_O<br>回到 d_model</span></div>
+<p class="small muted">类比：卷积层同时用多个卷积核，从不同角度提取特征；多头注意力同时用多组投影，从不同角度读取上下文。差别是注意力不预设“核”的作用范围，权重来自数据。</p>
 <p>不同头的投影可以学习不同的信息交互模式，但没有预先指定“这个头负责语法、那个头负责指代”。单个头也可以表达多种关系。若 h=8、d_model=512、每头 d_v=64，拼接后是 8×64=512 维。</p>
+<p class="small muted">常见取值：h = 8 或 16，每头维度 d_k = d_v = d_model / h。也有模型让各头维度之和不等于 d_model，但输出仍会投影回 d_model 才能接下一层。</p>
 <h3>3. FFN：先升维，再做非线性加工</h3>
 <p>注意力让不同位置交换信息；FFN 对每个位置自己的向量进行加工。<strong>各位置共享同一套 FFN 权重</strong>，也可以同时批量计算。</p>
 <div class="flow"><span class="chip">一个位置：d_model</span><span class="arrow">→ 线性变换 →</span><span class="chip">d_ff<br>例如 4×d_model</span><span class="arrow">→ ReLU →</span><span class="chip">再线性变换<br>回到 d_model</span></div>
@@ -546,12 +582,157 @@
 <p>用 GPT-3 的公开配置粗略验证（d = 12288，96 层，词表 50257）：</p>
 <div class="math">每层 ≈ 12 × 12288² ≈ 1.81B<br>96 层 ≈ 173.9B<br>词嵌入 ≈ 50257 × 12288 ≈ 0.62B<br>合计 ≈ 174.6B ≈ 175B</div>
 <p>这也解释了为什么“把模型加宽”比“加注意力头”更能增加容量：d 一变，FFN 的 8d² 同步变大。注意这个 12d² 只适用于这一套配置；交叉注意力、GQA/MQA、门控 FFN 与 MoE 都会改变比例。</p>
+<h3>7. Dropout：训练时随机“关掉”一部分单元</h3>
+<p class="def"><strong>定义：</strong>训练时按概率 p 把一部分激活值（或连接）临时置 0，并把保留下来的值放大 1/(1−p) 倍；<strong>推理时完全不丢弃</strong>，也不放大。</p>
+<p><strong>为什么需要：</strong>模型参数远多于数据时，神经元容易“互相依赖”——某个特征总由固定的几个单元一起凑出来，换一份数据就崩。随机丢弃逼着每个单元都能独立派上用场，相当于每次训练一个略有不同的子网络，推理时近似把这些子网络平均起来。</p>
+<p><strong>例子（p = 0.5）：</strong>某一层的激活值 x = [1.2, −0.5, 0.8, 2.0]</p>
+<div class="table-wrap"><table><thead><tr><th>单元</th><th>原始激活</th><th>随机掩码</th><th>置 0 后</th><th>放大 1/(1−0.5)</th></tr></thead><tbody>
+<tr><th>1</th><td>1.2</td><td>保留</td><td>1.2</td><td>2.4</td></tr>
+<tr><th>2</th><td>−0.5</td><td>丢弃</td><td>0</td><td>0</td></tr>
+<tr><th>3</th><td>0.8</td><td>保留</td><td>0.8</td><td>1.6</td></tr>
+<tr><th>4</th><td>2.0</td><td>丢弃</td><td>0</td><td>0</td></tr>
+</tbody></table></div>
+<div class="math">为什么放大：每个单元的期望输出 = p×0 + (1−p) × x/(1−p) = x<br>所以训练时“平均幅度”和推理时一致，不必等推理再去补偿</div>
+<p>放大这一步叫 <strong>inverted dropout</strong>，是现代实现的常见做法。另一种写法是训练时不放大、推理时统一乘 (1−p)，数学上等价。</p>
+<div class="note"><strong>三个常见坑：</strong>① 推理时忘记切到 eval 模式，结果会随机抖动；② Dropout 只在训练启用，评估/上线必须关闭；③ p 不是越大越好，0.1～0.5 之间常见，现代大模型往往只用很小的 p，或只在部分位置使用。</div>
+<p class="small muted">相似的正则化还有标签平滑（软化目标分布）与权重衰减（惩罚过大的参数），它们作用于不同环节：Dropout 改的是激活，标签平滑改的是目标，权重衰减改的是参数更新。</p>
+<h3>8. 标签平滑：不让目标“非 1 即 0”</h3>
+<p class="def"><strong>定义：</strong>把 one-hot 的硬目标改成软目标：正确类拿 1−ε，其余 K−1 个类平分 ε。例如 K = 4、ε = 0.1 时，目标从 [1, 0, 0, 0] 变成 [0.9, 0.0333, 0.0333, 0.0333]。</p>
+<p><strong>为什么需要：</strong>语言里同一句话常常有多种合理续写，“正确答案唯一”这个假设并不总成立。硬目标会驱使模型把 logit 越推越大，追求 100% 自信，容易过拟合、也让概率校准变差。软化目标相当于告诉模型“别那么绝对”。</p>
+<p><strong>例子（沿用第 0 节的四个词）</strong>：当前预测 p = [0.3125, 0.3489, 0.1433, 0.1953]，正确词是第 1 个。</p>
+<div class="table-wrap"><table><thead><tr><th>目标类型</th><th>目标向量</th><th>交叉熵损失</th></tr></thead><tbody>
+<tr><th>硬目标（one-hot）</th><td>[1, 0, 0, 0]</td><td>1.163</td></tr>
+<tr><th>软目标（ε = 0.1）</th><td>[0.9, 0.0333, 0.0333, 0.0333]</td><td>1.201</td></tr>
+</tbody></table></div>
+<p>同一组预测下，软目标的损失<strong>更高</strong>——因为它还要求模型给其他词留下一点概率。这正是目的：损失不会再被“把正确词推到 1”这一件事主导。</p>
+<p><strong>从梯度看更清楚</strong>：softmax + 交叉熵的梯度是 p − 目标。</p>
+<div class="table-wrap"><table><thead><tr><th>词</th><th>预测 p</th><th>硬目标</th><th>梯度（硬）</th><th>软目标</th><th>梯度（软）</th></tr></thead><tbody>
+<tr><th>可爱（正确）</th><td>0.3125</td><td>1</td><td>−0.6875</td><td>0.9000</td><td>−0.5875</td></tr>
+<tr><th>柔软</th><td>0.3489</td><td>0</td><td>0.3489</td><td>0.0333</td><td>0.3156</td></tr>
+<tr><th>阅读</th><td>0.1433</td><td>0</td><td>0.1433</td><td>0.0333</td><td>0.1100</td></tr>
+<tr><th>是</th><td>0.1953</td><td>0</td><td>0.1953</td><td>0.0333</td><td>0.1620</td></tr>
+</tbody></table></div>
+<p>硬目标下，只有当 p(可爱) 逼近 1、其他逼近 0 时梯度才归零；软目标下，最优解是 <strong>p ≈ 软目标</strong>（此时损失约 0.435，而不是 0）。所以模型学到的是“比较有把握”，而不是“绝对确定”。</p>
+<div class="note"><strong>要注意的边界：</strong>均匀平滑会把概率平均分给所有其他词，它并不知道“柔软”和“阅读”谁更合理；对语言建模这种“下一个词常常确实唯一”的任务，ε 通常取得很小（如 0.1），或只在特定训练阶段使用。它与蒸馏中的“软标签”不是一回事——后者的软标签来自教师模型的分布。</div>
+<p class="small muted">原始 Transformer 论文在机器翻译任务上报告过标签平滑带来的 BLEU 提升；它属于“训练目标层面”的正则化，与 Dropout（作用于激活）、权重衰减（作用于参数）分工不同。</p>
 <p class="source">Pre-Norm 与现代架构仅作补充。理解第一讲时，优先跟踪原始模型的计算顺序。</p>
 </section>
 
+
+<section id="architecture" class="switch">
+<div class="tag">Lecture outline · Transformer architecture（课件第 64–78、102–115 页）</div>
+<h2>④ 编码器与解码器：谁在读，谁在写</h2>
+<p>2017 年的原始 Transformer 是为机器翻译设计的。它把任务拆成两半：<strong>读懂源句</strong>和<strong>写出译文</strong>，分别交给编码器和解码器。二者都是“把同样几个子层堆 N 次”，区别在于读取范围和是否访问另一方。</p>
+
+<h3>概念 1：编码器（Encoder）</h3>
+<p class="def"><strong>定义：</strong>把源语言序列的每个位置转成<strong>同时包含整句上下文</strong>的表示。它对每个位置都用双向自注意力，不加因果掩码——第 1 个词也能看到最后一个词。</p>
+<p><strong>为什么需要：</strong>翻译时，理解一句话需要前后文互证。例如判断“苹果”是水果还是公司，得看后面的“发布了新产品”。</p>
+<div class="flow"><span class="chip">源句 token</span><span class="arrow">→ embedding + 位置编码 →</span><span class="chip">自注意力（双向）</span><span class="arrow">→</span><span class="chip">FFN</span><span class="arrow">→ 重复 N 层 →</span><span class="chip">每个源位置一个上下文表示</span></div>
+<p><strong>一个常见误解：</strong>编码器不是“把整句压成一个向量”。它输出的是<strong>与源句等长的一组向量</strong>（每个位置一个），后续交叉注意力正是按需读取其中某几个位置。</p>
+
+<h3>概念 2：解码器（Decoder）</h3>
+<p class="def"><strong>定义：</strong>根据<strong>已经生成的目标词</strong>与<strong>编码器对源句的表示</strong>，逐步预测下一个目标 token。</p>
+<p><strong>为什么需要：</strong>生成是自回归的：第 t 个词取决于前 t−1 个已生成的词。它必须同时满足两个约束——只能看左边（不能偷看答案），又能读原文。</p>
+<p>这两件事由两个不同的注意力子层完成：</p>
+<div class="table-wrap"><table><thead><tr><th>子层</th><th>Q 来自</th><th>K、V 来自</th><th>作用</th></tr></thead><tbody><tr><th>掩码自注意力</th><td>解码器当前表示</td><td>解码器当前表示（屏蔽未来）</td><td>“我已经写了什么”</td></tr><tr><th>交叉注意力</th><td>解码器当前表示</td><td>编码器输出</td><td>“原文里哪一部分对当前这个词有用”</td></tr></tbody></table></div>
+<p class="small muted">为什么交叉注意力的 K、V 来自编码器而不是解码器：解码器是在“查询”原文——它提出问题（Q），编码器提供可被匹配的特征（K）与内容（V）。</p>
+
+<h3>概念 3：两个堆叠怎么连接</h3>
+<svg viewBox="0 0 820 470" role="img" aria-label="编码器与解码器结构：编码器多层自注意力与前馈网络，解码器为掩码自注意力、交叉注意力与前馈网络" style="width:100%;max-width:820px;display:block;margin:16px auto">
+<defs>
+<marker id="a-arrow" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#2166cd"/></marker>
+<marker id="a-arrow2" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#c0392b"/></marker>
+</defs>
+<text x="150" y="22" text-anchor="middle" font-size="15" fill="#193049" font-weight="600">编码器（读源句）</text>
+<text x="640" y="22" text-anchor="middle" font-size="15" fill="#193049" font-weight="600">解码器（写译文）</text>
+
+<rect x="55" y="40" width="190" height="42" rx="8" fill="#f6f9fd" stroke="#2166cd"/><text x="150" y="67" text-anchor="middle" font-size="13" fill="#193049">源句 embedding ＋ 位置编码</text>
+<rect x="55" y="100" width="190" height="118" rx="10" fill="#edf4ff" stroke="#2166cd" stroke-dasharray="4 3"/>
+<text x="150" y="120" text-anchor="middle" font-size="12" fill="#53677b">× N 层</text>
+<rect x="70" y="130" width="160" height="32" rx="6" fill="#fff" stroke="#2166cd"/><text x="150" y="151" text-anchor="middle" font-size="13" fill="#193049">自注意力（双向）</text>
+<rect x="70" y="172" width="160" height="32" rx="6" fill="#fff" stroke="#2166cd"/><text x="150" y="193" text-anchor="middle" font-size="13" fill="#193049">前馈网络 FFN</text>
+<text x="150" y="238" text-anchor="middle" font-size="11" fill="#53677b">每层都含残差连接＋归一化</text>
+<rect x="55" y="252" width="190" height="44" rx="8" fill="#eff8f0" stroke="#2e7d32"/>
+<text x="150" y="271" text-anchor="middle" font-size="12" fill="#193049">编码器输出：每个源位置</text>
+<text x="150" y="287" text-anchor="middle" font-size="12" fill="#193049">都有一个上下文表示</text>
+
+<rect x="545" y="40" width="190" height="42" rx="8" fill="#fff8ec" stroke="#db8b16"/><text x="640" y="60" text-anchor="middle" font-size="13" fill="#193049">已生成的目标 token</text>
+<text x="640" y="75" text-anchor="middle" font-size="11" fill="#53677b">＋ 位置编码</text>
+<rect x="545" y="100" width="190" height="198" rx="10" fill="#fff6e6" stroke="#db8b16" stroke-dasharray="4 3"/>
+<text x="640" y="120" text-anchor="middle" font-size="12" fill="#53677b">× N 层</text>
+<rect x="560" y="132" width="160" height="34" rx="6" fill="#fff" stroke="#db8b16"/><text x="640" y="154" text-anchor="middle" font-size="12" fill="#193049">掩码自注意力（只看左边）</text>
+<rect x="560" y="176" width="160" height="34" rx="6" fill="#fff" stroke="#c0392b"/><text x="640" y="198" text-anchor="middle" font-size="12" fill="#193049">交叉注意力（读编码器）</text>
+<rect x="560" y="220" width="160" height="34" rx="6" fill="#fff" stroke="#db8b16"/><text x="640" y="242" text-anchor="middle" font-size="12" fill="#193049">前馈网络 FFN</text>
+<text x="640" y="280" text-anchor="middle" font-size="11" fill="#53677b">每层都含残差连接＋归一化</text>
+<rect x="545" y="316" width="190" height="40" rx="8" fill="#f6f9fd" stroke="#2166cd"/><text x="640" y="341" text-anchor="middle" font-size="12" fill="#193049">线性层 → softmax → 下一个 token</text>
+
+<path d="M150 82 V100" fill="none" stroke="#2166cd" stroke-width="2" marker-end="url(#a-arrow)"/>
+<path d="M150 218 V252" fill="none" stroke="#2166cd" stroke-width="2" marker-end="url(#a-arrow)"/>
+<path d="M640 82 V100" fill="none" stroke="#db8b16" stroke-width="2" marker-end="url(#a-arrow)"/>
+<path d="M640 298 V316" fill="none" stroke="#db8b16" stroke-width="2" marker-end="url(#a-arrow)"/>
+
+<path d="M245 274 C 330 274 480 236 560 196" fill="none" stroke="#c0392b" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#a-arrow2)"/>
+<text x="404" y="330" text-anchor="middle" font-size="12" fill="#c0392b">红线：Q 来自解码器，K、V 来自编码器输出</text>
+<text x="404" y="348" text-anchor="middle" font-size="11" fill="#53677b">即“解码器提问，编码器提供可匹配的特征与内容”</text>
+
+<text x="410" y="440" text-anchor="middle" font-size="12" fill="#53677b">左半部分负责“读原文”；右半部分在“写译文”时反复运行</text>
+</svg>
+<p>三个容易忽略的细节：</p>
+<ul><li><strong>编码器的输出会被每一层解码器重复读取</strong>，不是只传给第一层。</li><li><strong>解码器每层都有三块</strong>：掩码自注意力 → 交叉注意力 → FFN，每块后面都接残差与归一化。</li><li><strong>编码器和解码器的层数可以相同</strong>（论文 base 用 N = 6），但参数不共享。</li></ul>
+<p>论文 base 配置：N = 6、d_model = 512、h = 8、d_ff = 2048、d_k = d_v = 64，参数量约 6500 万。</p>
+
+<h3>概念 4：一次完整翻译的数据流</h3>
+<div class="table-wrap"><table><thead><tr><th>步骤</th><th>做什么</th><th>形状（base 配置，源长 m、目标长 n）</th></tr></thead><tbody>
+<tr><td>①</td><td>源句分词 → embedding ＋ 位置编码</td><td>m × 512</td></tr>
+<tr><td>②</td><td>编码器 N 层：自注意力 → FFN</td><td>m × 512</td></tr>
+<tr><td>③</td><td>编码器输出（每个源位置一个表示）</td><td>m × 512</td></tr>
+<tr><td>④</td><td>解码器输入：<code>[BOS]</code> ＋ 已生成词，加位置编码</td><td>n × 512</td></tr>
+<tr><td>⑤</td><td>掩码自注意力（只看左侧）</td><td>n × 512</td></tr>
+<tr><td>⑥</td><td>交叉注意力：Q 来自 ⑤，K/V 来自 ③</td><td>n × 512</td></tr>
+<tr><td>⑦</td><td>FFN；重复 N 层</td><td>n × 512</td></tr>
+<tr><td>⑧</td><td>线性投影到词表 V → softmax → 下一个 token 的概率</td><td>n × V</td></tr>
+</tbody></table></div>
+<p>注意上表第 ⑥ 步的矩阵形状：Q 是 n × d_k，K 是 m × d_k，所以分数矩阵是 <strong>n × m</strong>——行是“正在写的词”，列是“原文的每个位置”。这也解释了长原文为什么会增加解码开销。</p>
+
+<h3>概念 5：生成是循环，不是一次吐出一整句</h3>
+<p>训练时目标文本已知，可以把整句喂进去、用因果掩码并行算损失；<strong>推理时没有答案</strong>，只能一步一步来：</p>
+<input type="radio" name="gen" id="gen-1" checked>
+<input type="radio" name="gen" id="gen-2">
+<input type="radio" name="gen" id="gen-3">
+<input type="radio" name="gen" id="gen-4">
+<div class="controls" role="group" aria-label="生成步骤"><span>第几步：</span><label for="gen-1">第 1 步</label><label for="gen-2">第 2 步</label><label for="gen-3">第 3 步</label><label for="gen-4">第 4 步</label></div>
+<div class="panel panel-gen1">
+<div class="flow"><span class="chip">[BOS]</span><span class="chip muted-chip">？</span></div>
+<p>解码器读完这 1 个位置后，输出层给整个词表打分，概率最高的是 <strong>Un</strong>。</p>
+<p class="small muted">第一步只有起始标记作为输入，模型给出第一个词。</p>
+</div>
+<div class="panel panel-gen2">
+<div class="flow"><span class="chip">[BOS]</span><span class="chip">Un</span><span class="chip muted-chip">？</span></div>
+<p>解码器读完这 2 个位置后，输出层给整个词表打分，概率最高的是 <strong>ours</strong>。</p>
+<p class="small muted">把刚生成的 Un 接到输入末尾，再预测下一个词。</p>
+</div>
+<div class="panel panel-gen3">
+<div class="flow"><span class="chip">[BOS]</span><span class="chip">Un</span><span class="chip">ours</span><span class="chip muted-chip">？</span></div>
+<p>解码器读完这 3 个位置后，输出层给整个词表打分，概率最高的是 <strong>en</strong>。</p>
+<p class="small muted">每多一个词，解码器的输入就长一格。</p>
+</div>
+<div class="panel panel-gen4">
+<div class="flow"><span class="chip">[BOS]</span><span class="chip">Un</span><span class="chip">ours</span><span class="chip">en</span><span class="chip muted-chip">？</span></div>
+<p>解码器读完这 4 个位置后，输出层给整个词表打分，概率最高的是 <strong>peluche</strong>。</p>
+<p class="small muted">注意：之前生成的词可以被反复读取，因为它们都在左侧。</p>
+</div>
+<p>直到模型输出 <code>[EOS]</code>（或达到长度上限）才停止。这也是“训练能并行、生成要串行”的原因。</p>
+
+<h3>概念 6：三种架构 = 保留了这个结构的哪几块</h3>
+<div class="table-wrap"><table><thead><tr><th>架构</th><th>保留的部分</th><th>典型模型</th><th>擅长</th></tr></thead><tbody><tr><th>Encoder–Decoder</th><td>①～⑧ 全部</td><td>原始 Transformer、T5、BART</td><td>翻译、摘要等“输入→输出”转换</td></tr><tr><th>Encoder-only</th><td>①～③，双向读取</td><td>BERT</td><td>分类、抽取、检索等理解任务</td></tr><tr><th>Decoder-only</th><td>④～⑧，去掉交叉注意力</td><td>GPT、LLaMA、Qwen</td><td>续写、对话，也能用生成方式做理解任务</td></tr></tbody></table></div>
+<p>第一讲讲的是第一行。今天的主流模型多是第三行：<strong>没有独立编码器，输入直接作为序列的一部分参与自注意力</strong>。</p>
+
+<div class="note"><strong>两处 softmax，两个用途：</strong>注意力里的 softmax 在“可读取的位置”上归一化，决定读多少；输出层的 softmax 在“整个词表”上归一化，决定下一个词是哪个。</div>
+<p class="source">课件定位：第 64–78、102–115 页。结构图按课件重绘；base 配置数字与形状推导为补充说明。三种架构的对比在后面的“补充展望”中也有对应表格。</p>
+</section>
 <section id="mask" class="switch">
 <div class="tag">Transformer architecture · Masking / causal self-attention（课件第 75 页）</div>
-<h2>④ 预测未来时，不能偷看答案</h2>
+<h2>⑤ 预测未来时，不能偷看答案</h2>
 <p>训练时我们已经拥有完整句子，但仍然要模拟生成条件。例如输入位置“喜欢”的输出负责预测“熊”，它可以读取“我”和“喜欢”，不能直接读取后面的“熊”。</p>
 <input type="radio" name="mask-pos" id="mask-1">
 <input type="radio" name="mask-pos" id="mask-2" checked>
@@ -567,19 +748,55 @@
 <details><summary>训练能并行，为什么生成还要逐个进行？</summary><p>训练文本已知，可以同时提供各输入位置，再通过掩码阻断未来信息，计算各位置的预测损失。自回归生成时，下一 token 还没选出来，后续位置的输入尚不存在，所以通常需要逐个生成。</p></details>
 <p class="source">课件定位：第 75 页及课堂末尾问答。这里展示因果掩码，实际训练还可能需要屏蔽填充位置。</p>
 </section>
-<section id="architecture">
-<div class="tag">Lecture outline · Transformer architecture（课件第 64–78、102–115 页）</div>
-<h2>⑤ 把这些零件放回翻译模型</h2>
-<p>第一讲主要介绍 2017 年原始 Transformer：编码器读取原文，解码器根据原文及已生成内容，预测下一个目标 token。</p>
-<div class="grid"><div><h3>编码器：理解源句</h3><div class="layer">源语言 token embedding + 位置编码</div><div class="layer">自注意力：在源句中读取信息<br>＋残差连接与归一化</div><div class="layer">FFN：对各位置做非线性变换<br>＋残差连接与归一化</div><div class="layer">重复多层 → 源句的上下文表示</div></div><div><h3>解码器：生成译文</h3><div class="layer">目标语言 token embedding + 位置编码</div><div class="layer">因果自注意力：读取已有目标内容<br>＋残差连接与归一化</div><div class="layer">交叉注意力：读取编码器输出<br>Q 来自解码器，K/V 来自编码器输出<br>＋残差连接与归一化</div><div class="layer">FFN ＋残差连接与归一化<br>重复多层 → 投影到词表 → softmax</div></div></div>
-<p>注意力让位置之间交换信息；FFN 对各位置的特征进行变换。多头注意力让多组不同投影并行读取信息，再把结果合并。</p>
-<div class="note"><strong>两处 softmax，两个用途：</strong>注意力中的 softmax 决定“从哪些位置读取多少”；输出端的 softmax 决定“下一个 token 的概率分布”。</div>
-<p class="small muted">图中省略 Dropout 等细节。今天常见的 GPT 类模型通常使用 decoder-only 架构，没有这里独立的编码器及其交叉注意力。</p>
-<p class="source">课件定位：第 64–78、102–115 页。</p>
+
+<section id="end-to-end">
+<div class="tag">Lecture outline · End-to-end example（课件第 79–115 页）</div>
+<h2>⑥ 端到端：把 "A cute teddy bear is reading." 翻成法语</h2>
+<p>课件从这里开始不再讲零件，而是走一遍完整流程。为了看清形状，下面的嵌入维度取 d = 4（真实模型常是 512～4096），词表也故意很小。数字是教学示例，流程与课件一致。</p>
+
+<h3>第 1 步：分词并加上边界标记</h3>
+<div class="flow"><span class="chip">[BOS]</span><span class="chip">A</span><span class="chip">cute</span><span class="chip">teddy bear</span><span class="chip">is</span><span class="chip">reading</span><span class="chip">.</span><span class="chip">[EOS]</span></div>
+<p>源句被切成 7 个 token（含标点）；<code>[BOS]</code>/<code>[EOS]</code> 标出序列边界。序列长度 m = 7。</p>
+
+<h3>第 2 步：查表得到嵌入，再加上位置编码</h3>
+<div class="table-wrap"><table><caption>嵌入只是“按 ID 取一行”，位置编码按位置相加（位置编号从 0 起）</caption><thead><tr><th>位置（从 0 计）</th><th>token</th><th>示例 ID</th><th>embedding（d = 4）</th><th>位置编码</th><th>相加后</th></tr></thead><tbody>
+<tr><th>1</th><td>A</td><td>31</td><td>[0.2, −0.1, 0.4, 0.0]</td><td>[0.00, 1.00, 0.00, 1.00]</td><td>[0.2, 0.9, 0.4, 1.0]</td></tr>
+<tr><th>2</th><td>cute</td><td>7</td><td>[0.5, 0.3, −0.2, 0.1]</td><td>[0.84, 0.54, 0.01, 1.00]</td><td>[1.34, 0.84, −0.19, 1.10]</td></tr>
+<tr><th>3</th><td>teddy bear</td><td>412</td><td>[0.6, 0.2, 0.1, −0.3]</td><td>[0.91, −0.42, 0.02, 1.00]</td><td>[1.51, −0.22, 0.12, 0.70]</td></tr>
+<tr><th>4</th><td>is</td><td>9</td><td>[0.1, 0.4, 0.3, 0.2]</td><td>[0.14, −0.99, 0.03, 1.00]</td><td>[0.24, −0.59, 0.33, 1.20]</td></tr>
+<tr><th>5</th><td>reading</td><td>88</td><td>[0.3, −0.2, 0.6, 0.4]</td><td>[−0.76, −0.65, 0.04, 1.00]</td><td>[−0.46, −0.85, 0.64, 1.40]</td></tr>
+</tbody></table></div>
+<p class="small muted">表中位置编码取自正弦／余弦公式（d = 4 时的前几维），仅示意“同维相加”。真实实现通常一次处理整个矩阵。</p>
+
+<h3>第 3 步：编码器把每个源位置变成上下文表示</h3>
+<div class="flow"><span class="chip">7 × 4 矩阵</span><span class="arrow">→ 自注意力（7×7 权重）→</span><span class="chip">残差＋归一化</span><span class="arrow">→</span><span class="chip">FFN</span><span class="arrow">→ ×N 层 →</span><span class="chip">7 × 4 的上下文表示</span></div>
+<p>关键点：输出仍是 <strong>7 个向量</strong>（每个源位置一个），不是“一句话一个向量”。这一步之后，每个位置的表示都已经混合了整句信息。</p>
+
+<h3>第 4 步：解码器开始生成，第一次输入只有 [BOS]</h3>
+<div class="flow"><span class="chip">[BOS]</span><span class="arrow">→ 掩码自注意力（只能看自己）→</span><span class="chip">交叉注意力（看编码器 7 个位置）</span><span class="arrow">→ FFN →</span><span class="chip">线性 → softmax</span><span class="arrow">→ 选</span><span class="chip">Un</span></div>
+<p>交叉注意力这一步，解码器用当前状态作查询，去源句的 7 个位置里找最相关的信息。可以理解为它在问：“要开始翻译这句话，我该先看哪儿？”</p>
+
+<h3>第 5 步：把新词接回输入，重复直到 [EOS]</h3>
+<div class="table-wrap"><table><caption>每轮把刚生成的法语词追加到解码器输入末尾</caption><thead><tr><th>轮次</th><th>解码器输入</th><th>输出</th><th>最关注的源词（示意）</th></tr></thead><tbody>
+<tr><th>1</th><td>[BOS]</td><td>Un</td><td>A</td></tr>
+<tr><th>2</th><td>[BOS] Un</td><td>ours</td><td>teddy bear</td></tr>
+<tr><th>3</th><td>[BOS] Un ours</td><td>en</td><td>teddy bear</td></tr>
+<tr><th>4</th><td>[BOS] Un ours en</td><td>peluche</td><td>teddy bear</td></tr>
+<tr><th>5</th><td>[BOS] Un ours en peluche</td><td>mignon</td><td>cute</td></tr>
+<tr><th>6</th><td>… peluche mignon</td><td>lit</td><td>is / reading</td></tr>
+<tr><th>7</th><td>… lit</td><td>[EOS]</td><td>—</td></tr>
+</tbody></table></div>
+<p>最终得到 <strong>Un ours en peluche mignon lit.</strong> 注意“语序不同”：法语把修饰语放在后面，所以模型不是逐词对齐翻译，而是在生成每个词时重新决定看哪儿。</p>
+
+<h3>第 6 步：训练与推理，差别在哪</h3>
+<div class="table-wrap"><table><thead><tr><th>环节</th><th>训练时</th><th>推理时</th></tr></thead><tbody><tr><th>解码器输入</th><td>完整的目标句（右移一位）</td><td>只有已生成的部分</td></tr><tr><th>能否并行</th><td>能，靠因果掩码挡住未来</td><td>不能，必须逐词</td></tr><tr><th>损失</th><td>对每个位置算交叉熵，再平均</td><td>不算损失</td></tr><tr><th>停止条件</th><td>由数据决定，训练时已含 [EOS]</td><td>模型输出 [EOS] 或达长度上限</td></tr></tbody></table></div>
+<div class="note"><strong>一句话总结这一节：</strong>编码器把源句变成“7 个懂上下文的向量”；解码器带着已写的译文，一轮一轮去这些向量里取信息，每轮吐一个词，直到写完。</div>
+<p class="source">课件定位：第 79–115 页。嵌入与位置编码数值为教学示例，法语对齐为示意；数据流结构对应课件逐步展开的图示，也对应补充阅读 2.4 节的 ①～⑧ 步骤。</p>
 </section>
+
 <section id="beyond-lecture">
 <div class="tag">补充展望 · 参考文档 1.5、2.3 节；后续学习入口</div>
-<h2>从这一讲，到今天的大语言模型</h2>
+<h2>⑦ 补充展望：从这一讲，到今天的大语言模型</h2>
 <div class="table-wrap"><table><thead><tr><th>架构</th><th>主要信息路径</th><th>常见用途与例子</th></tr></thead><tbody><tr><th>Encoder-only</th><td>输入位置可双向交互</td><td>BERT 类：表示学习、分类、检索等</td></tr><tr><th>Decoder-only</th><td>读取前文，因果预测后续 token</td><td>GPT 类：续写、对话，也能通过生成回答理解类任务</td></tr><tr><th>Encoder–Decoder</th><td>编码源输入；解码器用交叉注意力读取它</td><td>T5、原始 Transformer：翻译、摘要等序列转换</td></tr></tbody></table></div>
 <p>这些是结构与常见使用方式，不能仅凭架构就给模型排能力高低。Decoder-only 也会处理和理解输入；标准 BERT 不直接采用 GPT 式自回归生成，但“任何编码器都绝不可能用于生成”同样过于绝对。</p>
 <div class="flow"><span class="chip">架构设计</span><span class="arrow">＋</span><span class="chip">数据与训练</span><span class="arrow">→</span><span class="chip">预训练基座</span><span class="arrow">→</span><span class="chip">任务适配／指令训练等</span><span class="arrow">→</span><span class="chip">应用与工具系统</span></div>
@@ -588,7 +805,7 @@
 </section>
 <section id="deep-dive">
 <div class="tag">深入补充 · 参考文档 2.7、5.1、1.7、12.x 节；不属于第一讲课件</div>
-<h2>⑥ 想再往下走一步：训练、规模与今天的架构</h2>
+<h2>⑧ 想再往下走一步：训练、规模与今天的架构</h2>
 <p>第一讲讲的是“网络怎样计算”。下面几块用折叠面板收起来，需要时再展开。它们解释了很多第一讲里没说透的“为什么”。</p>
 
 <p class="small muted">训练循环、损失函数、反向传播与梯度消失已在前面 <a href="#basics">⓿ 基础概念</a> 中详细展开，这里不再重复。</p>
