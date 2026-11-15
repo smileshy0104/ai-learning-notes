@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>CME295 第一讲 · 看得见的 Transformer</title>
 <style>
-:root{color-scheme:light;--ink:#193049;--muted:#53677b;--blue:#2166cd;--line:#dbe5ee;--paper:#fff;--bg:#f3f6fb}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.8 system-ui,-apple-system,"PingFang SC",sans-serif}main{max-width:1080px;margin:auto;padding:35px 22px 80px}h1{font-size:clamp(30px,5vw,46px);line-height:1.3}h2{font-size:27px;line-height:1.5;margin-top:0}h3{font-size:19px}p{max-width:850px}.eyebrow,.source{color:var(--muted);font-size:14px}nav{display:flex;gap:10px;flex-wrap:wrap;margin:25px 0}a{color:var(--blue)}nav a{background:white;border:1px solid var(--line);border-radius:24px;padding:6px 16px;text-decoration:none}section{margin:25px 0;padding:28px;background:var(--paper);border:1px solid var(--line);border-radius:20px;scroll-margin-top:18px}.note{background:#edf4ff;border-left:4px solid var(--blue);padding:14px 18px;margin:18px 0}.flow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:18px 0}.chip{border:1px solid #b6cae6;background:#edf4ff;border-radius:10px;padding:9px 14px}.arrow{color:var(--muted)}button,select{font:inherit;border:1px solid #adc3de;border-radius:9px;padding:7px 13px;background:white;color:var(--ink)}button{cursor:pointer}button:hover{border-color:var(--blue)}button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #db8b16;outline-offset:3px}.controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:18px 0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:15px;margin:15px 0}th,td{padding:10px;text-align:left;border:1px solid var(--line);white-space:nowrap}th{background:#f1f5fa}code,.math{font-family:ui-monospace,SFMono-Regular,monospace}.math{padding:15px;background:#f3f6fb;border-radius:10px;overflow-x:auto;font-size:15px}.bars{display:grid;gap:14px}.barrow{display:grid;grid-template-columns:55px 1fr 64px;gap:10px;align-items:center}.track{height:24px;background:#edf1f7;border-radius:5px;overflow:hidden}.fill{height:100%;background:var(--blue);transition:width .2s}.muted{color:var(--muted)}input[type=range]{width:min(280px,100%);accent-color:var(--blue)}details{border-top:1px solid var(--line);margin-top:18px;padding-top:12px}summary{cursor:pointer;font-weight:600}.mask td{text-align:center}.allowed{background:#dceafe}.blocked{background:#eff1f4;color:#6b7280}.layer{border-radius:12px;border:1px solid #b6cae6;padding:14px;text-align:center;background:#f0f6ff}.layer+.layer{margin-top:10px}.small{font-size:14px}footer{font-size:14px;color:var(--muted)}
+:root{color-scheme:light;--ink:#193049;--muted:#53677b;--blue:#2166cd;--line:#dbe5ee;--paper:#fff;--bg:#f3f6fb}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.8 system-ui,-apple-system,"PingFang SC",sans-serif}main{max-width:1080px;margin:auto;padding:35px 22px 80px}h1{font-size:clamp(30px,5vw,46px);line-height:1.3}h2{font-size:27px;line-height:1.5;margin-top:0}h3{font-size:19px}h4{font-size:17px;margin:22px 0 6px}p{max-width:850px}.eyebrow,.source{color:var(--muted);font-size:14px}nav{display:flex;gap:10px;flex-wrap:wrap;margin:25px 0}a{color:var(--blue)}nav a{background:white;border:1px solid var(--line);border-radius:24px;padding:6px 16px;text-decoration:none}section{margin:25px 0;padding:28px;background:var(--paper);border:1px solid var(--line);border-radius:20px;scroll-margin-top:18px}.note{background:#edf4ff;border-left:4px solid var(--blue);padding:14px 18px;margin:18px 0}.flow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:18px 0}.chip{border:1px solid #b6cae6;background:#edf4ff;border-radius:10px;padding:9px 14px}.arrow{color:var(--muted)}button,select{font:inherit;border:1px solid #adc3de;border-radius:9px;padding:7px 13px;background:white;color:var(--ink)}button{cursor:pointer}button:hover{border-color:var(--blue)}button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #db8b16;outline-offset:3px}.controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:18px 0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:15px;margin:15px 0}th,td{padding:10px;text-align:left;border:1px solid var(--line);white-space:nowrap}th{background:#f1f5fa}code,.math{font-family:ui-monospace,SFMono-Regular,monospace}.math{padding:15px;background:#f3f6fb;border-radius:10px;overflow-x:auto;font-size:15px}.bars{display:grid;gap:14px}.barrow{display:grid;grid-template-columns:55px 1fr 64px;gap:10px;align-items:center}.track{height:24px;background:#edf1f7;border-radius:5px;overflow:hidden}.fill{height:100%;background:var(--blue);transition:width .2s}.muted{color:var(--muted)}input[type=range]{width:min(280px,100%);accent-color:var(--blue)}details{border-top:1px solid var(--line);margin-top:18px;padding-top:12px}summary{cursor:pointer;font-weight:600}.mask td{text-align:center}.allowed{background:#dceafe}.blocked{background:#eff1f4;color:#6b7280}.layer{border-radius:12px;border:1px solid #b6cae6;padding:14px;text-align:center;background:#f0f6ff}.layer+.layer{margin-top:10px}.small{font-size:14px}footer{font-size:14px;color:var(--muted)}
 .switch>input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 .switch label{display:inline-block;border:1px solid #adc3de;border-radius:9px;padding:7px 13px;background:#fff;cursor:pointer}
 .switch>input:focus-visible+label{outline:3px solid #db8b16;outline-offset:3px}
@@ -16,6 +16,15 @@
 #qpreset-1:checked~.controls label[for=qpreset-1],#qpreset-2:checked~.controls label[for=qpreset-2],#qpreset-3:checked~.controls label[for=qpreset-3],#qpreset-4:checked~.controls label[for=qpreset-4],#qpreset-5:checked~.controls label[for=qpreset-5]{background:var(--blue);color:#fff;border-color:var(--blue)}
 #qpreset-1:checked~.panel-p1,#qpreset-2:checked~.panel-p2,#qpreset-3:checked~.panel-p3,#qpreset-4:checked~.panel-p4,#qpreset-5:checked~.panel-p5{display:block}
 [hidden]{display:none}
+#pad-off:checked~.controls label[for=pad-off],#pad-on:checked~.controls label[for=pad-on]{background:var(--blue);color:#fff;border-color:var(--blue)}
+#pad-off:checked~.panel-padoff,#pad-on:checked~.panel-padon{display:block}
+.muted-chip{background:#eef1f5;border-style:dashed;color:#5b6b7c}
+.panel-bpe{padding-top:4px}
+#bpe-1:checked~.controls label[for=bpe-1],#bpe-2:checked~.controls label[for=bpe-2],#bpe-3:checked~.controls label[for=bpe-3],#bpe-4:checked~.controls label[for=bpe-4]{background:var(--blue);color:#fff;border-color:var(--blue)}
+#bpe-1:checked~.panel-bpe1,#bpe-2:checked~.panel-bpe2,#bpe-3:checked~.panel-bpe3,#bpe-4:checked~.panel-bpe4{display:block}
+.tag{display:inline-block;font-size:13px;color:var(--muted);background:#f6f9fd;border:1px solid var(--line);border-radius:999px;padding:2px 10px;margin-bottom:6px}
+#w2v-1:checked~.controls label[for=w2v-1],#w2v-2:checked~.controls label[for=w2v-2]{background:var(--blue);color:#fff;border-color:var(--blue)}
+#w2v-1:checked~.panel-w2v1,#w2v-2:checked~.panel-w2v2{display:block}
 @media(max-width:650px){section{padding:20px 16px}.grid{grid-template-columns:1fr}body{font-size:16px}main{padding:25px 12px 55px}th,td{padding:8px}}
 </style>
 </head>
@@ -27,9 +36,10 @@
 <p>沿着“文字 → 向量 → 读取上下文 → 预测下一个词元”这条路线，理解 Transformer。每次先看一个小例子，再展开公式。</p>
 <p class="source">对应所提供课件第 1–115 页。这里的数字、分词和向量是教学示例，并非真实模型的运行结果。页面可离线打开，无需安装依赖。</p>
 <div class="note small"><strong>切换按钮没有反应？</strong>这通常是因为文件在“快速预览”或编辑器内预览中打开，这类窗口会禁用脚本。请用 Chrome、Safari 或 Firefox 直接打开本文件。本页的分词、向量、注意力和因果掩码都使用纯 CSS 切换，即使脚本被禁用也能点击。</div>
-<nav aria-label="知识点导航"><a href="#introduction">导读 · Introduction</a><a href="#tokens">① 分词</a><a href="#embedding">② 向量</a><a href="#attention">③ 注意力实验</a><a href="#mask">④ 因果掩码</a><a href="#architecture">⑤ 完整流程</a></nav>
+<nav aria-label="知识点导航"><a href="#introduction">导读 · Introduction</a><a href="#tokens">① 分词</a><a href="#embedding">② 词元表示</a><a href="#neural-nets">②′ 神经网络</a><a href="#attention">③ 注意力实验</a><a href="#mask">④ 因果掩码</a><a href="#architecture">⑤ 完整流程</a></nav>
 </header>
 <section id="introduction">
+<div class="tag">Lecture outline · Introduction（课件第 1–22 页）</div>
 <h2>Introduction：我们为什么要学 Transformer？</h2>
 <p>先把计算细节放一放。这部分帮助我们回答三个问题：这门课准备讲什么？今天的语言模型从哪里来？Transformer 在其中处于什么位置？</p>
 <h3>1. 这门课的目标：理解原理，也理解使用方式</h3>
@@ -57,6 +67,7 @@
 <p class="source">课件定位：第 1–16 页为课程开场；第 17–22 页为 Introduction 的发展脉络。例句、概念对照与代理循环为教学补充。课件还介绍后训练、AI Agents 和 Diffusion LLMs 等后续主题，本讲无需提前掌握。课程安排和考试信息以课程官方发布为准。</p>
 </section>
 <section id="tokens" class="switch">
+<div class="tag">Lecture outline · Tokenization（课件第 24–31 页）</div>
 <h2>① 先把文字切成小块</h2>
 <p>模型不能直接把一段文字拿去做矩阵乘法。第一步是把文字切成 <strong>token（词元）</strong>，然后给每个 token 一个编号。token 可以是完整单词、单词的一部分或标点。</p>
 <div class="math">原文：A cute teddy bear is reading.</div>
@@ -79,12 +90,82 @@
 <div class="note">观察两个量：<strong>词表大小</strong>是“总共有多少种可用的小块”；<strong>序列长度</strong>是“这句话用了多少个小块”。这里能直接看到的是后者。</div>
 <p class="small muted">三种切法仅用于比较。真实 BPE 的切分由词表与合并规则决定，空格也有具体的编码方式；这里的“按子词”不执行 BPE 训练。</p>
 <details><summary>想一想：为什么不把每个句子都当成一个 token？</summary><p>可能出现的句子太多，有限词表无法列举。把文本切成可重复使用的小块，能用有限词表组合出大量表达。另一端，如果切得非常细，序列会变长，计算也会增加。</p></details>
-<p class="source">课件定位：第 24–31 页。</p>
+<h3>特殊 token：不是普通文字，却有固定作用</h3>
+<p>词表里除了普通文字块，还预留了一些带固定含义的<strong>特殊 token（special token）</strong>。它们像句子里的“功能标记”，告诉模型这段内容从哪里开始、到哪里结束，或者某个位置其实没有内容。</p>
+<div class="table-wrap"><table><thead><tr><th>特殊 token</th><th>名称</th><th>作用</th><th>例子</th></tr></thead><tbody><tr><td>[UNK]</td><td>Unknown，未知词</td><td>表示词表里没有这个片段</td><td>拼错的词被替换为 [UNK]</td></tr><tr><td>[BOS]</td><td>Beginning of sequence，序列开始</td><td>告诉模型“从这里开始”</td><td>生成时先输入 [BOS]</td></tr><tr><td>[EOS]</td><td>End of sequence，序列结束</td><td>告诉模型“这里结束了”</td><td>模型输出 [EOS] 时停止生成</td></tr><tr><td>[PAD]</td><td>Padding，填充</td><td>把短句补到统一起见长度，其位置不参与实际内容</td><td>把 4 个 token 的句子补齐到 8 个</td></tr></tbody></table></div>
+<h4>例 1：词表里没有的词</h4>
+<p>假设词表只有四个 token：<code>teddy bear</code>、<code>cute bear</code>、<code>bear</code>、<code>[UNK]</code>。输入写成了 <code>tedi bear</code>（少了一个 d），前两个字符组合不在词表里，于是：</p>
+<div class="flow"><span class="chip">tedi</span><span class="arrow">→ 词表里找不到 →</span><span class="chip">[UNK]</span><span class="arrow">+</span><span class="chip">bear</span></div>
+<p>这样模型至少知道“这里有个东西，但我不认识”，而不是直接丢弃。现代使用字节级子词的分词器能让常见文字片段都落在词表内，所以遇到普通拼写错误时往往不需要 [UNK]。</p>
+<h4>例 2：开始与结束</h4>
+<p>生成文本时，需要告诉模型从哪里开始，也需要模型告诉我们何时停下：</p>
+<div class="flow"><span class="chip">[BOS]</span><span class="chip">What</span><span class="chip">a</span><span class="chip">cute</span><span class="chip">teddy bear</span><span class="chip">!</span><span class="chip">[EOS]</span></div>
+<p>[BOS] 是<strong>输入</strong>的第一个位置，用来启动生成；[EOS] 是模型应当<strong>输出</strong>的结束信号。两者不是同一件事。</p>
+<h4>例 3：为什么需要填充</h4>
+<p>同一批数据里句子长短不一。硬件喜欢整齐的矩阵，所以常把短句补齐到相同长度。下面切换看一下：</p>
+<input type="radio" name="pad" id="pad-off" checked>
+<input type="radio" name="pad" id="pad-on">
+<div class="controls" role="group" aria-label="是否填充"><label for="pad-off">原始长度</label><label for="pad-on">补齐到 8 个位置</label></div>
+<div class="panel panel-padoff">
+<div class="flow"><span class="chip">[BOS]</span><span class="chip">What</span><span class="chip">a</span><span class="chip">cute</span><span class="chip">teddy bear</span><span class="chip">!</span><span class="chip">[EOS]</span></div>
+<p>句子 A：7 个位置。另一句可能只有 3 个位置，两句话长度不同。</p>
+</div>
+<div class="panel panel-padon">
+<p>句子 A（7 个）：</p>
+<div class="flow"><span class="chip">[BOS]</span><span class="chip">What</span><span class="chip">a</span><span class="chip">cute</span><span class="chip">teddy bear</span><span class="chip">!</span><span class="chip">[EOS]</span><span class="chip muted-chip">[PAD]</span></div>
+<p>句子 B（3 个）：</p>
+<div class="flow"><span class="chip">[BOS]</span><span class="chip">Good</span><span class="chip">night</span><span class="chip">[EOS]</span><span class="chip muted-chip">[PAD]</span><span class="chip muted-chip">[PAD]</span><span class="chip muted-chip">[PAD]</span><span class="chip muted-chip">[PAD]</span></div>
+<p>两行现在都是 8 个位置，可以堆成一个整齐的矩阵。填充位置不是真实内容，训练时通常需要让注意力忽略它们，否则会干扰计算与损失。</p>
+</div>
+<div class="note"><strong>名字不是固定的。</strong>不同模型使用不同写法，例如 <code>&lt;s&gt;</code>、<code>&lt;|endoftext|&gt;</code>、<code>&lt;|start_header_id|&gt;</code> 等；对话模型还可能出现标记“谁在说话”的角色 token（如 user、assistant）。使用一个模型时，应当查它自己的分词器说明，而不是套用这里的名字。</div>
+<details><summary>理解检查：[BOS] 与 [EOS] 分别由谁产生？</summary><p>[BOS] 通常由使用者在构造输入时加上，作为生成起点（输入侧）；[EOS] 通常由模型在输出层预测得到，作为停止信号（输出侧）。原始 Transformer 翻译示例里，解码器输入以 [BOS] 开头，训练目标末尾则是 [EOS]。</p></details>
+<h3>分词器与词表规模</h3>
+<p><strong>分词器（tokenizer）</strong>是一个独立于神经网络的组件，负责“文字 ⇄ 编号”的转换：</p>
+<div class="flow"><span class="chip">训练阶段：从语料统计出词表与合并规则</span><span class="arrow">→</span><span class="chip">使用阶段：encode 文字→ID</span><span class="arrow">→</span><span class="chip">模型计算</span><span class="arrow">→</span><span class="chip">decode 生成 ID→文字</span></div>
+<p>词表大小 V 就是“总共准备多少个可用符号”。它和序列长度 n 是一对相互牵制的量：切得越细，词表越小，但同样的句子需要更多位置；切得越粗，序列变短，但词表膨胀。</p>
+<div class="table-wrap"><table><thead><tr><th>粒度</th><th>大致词表规模</th><th>同一句的序列长度</th><th>主要代价</th></tr></thead><tbody><tr><td>字符级</td><td>几十到几百</td><td>最长</td><td>位置多，计算与长距离依赖更重</td></tr><tr><td>子词级（主流）</td><td>约 3 万到 20 万</td><td>中等</td><td>依赖训练语料与语言覆盖</td></tr><tr><td>词级</td><td>可达数十万以上</td><td>最短</td><td>未登录词、形态变化导致词表膨胀</td></tr></tbody></table></div>
+<p class="small muted">区间为公开模型的常见量级，用于建立直觉；具体数值以各模型的分词器说明为准。</p>
+<h4>BPE 到底在做什么？</h4>
+<p>课堂以 BPE（Byte Pair Encoding，字节对编码）为例：从基础符号出发，反复把<strong>语料中最常见的相邻符号对</strong>合并成一个新符号，直到词表达到目标大小。下面用一个很小的语料走四步：</p>
+<input type="radio" name="bpe" id="bpe-1" checked>
+<input type="radio" name="bpe" id="bpe-2">
+<input type="radio" name="bpe" id="bpe-3">
+<input type="radio" name="bpe" id="bpe-4">
+<div class="controls" role="group" aria-label="BPE 合并步骤"><span>合并步骤：</span><label for="bpe-1">第 0 步：只有字母</label><label for="bpe-2">第 1 步：合并 a+d</label><label for="bpe-3">第 2 步：合并 e+ad</label><label for="bpe-4">第 3 步：合并 r+ead</label></div>
+<div class="panel panel-bpe1">
+<div class="table-wrap"><table><caption>第 0 步：只有字母</caption><thead><tr><th>语料中的词</th><th>当前切分</th><th>token 数</th></tr></thead><tbody><tr><th scope="row">read ×4</th><td><div class="flow" style="margin:6px 0"><span class="chip">r</span><span class="chip">e</span><span class="chip">a</span><span class="chip">d</span></div></td><td>4</td></tr><tr><th scope="row">reader ×2</th><td><div class="flow" style="margin:6px 0"><span class="chip">r</span><span class="chip">e</span><span class="chip">a</span><span class="chip">d</span><span class="chip">e</span><span class="chip">r</span></div></td><td>6</td></tr><tr><th scope="row">reading ×3</th><td><div class="flow" style="margin:6px 0"><span class="chip">r</span><span class="chip">e</span><span class="chip">a</span><span class="chip">d</span><span class="chip">i</span><span class="chip">n</span><span class="chip">g</span></div></td><td>7</td></tr></tbody></table></div>
+<p><strong>词表：</strong>字母表 r e a d i n g（7 个符号）</p>
+<p>初始词表只放单个字符。此时 read、reader、reading 都拆得很碎，句子会变长。</p>
+</div>
+<div class="panel panel-bpe2">
+<div class="table-wrap"><table><caption>第 1 步：合并 a+d（a + d → ad）</caption><thead><tr><th>语料中的词</th><th>当前切分</th><th>token 数</th></tr></thead><tbody><tr><th scope="row">read ×4</th><td><div class="flow" style="margin:6px 0"><span class="chip">r</span><span class="chip">e</span><span class="chip">ad</span></div></td><td>3</td></tr><tr><th scope="row">reader ×2</th><td><div class="flow" style="margin:6px 0"><span class="chip">r</span><span class="chip">e</span><span class="chip">ad</span><span class="chip">e</span><span class="chip">r</span></div></td><td>5</td></tr><tr><th scope="row">reading ×3</th><td><div class="flow" style="margin:6px 0"><span class="chip">r</span><span class="chip">e</span><span class="chip">ad</span><span class="chip">i</span><span class="chip">n</span><span class="chip">g</span></div></td><td>6</td></tr></tbody></table></div>
+<p><strong>词表：</strong>7 + 1 = 8 个符号（新增 ad）</p>
+<p>统计全语料中相邻符号对：(r,e)、(e,a)、(a,d) 各出现 9 次，此处按字母顺序取 a+d 合并。</p>
+</div>
+<div class="panel panel-bpe3">
+<div class="table-wrap"><table><caption>第 2 步：合并 e+ad（e + ad → ead）</caption><thead><tr><th>语料中的词</th><th>当前切分</th><th>token 数</th></tr></thead><tbody><tr><th scope="row">read ×4</th><td><div class="flow" style="margin:6px 0"><span class="chip">r</span><span class="chip">ead</span></div></td><td>2</td></tr><tr><th scope="row">reader ×2</th><td><div class="flow" style="margin:6px 0"><span class="chip">r</span><span class="chip">ead</span><span class="chip">e</span><span class="chip">r</span></div></td><td>4</td></tr><tr><th scope="row">reading ×3</th><td><div class="flow" style="margin:6px 0"><span class="chip">r</span><span class="chip">ead</span><span class="chip">i</span><span class="chip">n</span><span class="chip">g</span></div></td><td>5</td></tr></tbody></table></div>
+<p><strong>词表：</strong>8 + 1 = 9 个符号（新增 ead）</p>
+<p>此时 (e,ad) 出现 9 次，是最频繁的相邻对之一。read 变成 r + ead。</p>
+</div>
+<div class="panel panel-bpe4">
+<div class="table-wrap"><table><caption>第 3 步：合并 r+ead（r + ead → read）</caption><thead><tr><th>语料中的词</th><th>当前切分</th><th>token 数</th></tr></thead><tbody><tr><th scope="row">read ×4</th><td><div class="flow" style="margin:6px 0"><span class="chip">read</span></div></td><td>1</td></tr><tr><th scope="row">reader ×2</th><td><div class="flow" style="margin:6px 0"><span class="chip">read</span><span class="chip">e</span><span class="chip">r</span></div></td><td>3</td></tr><tr><th scope="row">reading ×3</th><td><div class="flow" style="margin:6px 0"><span class="chip">read</span><span class="chip">i</span><span class="chip">n</span><span class="chip">g</span></div></td><td>4</td></tr></tbody></table></div>
+<p><strong>词表：</strong>9 + 1 = 10 个符号（新增 read）</p>
+<p>高频词 read 合并成一个符号；reader、reading 仍然保留复用的部分，因此它们和 read 共享词根表示。</p>
+</div>
+<div class="note">真实 BPE 往往从字节开始，并在“词边界”内统计相邻对；这里的字母级演示省略了这些细节，只展示“高频相邻对逐次合并、词表逐步变大、序列逐步变短”这个核心机制。</div>
+<h4>词表大小怎样影响参数量</h4>
+<p>输入嵌入表的大小是 <code>V × d_model</code>。以 d_model = 4096 为例：</p>
+<div class="table-wrap"><table><thead><tr><th>词表大小 V</th><th>嵌入表参数量 V × 4096</th><th>直观理解</th></tr></thead><tbody><tr><td>32,000</td><td>约 1.31 亿</td><td>词表较小，序列更长</td></tr><tr><td>50,257</td><td>约 2.06 亿</td><td>常见英文为主的量级</td></tr><tr><td>200,000</td><td>约 8.19 亿</td><td>词表很大，单这一层就很占参数</td></tr></tbody></table></div>
+<p>词表变大还会带来一个副作用：每个符号在训练中出现的次数变少，低频符号的向量不容易学好。所以词表规模是效率、覆盖率与学习效果的折中，并非越大越好。总计算量还与序列长度有关：注意力分数矩阵是 n × n。</p>
+<h4>多语言时要注意什么？</h4>
+<p>课堂问答提到：如果分词器在多语言混合语料上训练，词表会被多种语言瓜分。如果你只关心其中一种语言，序列可能变长；但跨语言共享的符号（比如通用缩写）也可能带来帮助。因此做多语言工作时，应确认分词器确实在你关心的语言上训练过。</p>
+<p class="source">课件定位：第 24、27 页提到词表与序列长度；第 28–31 页为特殊 token；BPE 步骤、参数量与规模区间为教学补充，词表量级参考课堂问答。</p>
 </section>
 <section id="embedding" class="switch">
+<div class="tag">Lecture outline · Word representation / Token representations（课件第 33–44 页）</div>
 <h2>② 编号只是索引，向量才进入计算</h2>
 <p>可以把 token ID 想成图书馆的索书号：它帮助找到对应记录，但编号本身不表示语义。<strong>Embedding（嵌入）</strong>就是根据编号，查出一组可学习的数字。</p>
-<p>选择一查看它查到什么：</p>
+<p>选择一个 token，看看它查到什么：</p>
 <input type="radio" name="emb" id="emb-a" checked>
 <input type="radio" name="emb" id="emb-b">
 <input type="radio" name="emb" id="emb-c">
@@ -92,12 +173,121 @@
 <div class="panel panel-a"><div class="flow"><span class="chip">token：泰迪熊</span><span class="arrow">→</span><span class="chip">示例 ID：42</span><span class="arrow">→ 查表 →</span><span class="chip">示例向量：[1, 0]</span></div></div>
 <div class="panel panel-b"><div class="flow"><span class="chip">token：可爱</span><span class="arrow">→</span><span class="chip">示例 ID：7</span><span class="arrow">→ 查表 →</span><span class="chip">示例向量：[0, 2]</span></div></div>
 <div class="panel panel-c"><div class="flow"><span class="chip">token：阅读</span><span class="arrow">→</span><span class="chip">示例 ID：105</span><span class="arrow">→ 查表 →</span><span class="chip">示例向量：[1, 1]</span></div></div>
+<h3>两种表示方式：one-hot 与可学习嵌入</h3>
+<p>课件第 33 页把 token 表示分成两类：朴素写法（one-hot）与学出来的向量（learned embedding）。先用一个 5 个词的小词表看差别：</p>
+<div class="grid">
+<div><h4>One-hot：每个 token 一根独热轴</h4>
+<div class="table-wrap"><table><caption>长度 = 词表大小 V = 5</caption><thead><tr><th>token</th><th>向量</th></tr></thead><tbody><tr><th scope="row">泰迪熊</th><td>[1, 0, 0, 0, 0]</td></tr><tr><th scope="row">可爱</th><td>[0, 1, 0, 0, 0]</td></tr><tr><th scope="row">阅读</th><td>[0, 0, 1, 0, 0]</td></tr><tr><th scope="row">书</th><td>[0, 0, 0, 1, 0]</td></tr><tr><th scope="row">.</th><td>[0, 0, 0, 0, 1]</td></tr></tbody></table></div>
+<p>任意两个不同 token 的点积都是 0，也就是说它们<strong>彼此完全无关</strong>。“泰迪熊”和“书”的相似度，与“泰迪熊”和“可爱”一样，都是 0，模型学不到它们之间的联系。</p>
+</div>
+<div><h4>Learned embedding：每个 token 一行可学习数字</h4>
+<div class="table-wrap"><table><caption>嵌入表 V × d，d = 3（数字为示例）</caption><thead><tr><th>token</th><th>第 1 维</th><th>第 2 维</th><th>第 3 维</th></tr></thead><tbody><tr><th scope="row">泰迪熊</th><td>0.9</td><td>0.8</td><td>−0.2</td></tr><tr><th scope="row">可爱</th><td>0.7</td><td>0.9</td><td>−0.1</td></tr><tr><th scope="row">阅读</th><td>−0.3</td><td>0.1</td><td>0.8</td></tr><tr><th scope="row">书</th><td>−0.2</td><td>0.2</td><td>0.7</td></tr><tr><th scope="row">.</th><td>0.0</td><td>−0.4</td><td>0.1</td></tr></tbody></table></div>
+<p>泰迪熊与可爱的向量接近，阅读与书的向量接近。相似度已经写进数字里，可以直接用点积或余弦相似度衡量。</p>
+</div>
+</div>
+<div class="note"><strong>两者的关系：</strong>“用 one-hot 去乘嵌入矩阵”在数学上等价于“直接按 ID 取某一行”，但实际实现通常直接查表，因为乘一个几乎全是 0 的向量很浪费。one-hot 的长度等于词表大小 V，嵌入向量的长度是另一个可选的超参数 d，通常 d 远小于 V。</div>
+<p>课件用 Word2Vec（第 34–44 页）说明这种向量可以<strong>学出来</strong>：用一个代理任务（预测上下文词，或由上下文预测中心词）训练一个简单网络，取中间层学到的表示作为词向量。这里补一句课件没有强调的对比——</p>
+<div class="table-wrap"><table><thead><tr><th>对比项</th><th>One-hot</th><th>Learned embedding</th></tr></thead><tbody><tr><td>长度</td><td>V（词表大小）</td><td>d（可选超参数）</td></tr><tr><td>是否可学习</td><td>否，写死</td><td>是，训练中更新</td></tr><tr><td>相似度</td><td>任意两个都正交，恒为 0</td><td>可以表达“意思接近”</td></tr><tr><td>参数量</td><td>0（只是下标）</td><td>V × d</td></tr></tbody></table></div>
+<h3>还要分清两种“表示”</h3>
 <p>下面两项区别很重要：</p>
 <ul><li><strong>初始 token embedding：</strong>同一个 token 通常查到相同的初始向量。</li><li><strong>上下文表示：</strong>经过后续层后，会根据句子中的其他内容发生变化。例如同一个 <code>bank</code>，可以在不同上下文中表示“银行”或“河岸”。</li></ul>
 <div class="note">这里用二维向量方便计算。真实模型的向量通常有更多维度，每个维度通常也没有预先指定的人类含义。</div>
 <p class="source">课件定位：第 33–44 页；上下文表示见第 104 页。</p>
 </section>
+<section id="neural-nets" class="switch">
+<div class="tag">Pre-Transformer · Word2vec / RNN / LSTM / 早期注意力（课件第 34–55 页）</div>
+<h2>②′ 这些向量和上下文，是神经网络算出来的</h2>
+<p>前面把 token 变成了向量、把位置换成了上下文表示，但还没有看到<strong>神经网络本身</strong>。课件用三张图串起这条历史：Word2vec 学词向量 → RNN 处理顺序 → 注意力解决长距离依赖。</p>
+
+<h3>1. Word2vec：一个很窄的神经网络</h3>
+<p>课件第 35 页的结构只有三层：输入大小 V，隐藏层大小 d，输出大小 V。中间那层就是我们要的词向量。</p>
+<svg viewBox="0 0 800 290" role="img" aria-label="Word2vec 神经网络结构：输入 V 维 one-hot，隐藏层 d 维，输出 V 维概率" style="width:100%;height:auto;max-width:720px;display:block;margin:14px auto">
+<text x="150" y="14" font-size="13" text-anchor="middle" fill="#53677b">输入 one-hot（V=6）</text>
+<text x="390" y="14" font-size="13" text-anchor="middle" fill="#53677b">隐藏层（d=2）</text>
+<text x="630" y="14" font-size="13" text-anchor="middle" fill="#53677b">输出 softmax（V=6）</text>
+<line x1="166" y1="30" x2="374" y2="95" stroke="#c9d8ea" stroke-width="1"/><line x1="166" y1="30" x2="374" y2="165" stroke="#c9d8ea" stroke-width="1"/><line x1="166" y1="64" x2="374" y2="95" stroke="#c9d8ea" stroke-width="1"/><line x1="166" y1="64" x2="374" y2="165" stroke="#c9d8ea" stroke-width="1"/><line x1="166" y1="98" x2="374" y2="95" stroke="#c9d8ea" stroke-width="1"/><line x1="166" y1="98" x2="374" y2="165" stroke="#c9d8ea" stroke-width="1"/><line x1="166" y1="132" x2="374" y2="95" stroke="#c9d8ea" stroke-width="1"/><line x1="166" y1="132" x2="374" y2="165" stroke="#c9d8ea" stroke-width="1"/><line x1="166" y1="166" x2="374" y2="95" stroke="#c9d8ea" stroke-width="1"/><line x1="166" y1="166" x2="374" y2="165" stroke="#c9d8ea" stroke-width="1"/><line x1="166" y1="200" x2="374" y2="95" stroke="#c9d8ea" stroke-width="1"/><line x1="166" y1="200" x2="374" y2="165" stroke="#c9d8ea" stroke-width="1"/><line x1="406" y1="95" x2="614" y2="30" stroke="#c9d8ea" stroke-width="1"/><line x1="406" y1="95" x2="614" y2="64" stroke="#c9d8ea" stroke-width="1"/><line x1="406" y1="95" x2="614" y2="98" stroke="#c9d8ea" stroke-width="1"/><line x1="406" y1="95" x2="614" y2="132" stroke="#c9d8ea" stroke-width="1"/><line x1="406" y1="95" x2="614" y2="166" stroke="#c9d8ea" stroke-width="1"/><line x1="406" y1="95" x2="614" y2="200" stroke="#c9d8ea" stroke-width="1"/><line x1="406" y1="165" x2="614" y2="30" stroke="#c9d8ea" stroke-width="1"/><line x1="406" y1="165" x2="614" y2="64" stroke="#c9d8ea" stroke-width="1"/><line x1="406" y1="165" x2="614" y2="98" stroke="#c9d8ea" stroke-width="1"/><line x1="406" y1="165" x2="614" y2="132" stroke="#c9d8ea" stroke-width="1"/><line x1="406" y1="165" x2="614" y2="166" stroke="#c9d8ea" stroke-width="1"/><line x1="406" y1="165" x2="614" y2="200" stroke="#c9d8ea" stroke-width="1"/>
+<circle cx="150" cy="30" r="16" fill="#edf4ff" stroke="#2166cd" stroke-width="1.5"/><circle cx="150" cy="64" r="16" fill="#edf4ff" stroke="#2166cd" stroke-width="1.5"/><circle cx="150" cy="98" r="16" fill="#edf4ff" stroke="#2166cd" stroke-width="1.5"/><circle cx="150" cy="132" r="16" fill="#edf4ff" stroke="#2166cd" stroke-width="1.5"/><circle cx="150" cy="166" r="16" fill="#edf4ff" stroke="#2166cd" stroke-width="1.5"/><circle cx="150" cy="200" r="16" fill="#edf4ff" stroke="#2166cd" stroke-width="1.5"/>
+<circle cx="390" cy="95" r="16" fill="#fff6e6" stroke="#db8b16" stroke-width="1.5"/><circle cx="390" cy="165" r="16" fill="#fff6e6" stroke="#db8b16" stroke-width="1.5"/>
+<circle cx="630" cy="30" r="16" fill="#edf4ff" stroke="#2166cd" stroke-width="1.5"/><circle cx="630" cy="64" r="16" fill="#edf4ff" stroke="#2166cd" stroke-width="1.5"/><circle cx="630" cy="98" r="16" fill="#edf4ff" stroke="#2166cd" stroke-width="1.5"/><circle cx="630" cy="132" r="16" fill="#edf4ff" stroke="#2166cd" stroke-width="1.5"/><circle cx="630" cy="166" r="16" fill="#edf4ff" stroke="#2166cd" stroke-width="1.5"/><circle cx="630" cy="200" r="16" fill="#edf4ff" stroke="#2166cd" stroke-width="1.5"/>
+<text x="124" y="35" font-size="13" text-anchor="end" fill="#193049">A</text><text x="124" y="69" font-size="13" text-anchor="end" fill="#193049">cute</text><text x="124" y="103" font-size="13" text-anchor="end" fill="#193049">teddy bear</text><text x="124" y="137" font-size="13" text-anchor="end" fill="#193049">is</text><text x="124" y="171" font-size="13" text-anchor="end" fill="#193049">reading</text><text x="124" y="205" font-size="13" text-anchor="end" fill="#193049">.</text><text x="656" y="35" font-size="13" fill="#193049">A</text><text x="656" y="69" font-size="13" fill="#193049">cute</text><text x="656" y="103" font-size="13" fill="#193049">teddy bear</text><text x="656" y="137" font-size="13" fill="#193049">is</text><text x="656" y="171" font-size="13" fill="#193049">reading</text><text x="656" y="205" font-size="13" fill="#193049">.</text>
+<text x="270" y="258" font-size="12" text-anchor="middle" fill="#53677b">权重 W₁：V×d</text>
+<text x="510" y="258" font-size="12" text-anchor="middle" fill="#53677b">权重 W₂：d×V</text>
+</svg>
+<p>训练时并不是在做“翻译”或“分类”这种真正的目标，而是在做一个<strong>代理任务</strong>：给一个词，预测它周围的词或下一个词。这个预测任务本身不重要，重要的是训练完之后，隐藏层那组数字变得有意义了。</p>
+<p>课件第 36–41 页用一句话演示：用 “A” 预测 “cute”。下面切换两个阶段看数字怎样变化（数字为教学示例，用于说明变化方向）：</p>
+<input type="radio" name="w2v" id="w2v-1" checked>
+<input type="radio" name="w2v" id="w2v-2">
+<div class="controls" role="group" aria-label="Word2vec 训练前后"><span>阶段：</span><label for="w2v-1">训练前（初始权重）</label><label for="w2v-2">训练后（若干次更新）</label></div>
+<div class="panel panel-w2v1">
+<div class="grid"><div><h4>输出层：下一个 token 的概率</h4><div class="bars"><div class="barrow"><span>A</span><div class="track"><div class="fill" style="width:20%"></div></div><span>20%</span></div><div class="barrow"><span>cute</span><div class="track"><div class="fill" style="width:40%"></div></div><span>40%</span></div><div class="barrow"><span>teddy bear</span><div class="track"><div class="fill" style="width:10%"></div></div><span>10%</span></div><div class="barrow"><span>is</span><div class="track"><div class="fill" style="width:10%"></div></div><span>10%</span></div><div class="barrow"><span>reading</span><div class="track"><div class="fill" style="width:10%"></div></div><span>10%</span></div><div class="barrow"><span>.</span><div class="track"><div class="fill" style="width:10%"></div></div><span>10%</span></div></div></div>
+<div><h4>与目标比较</h4>
+<div class="table-wrap"><table><thead><tr><th>项目</th><th>值</th></tr></thead><tbody>
+<tr><th scope="row">输入</th><td>“A” → [1,0,0,0,0,0]</td></tr>
+<tr><th scope="row">隐藏层 d=2</th><td>可学习向量</td></tr>
+<tr><th scope="row">目标</th><td>“cute” → [0,1,0,0,0,0]</td></tr>
+<tr><th scope="row">cute 的概率</th><td>40%</td></tr>
+<tr><th scope="row">交叉熵损失</th><td>−ln(0.4) ≈ 0.916</td></tr>
+</tbody></table></div>
+<p>模型把“cute”的概率只给到 0.40，与目标 [0,1,0,0,0,0] 差距大，交叉熵损失较高。</p>
+</div></div>
+</div>
+<div class="panel panel-w2v2">
+<div class="grid"><div><h4>输出层：下一个 token 的概率</h4><div class="bars"><div class="barrow"><span>A</span><div class="track"><div class="fill" style="width:5%"></div></div><span>5%</span></div><div class="barrow"><span>cute</span><div class="track"><div class="fill" style="width:76%"></div></div><span>76%</span></div><div class="barrow"><span>teddy bear</span><div class="track"><div class="fill" style="width:5%"></div></div><span>5%</span></div><div class="barrow"><span>is</span><div class="track"><div class="fill" style="width:6%"></div></div><span>6%</span></div><div class="barrow"><span>reading</span><div class="track"><div class="fill" style="width:4%"></div></div><span>4%</span></div><div class="barrow"><span>.</span><div class="track"><div class="fill" style="width:4%"></div></div><span>4%</span></div></div></div>
+<div><h4>与目标比较</h4>
+<div class="table-wrap"><table><thead><tr><th>项目</th><th>值</th></tr></thead><tbody>
+<tr><th scope="row">输入</th><td>“A” → [1,0,0,0,0,0]</td></tr>
+<tr><th scope="row">隐藏层 d=2</th><td>可学习向量</td></tr>
+<tr><th scope="row">目标</th><td>“cute” → [0,1,0,0,0,0]</td></tr>
+<tr><th scope="row">cute 的概率</th><td>76%</td></tr>
+<tr><th scope="row">交叉熵损失</th><td>−ln(0.76) ≈ 0.274</td></tr>
+</tbody></table></div>
+<p>同样的输入“A”，模型把“cute”的概率提高到 0.76，损失下降。隐藏层向量也随之改变。</p>
+</div></div>
+</div>
+<div class="note">为什么这样能学到语义？因为经常出现在相似上下文里的词，会被同一套权重推向相似的隐藏向量。课件举的例子是“泰迪熊之于柔软”和“巴黎之于法国，柏林之于德国”——这种关系不是人工标注的，而是训练中浮现的。</div>
+<details><summary>交叉熵损失在这里到底在做什么？</summary><p>目标是 “cute” 的 one-hot 向量，模型给出的是 6 个概率。交叉熵只关心目标那一项的概率多大：越接近 1 损失越小。梯度回传后，W₁ 和 W₂ 都会调整，使下次遇到同样的输入时，“cute” 的概率更高。</p><p>课件里隐藏层写作 [0.2, 0.9] 这类二维向量。真实模型 d 通常是几百到几千维。</p></details>
+
+<h3>2. RNN：把顺序信息带进来</h3>
+<p>词向量本身不知道词序：“孩子抱着泰迪熊”和“泰迪熊抱着孩子”会得到同样的向量集合。RNN 通过一个<strong>隐藏状态</strong>把“已经读过什么”传递下去：</p>
+<div class="math">h_t = f(h_{t-1}, x_t)</div>
+<svg viewBox="0 0 800 190" role="img" aria-label="RNN 按时间展开：每一步接收一个 token 和上一步的隐藏状态，输出新的隐藏状态" style="width:100%;height:auto;max-width:720px;display:block;margin:14px auto">
+<defs>
+<marker id="rnvarrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#53677b"/></marker>
+<marker id="rnnarrow2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#db8b16"/></marker>
+</defs>
+<rect x="36" y="80" width="88" height="52" rx="10" fill="#edf4ff" stroke="#2166cd" stroke-width="1.5"/><text x="80" y="112" font-size="15" text-anchor="middle" fill="#193049">RNN</text><text x="80" y="158" font-size="14" text-anchor="middle" fill="#193049">A</text><line x1="80" y1="132" x2="80" y2="146" stroke="#53677b" stroke-width="1.2" marker-end="url(#rnvarrow)"/><text x="80" y="60" font-size="13" text-anchor="middle" fill="#db8b16">h1</text><line x1="80" y1="80" x2="80" y2="66" stroke="#db8b16" stroke-width="1.2" marker-end="url(#rnnarrow2)"/><line x1="124" y1="106" x2="181" y2="106" stroke="#db8b16" stroke-width="1.6" marker-end="url(#rnnarrow2)"/><rect x="181" y="80" width="88" height="52" rx="10" fill="#edf4ff" stroke="#2166cd" stroke-width="1.5"/><text x="225" y="112" font-size="15" text-anchor="middle" fill="#193049">RNN</text><text x="225" y="158" font-size="14" text-anchor="middle" fill="#193049">cute</text><line x1="225" y1="132" x2="225" y2="146" stroke="#53677b" stroke-width="1.2" marker-end="url(#rnvarrow)"/><text x="225" y="60" font-size="13" text-anchor="middle" fill="#db8b16">h2</text><line x1="225" y1="80" x2="225" y2="66" stroke="#db8b16" stroke-width="1.2" marker-end="url(#rnnarrow2)"/><line x1="269" y1="106" x2="326" y2="106" stroke="#db8b16" stroke-width="1.6" marker-end="url(#rnnarrow2)"/><rect x="326" y="80" width="88" height="52" rx="10" fill="#edf4ff" stroke="#2166cd" stroke-width="1.5"/><text x="370" y="112" font-size="15" text-anchor="middle" fill="#193049">RNN</text><text x="370" y="158" font-size="14" text-anchor="middle" fill="#193049">teddy bear</text><line x1="370" y1="132" x2="370" y2="146" stroke="#53677b" stroke-width="1.2" marker-end="url(#rnvarrow)"/><text x="370" y="60" font-size="13" text-anchor="middle" fill="#db8b16">h3</text><line x1="370" y1="80" x2="370" y2="66" stroke="#db8b16" stroke-width="1.2" marker-end="url(#rnnarrow2)"/><line x1="414" y1="106" x2="471" y2="106" stroke="#db8b16" stroke-width="1.6" marker-end="url(#rnnarrow2)"/><rect x="471" y="80" width="88" height="52" rx="10" fill="#edf4ff" stroke="#2166cd" stroke-width="1.5"/><text x="515" y="112" font-size="15" text-anchor="middle" fill="#193049">RNN</text><text x="515" y="158" font-size="14" text-anchor="middle" fill="#193049">is</text><line x1="515" y1="132" x2="515" y2="146" stroke="#53677b" stroke-width="1.2" marker-end="url(#rnvarrow)"/><text x="515" y="60" font-size="13" text-anchor="middle" fill="#db8b16">h4</text><line x1="515" y1="80" x2="515" y2="66" stroke="#db8b16" stroke-width="1.2" marker-end="url(#rnnarrow2)"/><line x1="559" y1="106" x2="616" y2="106" stroke="#db8b16" stroke-width="1.6" marker-end="url(#rnnarrow2)"/><rect x="616" y="80" width="88" height="52" rx="10" fill="#edf4ff" stroke="#2166cd" stroke-width="1.5"/><text x="660" y="112" font-size="15" text-anchor="middle" fill="#193049">RNN</text><text x="660" y="158" font-size="14" text-anchor="middle" fill="#193049">reading</text><line x1="660" y1="132" x2="660" y2="146" stroke="#53677b" stroke-width="1.2" marker-end="url(#rnvarrow)"/><text x="660" y="60" font-size="13" text-anchor="middle" fill="#db8b16">h5</text><line x1="660" y1="80" x2="660" y2="66" stroke="#db8b16" stroke-width="1.2" marker-end="url(#rnnarrow2)"/>
+<text x="400" y="184" font-size="12" text-anchor="middle" fill="#53677b">✔ 能利用词序　✘ 最后一步才“看到全部”，早期信息要经过多次传递</text>
+</svg>
+<p>课件第 51 页展示了 RNN 能承担的几类任务：生成（输入文本 → 输出文本）、分类（输入文本 → 一个类别）、多分类（每个位置一个标签，如词性）、情感分析、翻译、命名实体识别。</p>
+<details><summary>RNN 的两个硬伤</summary><p><strong>长距离依赖：</strong>所有历史都被压进一个固定长度的向量里，反复改写后早期信息容易丢失。比如先说“我的泰迪熊有 3 英尺高”，隔了很多词之后再说“它”，此时“它”指谁已经很难从当前隐藏状态里读出来。</p><p><strong>无法并行：</strong>h_t 依赖 h_{t-1}，必须一个接一个算，训练慢。这两点正是 Transformer 想要解决的问题。</p></details>
+
+<h3>3. LSTM：加一条更长的“记忆通道”</h3>
+<p>课件第 52 页提到 LSTM（1997）保留了隐藏状态，但额外引入<strong>细胞状态</strong>，并用门来控制“写入多少、保留多少、输出多少”。这里给出简化示意，不展开公式：</p>
+<div class="grid">
+<div class="layer"><strong>遗忘门</strong><br>决定旧记忆保留多少</div>
+<div class="layer"><strong>输入门</strong><br>决定新信息写入多少</div>
+<div class="layer"><strong>输出门</strong><br>决定当前输出取多少</div>
+<div class="layer"><strong>细胞状态</strong><br>一条贯穿时间步的通道，<br>比隐藏状态更容易长期保存信息</div>
+</div>
+<p>它缓解了长距离依赖，但仍然是<strong>顺序计算</strong>，也没有彻底解决信息在长序列中被稀释的问题。这是注意力机制出现的直接动机。</p>
+
+<h3>4. 早期注意力：翻译时“回头看原文”</h3>
+<p>课件第 54–55 页介绍 2014 年 Bahdanau 等人的工作。翻译长句时，seq2seq 模型原本只能靠编码器最后那个隐藏状态记住整句，注意力允许解码器在生成每个词时<strong>直接读取源句的相关位置</strong>：</p>
+<svg viewBox="0 0 800 215" role="img" aria-label="序列到序列翻译中，生成 lit 时通过注意力直接读取源句的 reading" style="width:100%;height:auto;max-width:720px;display:block;margin:14px auto">
+<text x="12" y="24" font-size="12" fill="#53677b">源句（编码器）</text>
+<text x="12" y="120" font-size="12" fill="#53677b">译文（解码器，逐步生成）</text>
+<rect x="40" y="34" width="100" height="38" rx="8" fill="#edf4ff" stroke="#2166cd" stroke-width="1.4"/><text x="90" y="59" font-size="13" text-anchor="middle" fill="#193049">A</text><rect x="185" y="34" width="100" height="38" rx="8" fill="#edf4ff" stroke="#2166cd" stroke-width="1.4"/><text x="235" y="59" font-size="13" text-anchor="middle" fill="#193049">cute</text><rect x="330" y="34" width="100" height="38" rx="8" fill="#edf4ff" stroke="#2166cd" stroke-width="1.4"/><text x="380" y="59" font-size="13" text-anchor="middle" fill="#193049">teddy bear</text><rect x="475" y="34" width="100" height="38" rx="8" fill="#edf4ff" stroke="#2166cd" stroke-width="1.4"/><text x="525" y="59" font-size="13" text-anchor="middle" fill="#193049">is</text><rect x="620" y="34" width="100" height="38" rx="8" fill="#edf4ff" stroke="#2166cd" stroke-width="1.4"/><text x="670" y="59" font-size="13" text-anchor="middle" fill="#193049">reading</text><rect x="43" y="126" width="84" height="34" rx="8" fill="#fff6e6" stroke="#db8b16" stroke-width="1.4"/><text x="85" y="149" font-size="13" text-anchor="middle" fill="#193049">Un</text><rect x="165" y="126" width="84" height="34" rx="8" fill="#fff6e6" stroke="#db8b16" stroke-width="1.4"/><text x="207" y="149" font-size="13" text-anchor="middle" fill="#193049">ours</text><rect x="287" y="126" width="84" height="34" rx="8" fill="#fff6e6" stroke="#db8b16" stroke-width="1.4"/><text x="329" y="149" font-size="13" text-anchor="middle" fill="#193049">en</text><rect x="409" y="126" width="84" height="34" rx="8" fill="#fff6e6" stroke="#db8b16" stroke-width="1.4"/><text x="451" y="149" font-size="13" text-anchor="middle" fill="#193049">peluche</text><rect x="531" y="126" width="84" height="34" rx="8" fill="#fff6e6" stroke="#db8b16" stroke-width="1.4"/><text x="573" y="149" font-size="13" text-anchor="middle" fill="#193049">mignon</text><rect x="653" y="126" width="84" height="34" rx="8" fill="#fff6e6" stroke="#db8b16" stroke-width="1.4"/><text x="695" y="149" font-size="13" text-anchor="middle" fill="#193049">lit</text>
+<line x1="695" y1="126" x2="670" y2="74" stroke="#c0392b" stroke-width="2.2" stroke-dasharray="6 4" marker-end="url(#attnarrow)"/>
+<defs><marker id="attnarrow" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#c0392b"/></marker></defs>
+<text x="400" y="200" font-size="12" text-anchor="middle" fill="#c0392b">红色虚线：要生成 lit 时，注意力直接指向源句的 reading</text>
+<text x="400" y="184" font-size="12" text-anchor="middle" fill="#53677b">不必只依赖一个被反复改写的隐藏状态</text>
+</svg>
+<p>要生成法语 “lit”（读）时，模型可以直接把注意力放到源句的 “reading” 上，而不必依赖一个被反复压缩的状态向量。这就是后来 Transformer 里 self-attention 的思想来源。</p>
+<div class="note">注意区别：这里的注意力连接的是<strong>解码器和编码器</strong>（cross-attention 的前身，2014 年）；Transformer 的核心创新是把注意力用在<strong>同一序列内部</strong>（self-attention），并几乎不再依赖循环结构。</div>
+<p class="source">课件定位：第 34–44 页（Word2vec）、45–52 页（RNN、LSTM）、53 页（方法对比表）、54–55 页（早期注意力）。网络结构图为按课件重绘的简化示意，概率与损失数值为教学示例。</p>
+</section>
 <section id="attention" class="switch">
+<div class="tag">Lecture outline · Self-attention mechanism（课件第 57–62 页）</div>
 <h2>③ 注意力：这一次，该从谁那里读取多少信息？</h2>
 <p>先把视线固定在“泰迪熊”这个位置。我们给它一个查询向量 <strong>Q</strong>，用 Q 与各位置的 <strong>K</strong> 计算匹配分数，再按权重汇总各位置的 <strong>V</strong>。</p>
 <div class="flow"><span class="chip">Q：用来匹配的信息需求</span><span class="chip">K：供匹配的特征</span><span class="chip">V：实际读取的信息</span></div>
@@ -141,6 +331,7 @@
 <p class="source">课件定位：第 58–62、93–101 页。权重不等同于模型完整的推理解释。</p>
 </section>
 <section id="mask" class="switch">
+<div class="tag">Transformer architecture · Masking / causal self-attention（课件第 75 页）</div>
 <h2>④ 预测未来时，不能偷看答案</h2>
 <p>训练时我们已经拥有完整句子，但仍然要模拟生成条件。例如输入位置“喜欢”的输出负责预测“熊”，它可以读取“我”和“喜欢”，不能直接读取后面的“熊”。</p>
 <input type="radio" name="mask-pos" id="mask-1">
@@ -158,6 +349,7 @@
 <p class="source">课件定位：第 75 页及课堂末尾问答。这里展示因果掩码，实际训练还可能需要屏蔽填充位置。</p>
 </section>
 <section id="architecture">
+<div class="tag">Lecture outline · Transformer architecture（课件第 64–78、102–115 页）</div>
 <h2>⑤ 把这些零件放回翻译模型</h2>
 <p>第一讲主要介绍 2017 年原始 Transformer：编码器读取原文，解码器根据原文及已生成内容，预测下一个目标 token。</p>
 <div class="grid"><div><h3>编码器：理解源句</h3><div class="layer">源语言 token embedding + 位置编码</div><div class="layer">自注意力：在源句中读取信息<br>＋残差连接与归一化</div><div class="layer">FFN：对各位置做非线性变换<br>＋残差连接与归一化</div><div class="layer">重复多层 → 源句的上下文表示</div></div><div><h3>解码器：生成译文</h3><div class="layer">目标语言 token embedding + 位置编码</div><div class="layer">因果自注意力：读取已有目标内容<br>＋残差连接与归一化</div><div class="layer">交叉注意力：读取编码器输出<br>Q 来自解码器，K/V 来自编码器输出<br>＋残差连接与归一化</div><div class="layer">FFN ＋残差连接与归一化<br>重复多层 → 投影到词表 → softmax</div></div></div>
