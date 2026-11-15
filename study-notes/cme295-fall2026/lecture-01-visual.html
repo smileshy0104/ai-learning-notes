@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CME295 第一讲 · 看得见的 Transformer</title>
+<style>
+:root{color-scheme:light;--ink:#193049;--muted:#53677b;--blue:#2166cd;--line:#dbe5ee;--paper:#fff;--bg:#f3f6fb}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.8 system-ui,-apple-system,"PingFang SC",sans-serif}main{max-width:1080px;margin:auto;padding:35px 22px 80px}h1{font-size:clamp(30px,5vw,46px);line-height:1.3}h2{font-size:27px;line-height:1.5;margin-top:0}h3{font-size:19px}p{max-width:850px}.eyebrow,.source{color:var(--muted);font-size:14px}nav{display:flex;gap:10px;flex-wrap:wrap;margin:25px 0}a{color:var(--blue)}nav a{background:white;border:1px solid var(--line);border-radius:24px;padding:6px 16px;text-decoration:none}section{margin:25px 0;padding:28px;background:var(--paper);border:1px solid var(--line);border-radius:20px;scroll-margin-top:18px}.note{background:#edf4ff;border-left:4px solid var(--blue);padding:14px 18px;margin:18px 0}.flow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:18px 0}.chip{border:1px solid #b6cae6;background:#edf4ff;border-radius:10px;padding:9px 14px}.arrow{color:var(--muted)}button,select{font:inherit;border:1px solid #adc3de;border-radius:9px;padding:7px 13px;background:white;color:var(--ink)}button{cursor:pointer}button[aria-pressed=true]{background:var(--blue);color:white}button:hover{border-color:var(--blue)}button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #db8b16;outline-offset:3px}.controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:18px 0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}.table-wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:15px;margin:15px 0}th,td{padding:10px;text-align:left;border:1px solid var(--line);white-space:nowrap}th{background:#f1f5fa}code,.math{font-family:ui-monospace,SFMono-Regular,monospace}.math{padding:15px;background:#f3f6fb;border-radius:10px;overflow-x:auto;font-size:15px}.bars{display:grid;gap:14px}.barrow{display:grid;grid-template-columns:55px 1fr 64px;gap:10px;align-items:center}.track{height:24px;background:#edf1f7;border-radius:5px;overflow:hidden}.fill{height:100%;background:var(--blue);transition:width .2s}.muted{color:var(--muted)}input[type=range]{width:min(280px,100%);accent-color:var(--blue)}details{border-top:1px solid var(--line);margin-top:18px;padding-top:12px}summary{cursor:pointer;font-weight:600}.mask td{text-align:center}.allowed{background:#dceafe}.blocked{background:#eff1f4;color:#6b7280}.selected td,.selected th{border-top:2px solid var(--blue);border-bottom:2px solid var(--blue)}.layer{border-radius:12px;border:1px solid #b6cae6;padding:14px;text-align:center;background:#f0f6ff}.layer+.layer{margin-top:10px}.small{font-size:14px}footer{font-size:14px;color:var(--muted)}@media(max-width:650px){section{padding:20px 16px}.grid{grid-template-columns:1fr}body{font-size:16px}main{padding:25px 12px 55px}th,td{padding:8px}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div class="eyebrow">Stanford CME295 · 第一讲配套学习图解</div>
+<h1>一句话，怎样变成模型能使用的信息？</h1>
+<p>沿着“文字 → 向量 → 读取上下文 → 预测下一个词元”这条路线，理解 Transformer。每次先看一个小例子，再展开公式。</p>
+<p class="source">对应所提供课件第 1–115 页。这里的数字、分词和向量是教学示例，并非真实模型的运行结果。页面可离线打开，无需安装依赖。</p>
+<nav aria-label="知识点导航"><a href="#introduction">导读 · Introduction</a><a href="#tokens">① 分词</a><a href="#embedding">② 向量</a><a href="#attention">③ 注意力实验</a><a href="#mask">④ 因果掩码</a><a href="#architecture">⑤ 完整流程</a></nav>
+</header>
+<section id="introduction">
+<h2>Introduction：我们为什么要学 Transformer？</h2>
+<p>先把计算细节放一放。这部分帮助我们回答三个问题：这门课准备讲什么？今天的语言模型从哪里来？Transformer 在其中处于什么位置？</p>
+<h3>1. 这门课的目标：理解原理，也理解使用方式</h3>
+<p>课件提出两个目标：理解 Transformer 怎样工作、与大语言模型有什么关系；理解大语言模型怎样训练，以及怎样用于不同应用。可以把课程理解成从“模型内部怎样计算”，逐步走到“怎样把模型用在实际系统中”。</p>
+<div class="flow" aria-label="课程学习路线"><span class="chip">架构：信息怎样流动</span><span class="arrow">→</span><span class="chip">训练：参数怎样学到</span><span class="arrow">→</span><span class="chip">应用：怎样完成任务</span></div>
+<p>例如，一个助手回答问题时，我们可以分别追问：它怎样读取输入？这些能力怎样通过训练获得？它什么时候需要搜索或调用工具？这些分别涉及架构、训练和应用。本讲主要打下架构基础。</p>
+<h3>2. 哪些基础会用到？</h3>
+<p>课件面向研究与职业发展、个人项目，以及希望了解 AI 的学习者，列出的前提是机器学习基础和线性代数。学习时可以按需补上：</p>
+<div class="grid"><div class="layer"><strong>线性代数</strong><br>向量：一组数字<br>矩阵：按行列排列的数字<br>点积：两个向量逐项相乘后求和<br>矩阵乘法：同时计算多组组合</div><div class="layer"><strong>机器学习</strong><br>参数：训练时调整的数字<br>预测：模型根据输入给出结果<br>损失：衡量预测与目标的差距<br>训练：根据损失调整参数</div></div>
+<p class="small muted">上面是帮助入门的简述。遇到具体计算时，我们再给出定义和例子；目前无需记住所有缩写。</p>
+<h3>3. 四个阶段：从专门的 NLP 模型到代理系统</h3>
+<p>NLP 是 Natural Language Processing，即自然语言处理，研究怎样让计算机处理人类语言。点击各阶段，查看它解决了什么问题。时间轴对应课件的组织方式，阶段之间存在重叠。</p>
+<div class="flow" aria-label="课程中的发展时间轴"><a class="chip" href="#era-task">2010 年代 · 专门任务</a><span class="arrow">→</span><a class="chip" href="#era-transformer">2017 · Transformer</a><span class="arrow">→</span><a class="chip" href="#era-chat">2022 · 对话</a><span class="arrow">→</span><a class="chip" href="#era-agent">课件所述当下 · 代理</a></div>
+<details id="era-task" open><summary>2010 年代：不同任务，常常使用不同模型</summary><p>早期常见的做法，是为每种任务训练或适配专门的模型。例如：</p><ul><li><strong>情感分析：</strong>输入“这家餐厅很好吃”，输出“正面”。</li><li><strong>机器翻译：</strong>输入一句英文，输出对应法文。</li><li><strong>命名实体识别：</strong>在“张三住在北京”中标出人名“张三”和地名“北京”。</li></ul><div class="flow"><span class="chip">评论 → 情感模型 → 类别</span><span class="chip">英文 → 翻译模型 → 法文</span><span class="chip">句子 → 实体模型 → 标注</span></div><p>当时 RNN 是重要的序列建模方法之一。后文会介绍它怎样通过隐藏状态传递信息，以及为什么长距离依赖和顺序计算会带来困难。这里是发展主线的简化，并不意味着当时只有 RNN。</p></details>
+<details id="era-transformer" open><summary>2017 年：Transformer 提供可扩展的架构基础</summary><p>《Attention Is All You Need》提出 Transformer。原始任务是机器翻译，架构由编码器和解码器组成，关键机制是自注意力：每个位置可以直接从允许访问的其他位置汇总信息。</p><p>“可扩展”可以先理解为：在合适的训练方案下，增加数据、模型参数与计算投入，可以继续改善能力。Transformer 的矩阵计算形式也适合训练中的并行处理。更多投入并不保证每项能力都自动提高，数据质量与训练设计同样重要。</p><div class="note"><strong>Transformer 是架构；LLM 是大语言模型。</strong>可以把架构理解为“计算模块怎样连接的设计”。训练把参数学出来。现代大语言模型通常采用 Transformer 的变体，但只给出架构图，还没有得到一个能聊天的模型。</div></details>
+<details id="era-chat" open><summary>2022 年：ChatGPT 让对话式交互走向大众</summary><p>课件把 ChatGPT 的发布作为产品与交互方式上的转折点。用户可以直接用自然语言提问、补充条件、要求改写，在同一对话中完成多种任务。</p><div class="flow"><span class="chip">总结这段文字</span><span class="chip">把它翻译成英文</span><span class="chip">解释其中的代码</span><span class="arrow">→</span><span class="chip">通过对话提出不同任务</span></div><p>多种任务可以通过同一个语言模型接口表达。这依赖模型规模、训练数据与训练方法等多方面发展；对话产品也可能连接额外的模型和工具。Transformer 架构本身并不能单独解释全部对话能力。</p></details>
+<details id="era-agent" open><summary>代理阶段：从给出建议，到调用工具并根据结果继续工作</summary><p>以“修复一个报错”为例：对话助手可以解释错误、给出修改建议；具备相应工具和权限的代理系统，还可以读取文件、修改代码、运行检查，再根据报错继续调整。</p><div class="flow" aria-label="代理系统的简化循环"><span class="chip">接收目标</span><span class="arrow">→</span><span class="chip">模型选择下一步</span><span class="arrow">→</span><span class="chip">系统执行工具</span><span class="arrow">→</span><span class="chip">结果返回模型，继续或结束</span></div><p>这里的 Agent 可以先理解成“模型与工具、状态管理、执行循环等组成的系统”。工具由外部程序执行，模型根据获得的结果决定后续动作。能调用工具不等于一定能正确完成任务，实际能力还取决于工具、上下文、权限与验证。</p><p class="small muted">代理循环是帮助理解课件概念的补充示意，本讲并未详细展开代理实现。</p></details>
+<h3>4. 再把几个经常混淆的名字分开</h3>
+<div class="table-wrap"><table><thead><tr><th>名称</th><th>指什么</th><th>通俗理解</th></tr></thead><tbody><tr><td>Transformer</td><td>神经网络架构</td><td>内部计算模块的设计</td></tr><tr><td>LLM</td><td>大语言模型</td><td>经过训练、能够处理与生成语言的模型</td></tr><tr><td>ChatGPT</td><td>对话式产品</td><td>用户与模型及相关功能交互的入口</td></tr><tr><td>AI Agent</td><td>围绕目标执行步骤的系统</td><td>模型结合工具、状态与执行循环完成工作</td></tr></tbody></table></div>
+<p>这些概念分别描述架构、模型、产品与系统。理解它们之间的联系，可以避免把“学会注意力公式”误认为已经解释了一个完整 AI 助手的全部工作方式。</p>
+<h3>5. 本讲接下来怎样走？</h3>
+<div class="flow"><span class="chip">文字怎样切分？<br>Tokenization</span><span class="arrow">→</span><span class="chip">词元怎样表示？<br>Word representation</span><span class="arrow">→</span><span class="chip">上下文怎样交互？<br>Self-attention</span><span class="arrow">→</span><span class="chip">组件怎样连接？<br>Transformer architecture</span><span class="arrow">→</span><span class="chip">完整翻译过程<br>End-to-end example</span></div>
+<details><summary>理解检查：ChatGPT、Transformer、Agent 是同一个东西吗？</summary><p>它们描述不同层面。Transformer 描述模型的架构；ChatGPT 是对话产品；Agent 描述围绕目标执行步骤的系统形式。一个产品可以使用 Transformer 架构的模型，也可以提供使用工具的代理功能。</p></details>
+<details><summary>理解检查：为什么第一讲先讲 2017 年的翻译架构？</summary><p>它提供了一个清晰的完整例子：源句进入编码器，解码器结合源句与已有输出生成译文。先理解嵌入、注意力和前馈网络怎样配合，后续再学习现代模型保留、修改或移除了哪些组件。</p></details>
+<p class="source">课件定位：第 1–16 页为课程开场；第 17–22 页为 Introduction 的发展脉络。例句、概念对照与代理循环为教学补充。课件还介绍后训练、AI Agents 和 Diffusion LLMs 等后续主题，本讲无需提前掌握。课程安排和考试信息以课程官方发布为准。</p>
+</section>
+<section id="tokens">
+<h2>① 先把文字切成小块</h2>
+<p>模型不能直接把一段文字拿去做矩阵乘法。第一步是把文字切成 <strong>token（词元）</strong>，然后给每个 token 一个编号。token 可以是完整单词、单词的一部分或标点。</p>
+<div class="math">原文：A cute teddy bear is reading.</div>
+<div class="controls" role="group" aria-label="分词方式"><button data-mode="word" aria-pressed="true">按词</button><button data-mode="subword" aria-pressed="false">按子词</button><button data-mode="character" aria-pressed="false">按字符</button></div>
+<div id="token-output" class="flow" aria-live="polite"></div>
+<p id="token-explanation"></p>
+<div class="note">观察两个量：<strong>词表大小</strong>是“总共有多少种可用的小块”；<strong>序列长度</strong>是“这句话用了多少个小块”。这里能直接看到的是后者。</div>
+<p class="small muted">三种切法仅用于比较。真实 BPE 的切分由词表与合并规则决定，空格也有具体的编码方式；“按子词”按钮不执行 BPE 训练。</p>
+<details><summary>想一想：为什么不把每个句子都当成一个 token？</summary><p>可能出现的句子太多，有限词表无法列举。把文本切成可重复使用的小块，能用有限词表组合出大量表达。另一端，如果切得非常细，序列会变长，计算也会增加。</p></details>
+<p class="source">课件定位：第 24–31 页。</p>
+</section>
+<section id="embedding">
+<h2>② 编号只是索引，向量才进入计算</h2>
+<p>可以把 token ID 想成图书馆的索书号：它帮助找到对应记录，但编号本身不表示语义。<strong>Embedding（嵌入）</strong>就是根据编号，查出一组可学习的数字。</p>
+<div class="controls"><label for="lookup">选择一个 token：</label><select id="lookup"><option value="0">泰迪熊</option><option value="1">可爱</option><option value="2">阅读</option></select></div>
+<div id="embedding-flow" class="flow" aria-live="polite"></div>
+<p>下面两项区别很重要：</p>
+<ul><li><strong>初始 token embedding：</strong>同一个 token 通常查到相同的初始向量。</li><li><strong>上下文表示：</strong>经过后续层后，会根据句子中的其他内容发生变化。例如同一个 <code>bank</code>，可以在不同上下文中表示“银行”或“河岸”。</li></ul>
+<div class="note">这里用二维向量方便计算。真实模型的向量通常有更多维度，每个维度通常也没有预先指定的人类含义。</div>
+<p class="source">课件定位：第 33–44 页；上下文表示见第 104 页。</p>
+</section>
+<section id="attention">
+<h2>③ 注意力：这一次，该从谁那里读取多少信息？</h2>
+<p>先把视线固定在“泰迪熊”这个位置。我们给它一个查询向量 <strong>Q</strong>，用 Q 与各位置的 <strong>K</strong> 计算匹配分数，再按权重汇总各位置的 <strong>V</strong>。</p>
+<div class="flow"><span class="chip">Q：用来匹配的信息需求</span><span class="chip">K：供匹配的特征</span><span class="chip">V：实际读取的信息</span></div>
+<p>拖动下面两个数字，看看同一组 K 和 V，在不同 Q 下怎样产生不同结果。此实验先允许读取全部三个位置。</p>
+<div class="controls"><label for="q1">Q 的第 1 维：<output id="q1-value">1.0</output></label><input id="q1" type="range" min="-2" max="2" step="0.1" value="1"><label for="q2">第 2 维：<output id="q2-value">0.0</output></label><input id="q2" type="range" min="-2" max="2" step="0.1" value="0"><button id="reset">重置</button></div>
+<div class="table-wrap"><table><caption>单个查询的完整计算：d_k = 2</caption><thead><tr><th>位置</th><th>K</th><th>V</th><th>Q · K</th><th>除以 √2 后</th><th>softmax 权重</th></tr></thead><tbody id="attention-table"></tbody></table></div>
+<div class="grid"><div><h3>读取比例</h3><div id="attention-bars" class="bars"></div></div><div><h3>汇总后的输出向量</h3><div id="attention-result" class="math" aria-live="polite"></div><p class="small muted">输出的每个维度，都用相同权重对 V 的对应维度求和。此处只展示一个头、一个查询的位置。</p></div></div>
+<details><summary>展开公式：为什么要做这几步？</summary><div class="math">分数 s_j = (q · k_j) / √d_k<br>权重 a_j = exp(s_j) / Σ exp(s_l)<br>输出 z = Σ a_j v_j</div><p>点积衡量经过学习的查询与键的匹配程度。缩放用来控制分数尺度；softmax 把分数变成非负且总和为 1 的权重。最后按权重混合 V。</p><p>把所有位置的查询一起计算，就是：</p><div class="math">Attention(Q,K,V) = softmax(QKᵀ / √d_k) V</div><p>如果共有 n 个位置，Q 与 K 都是 n × d_k，QKᵀ 就是 n × n。每一行对应一个查询，每一列对应一个被读取的位置。softmax 对每一行分别计算。</p></details>
+<details><summary>Q、K、V 从哪里来？</summary><p>真实模型通过不同的可学习矩阵对输入 X 做投影：Q = XW_Q，K = XW_K，V = XW_V。这里直接给定 K、V 并调整 Q，是为了隔离并看清匹配与汇总的过程。滑块不表示真实模型会让人手动设置查询。</p></details>
+<details><summary>试一试：把 Q 的两维都调成 0，会怎样？</summary><p>所有点积都等于 0，所以三个位置的权重均为 1/3。即使各个 V 不同，读取比例也相同。你可以再把 Q 改为 [2, −2]，观察它与 [1, 0]、[0, 1]、[1, 1] 三个键的匹配差异。</p></details>
+<p class="source">课件定位：第 58–62、93–101 页。权重不等同于模型完整的推理解释。</p>
+</section>
+<section id="mask">
+<h2>④ 预测未来时，不能偷看答案</h2>
+<p>训练时我们已经拥有完整句子，但仍然要模拟生成条件。例如输入位置“喜欢”的输出负责预测“熊”，它可以读取“我”和“喜欢”，不能直接读取后面的“熊”。</p>
+<div class="controls"><label for="mask-position">查看输入位置：</label><select id="mask-position"><option value="0">1 · 我</option><option value="1" selected>2 · 喜欢</option><option value="2">3 · 熊</option><option value="3">4 · 。</option></select></div>
+<div class="table-wrap"><table class="mask"><caption>行 = 发起查询的位置；列 = 可被读取的位置</caption><thead><tr><th scope="col">查询 ↓ / 读取 →</th><th scope="col">我</th><th scope="col">喜欢</th><th scope="col">熊</th><th scope="col">。</th></tr></thead><tbody id="mask-table"></tbody></table></div>
+<p id="mask-description" aria-live="polite"></p>
+<div class="note">允许读取的分数保持原值；禁止读取的分数在 softmax 前设为 −∞，于是对应权重为 0。图中的下三角形来自“只看当前及之前位置”的规则。</div>
+<details><summary>训练能并行，为什么生成还要逐个进行？</summary><p>训练文本已知，可以同时提供各输入位置，再通过掩码阻断未来信息，计算各位置的预测损失。自回归生成时，下一 token 还没选出来，后续位置的输入尚不存在，所以通常需要逐个生成。</p></details>
+<p class="source">课件定位：第 75 页及课堂末尾问答。这里展示因果掩码，实际训练还可能需要屏蔽填充位置。</p>
+</section>
+<section id="architecture">
+<h2>⑤ 把这些零件放回翻译模型</h2>
+<p>第一讲主要介绍 2017 年原始 Transformer：编码器读取原文，解码器根据原文及已生成内容，预测下一个目标 token。</p>
+<div class="grid"><div><h3>编码器：理解源句</h3><div class="layer">源语言 token embedding + 位置编码</div><div class="layer">自注意力：在源句中读取信息<br>＋残差连接与归一化</div><div class="layer">FFN：对各位置做非线性变换<br>＋残差连接与归一化</div><div class="layer">重复多层 → 源句的上下文表示</div></div><div><h3>解码器：生成译文</h3><div class="layer">目标语言 token embedding + 位置编码</div><div class="layer">因果自注意力：读取已有目标内容<br>＋残差连接与归一化</div><div class="layer">交叉注意力：读取编码器输出<br>Q 来自解码器，K/V 来自编码器输出<br>＋残差连接与归一化</div><div class="layer">FFN ＋残差连接与归一化<br>重复多层 → 投影到词表 → softmax</div></div></div>
+<p>注意力让位置之间交换信息；FFN 对各位置的特征进行变换。多头注意力让多组不同投影并行读取信息，再把结果合并。</p>
+<div class="note"><strong>两处 softmax，两个用途：</strong>注意力中的 softmax 决定“从哪些位置读取多少”；输出端的 softmax 决定“下一个 token 的概率分布”。</div>
+<p class="small muted">图中省略 Dropout 等细节。今天常见的 GPT 类模型通常使用 decoder-only 架构，没有这里独立的编码器及其交叉注意力。</p>
+<p class="source">课件定位：第 64–78、102–115 页。</p>
+</section>
+<footer>继续学习：<a href="lecture-01-transformers.md">第一讲文字笔记</a> · <a href="../../fall26-cme295-lecture1.pdf">原始课件 PDF</a>。建议先观察、再调整参数、最后尝试用自己的话解释变化。</footer>
+</main>
+<script>
+'use strict';
+const names=['泰迪熊','可爱','阅读'];
+const keys=[[1,0],[0,1],[1,1]];
+const values=[[1,0],[0,2],[1,1]];
+const tokenModes={word:['A','cute','teddy','bear','is','reading','.'],subword:['A','cute','ted','dy','bear','is','read','ing','.'],character:Array.from('A cute teddy bear is reading.').map(c=>c===' '?'␠':c)};
+const explanations={word:'完整单词分别占一个 token，标点单独处理。实际词级系统还需要规定大小写和未知词等规则。',subword:'示意：teddy 拆成 ted + dy，reading 拆成 read + ing。切分会让一些小块在不同词之间复用。',character:'每个字符占一个位置，␠ 表示空格。小块种类可以较少，但同一句话需要更多位置。'};
+function showTokens(mode){document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===mode)));document.getElementById('token-output').replaceChildren(...tokenModes[mode].map(t=>{const el=document.createElement('span');el.className='chip';el.textContent=t;return el;}));document.getElementById('token-explanation').textContent=`序列长度：${tokenModes[mode].length} 个 token。${explanations[mode]}`;}
+document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>showTokens(b.dataset.mode)));
+function lookup(){const i=Number(document.getElementById('lookup').value);document.getElementById('embedding-flow').innerHTML=`<span class="chip">token：${names[i]}</span><span class="arrow">→</span><span class="chip">示例 ID：${[42,7,105][i]}</span><span class="arrow">→ 查表 →</span><span class="chip">示例向量：[${values[i].join(', ')}]</span>`;}
+document.getElementById('lookup').addEventListener('change',lookup);
+function calculateAttention(q){const dots=keys.map(k=>q[0]*k[0]+q[1]*k[1]);const scores=dots.map(x=>x/Math.sqrt(2));const max=Math.max(...scores);const exps=scores.map(x=>Math.exp(x-max));const sum=exps.reduce((a,b)=>a+b,0);const weights=exps.map(x=>x/sum);const result=[0,1].map(d=>weights.reduce((acc,w,i)=>acc+w*values[i][d],0));return{dots,scores,weights,result};}
+function renderAttention(){const q=[Number(document.getElementById('q1').value),Number(document.getElementById('q2').value)];document.getElementById('q1-value').textContent=q[0].toFixed(1);document.getElementById('q2-value').textContent=q[1].toFixed(1);const {dots,scores,weights,result}=calculateAttention(q);document.getElementById('attention-table').innerHTML=names.map((n,i)=>`<tr><th scope="row">${n}</th><td>[${keys[i]}]</td><td>[${values[i]}]</td><td>${dots[i].toFixed(3)}</td><td>${scores[i].toFixed(3)}</td><td>${(weights[i]*100).toFixed(2)}%</td></tr>`).join('');document.getElementById('attention-bars').innerHTML=names.map((n,i)=>`<div class="barrow"><span>${n}</span><div class="track"><div class="fill" style="width:${weights[i]*100}%"></div></div><span>${(weights[i]*100).toFixed(1)}%</span></div>`).join('');document.getElementById('attention-result').textContent=weights.map((w,i)=>`${w.toFixed(3)} × [${values[i]}]`).join(' +\n')+`\n≈ [${result.map(x=>x.toFixed(3)).join(', ')}]`;document.getElementById('attention-result').style.whiteSpace='pre-wrap';}
+['q1','q2'].forEach(id=>document.getElementById(id).addEventListener('input',renderAttention));document.getElementById('reset').addEventListener('click',()=>{document.getElementById('q1').value='1';document.getElementById('q2').value='0';renderAttention();});
+function renderMask(){const words=['我','喜欢','熊','。'];const i=Number(document.getElementById('mask-position').value);document.getElementById('mask-table').innerHTML=words.map((w,row)=>`<tr class="${row===i?'selected':''}"><th scope="row">${w}</th>${words.map((_,col)=>`<td class="${col<=row?'allowed':'blocked'}">${col<=row?'可读':'屏蔽'}</td>`).join('')}</tr>`).join('');document.getElementById('mask-description').textContent=`位置 ${i+1}“${words[i]}”可读取：${words.slice(0,i+1).join('、')}。这个位置的输出用于预测${i<3?'下一个 token“'+words[i+1]+'”':'后续 token（例如结束标记）'}。`;}
+document.getElementById('mask-position').addEventListener('change',renderMask);
+showTokens('word');lookup();renderAttention();renderMask();
+</script>
+</body>
+</html>
