@@ -10,6 +10,7 @@
 - [第一讲：Transformers 详细笔记](study-notes/cme295-fall2026/lecture-01-transformers.md)
 - [第一讲：交互图解](study-notes/cme295-fall2026/lecture-01-visual.html)，从 Introduction 开始，使用浏览器打开。
 - [第一讲原始课件](fall26-cme295-lecture1.pdf)
+- [参考读物：《大语言模型基础 - 大模型技术与发展》副本](references/llm-foundations.md)，用于补充前置动机与现代架构背景。
 
 ## 目录组织
 
@@ -19,6 +20,8 @@
 ├── AGENTS.md
 ├── fall26-cme295-lecture1.pdf
 ├── [Chinese Traditional] ... [DownSub.com].txt
+├── references/
+│   └── llm-foundations.md
 └── study-notes/
     └── cme295-fall2026/
         ├── README.md
@@ -32,7 +35,7 @@
 
 页面无需构建、安装依赖或联网。用浏览器（Chrome、Safari 或 Firefox）直接打开 HTML 文件即可。
 
-注意：Finder 的“快速预览”（空格键）以及部分编辑器、AI 应用的内置预览会禁用 JavaScript。页面因此不依赖脚本：分词、向量查表、注意力预设和因果掩码全部用纯 CSS 切换；注意力滑块只在允许脚本的浏览器中出现。已在禁用脚本的环境中验证这些交互仍可点击。
+注意：Finder 的“快速预览”（空格键）以及部分编辑器、AI 应用的内置预览会禁用 JavaScript。页面因此不依赖脚本：分词、向量查表、注意力预设、掩码与各类切换全部用纯 CSS 实现；只有注意力滑块需要脚本，且只在允许脚本时出现。已在禁用脚本的环境中验证这些交互仍可点击。
 
 如果需要通过本地服务器查看，可在本仓库目录运行：
 
@@ -45,3 +48,5 @@ python3 -m http.server 8000 --bind 127.0.0.1
 ## 维护原则
 
 先用通俗语言解释问题，再提供例子、公式、推导和理解检查。课程内容需关联 PDF 页码；补充解释和教学数据需要明确标注。学习中的疑问与澄清持续更新到对应讲次，未经确认不标记为已经掌握。
+
+参考外部资料时，先核对数字与结论再采用。`references/` 中的文档只作为线索，其中过度简化的说法（例如把 one-hot 描述为模型“学不到”任何关系、把特定配置下的参数比例当作通用定律）不直接转述。

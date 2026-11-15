@@ -24,6 +24,8 @@ This repository stores personal study materials for Stanford CME295 Transformers
 - Verify changed internal links, JavaScript syntax, and relevant interactive calculations. Report whether actual browser rendering was checked.
 - Prefer interactions that still work when JavaScript is disabled: encode toggles as hidden radio inputs with CSS panels, and put any script-only control in a `hidden` element that the script reveals. Preview windows in Finder, editors, and chat apps commonly block scripts.
 - Verify HTML changes in both JavaScript-enabled and JavaScript-disabled browser contexts.
+- Recompute every numeric example (probabilities, weights, sums, parameter counts) with a script before finalizing; do not copy numbers from reference documents without checking them.
+- Treat files under `references/` as source material to cite, not as authoritative text. Quote them sparingly and correct simplifications in the learner-facing explanations.
 - Keep source identifiers and code comments in English.
 - Do not commit credentials, local runtime logs, caches, or OS metadata.
 - Do not create commits, push, or publish materials unless the user authorizes those actions.
