@@ -1,0 +1,24 @@
+{
+  "site": {"title":"AI Learning Notes","description":"把 AI 原理、框架和实践连接起来。先理解概念，再用例子与实验验证。"},
+  "collections": [
+    {"slug":"cme295","title":"CME295 · Transformers & LLMs","kind":"course","label":"课程学习","description":"从模型怎样学习，到 Transformer 的完整计算过程。按第一讲顺序，结合图解和可核对的例子逐步理解。","edition":"资料版本：Fall 2026","icon":"∑"},
+    {"slug":"langchain","title":"LangChain","kind":"framework","label":"框架专题","description":"理解模型、消息、工具和检索组件，建立从模型调用到应用开发的基础。","icon":"↗"},
+    {"slug":"langgraph","title":"LangGraph","kind":"framework","label":"框架专题","description":"从状态、节点与边开始，理解条件分支、执行循环与持久化。","icon":"⌘"},
+    {"slug":"eino","title":"Eino","kind":"framework","label":"框架专题","description":"用 Go 的类型与组件构建 AI 应用，逐步学习编排、流式处理与工具。","icon":"◇"}
+  ],
+  "chapters": [
+    {"slug":"introduction","title":"导读 · Introduction","description":"课程目标、模型发展与本讲学习顺序。","order":10,"tags":["导读","发展脉络"]},
+    {"slug":"basics","title":"基础工具箱：模型怎样学习","description":"14 个基础概念，各配一个例子，走完一次前向、反向与更新。","order":20,"tags":["前向传播","梯度","损失"]},
+    {"slug":"background","title":"前置动机：从计数到学习表示","description":"N-gram、神经语言模型与向量相似度。","order":30,"tags":["N-gram","NNLM"]},
+    {"slug":"tokens","title":"分词、词表与特殊 Token","description":"粒度选择、BPE、BOS、EOS 与填充。","order":40,"tags":["Tokenizer","BPE"]},
+    {"slug":"embedding","title":"词元表示 · Token representation","description":"从离散编号到可学习向量，区分初始嵌入与上下文表示。","order":50,"tags":["Embedding","One-hot"]},
+    {"slug":"neural-nets","title":"Word2Vec、RNN 与 LSTM","description":"从浅层网络到序列建模，理解早期注意力的动机。","order":60,"tags":["RNN","LSTM","Word2Vec"]},
+    {"slug":"attention","title":"自注意力 · Self-attention","description":"Q/K/V、矩阵维度、手算过程与可交互的权重实验。","order":70,"tags":["Attention","QKV"]},
+    {"slug":"components","title":"Transformer 的核心组件","description":"位置、多头、FFN、残差、归一化、Dropout 与标签平滑。","order":80,"tags":["FFN","LayerNorm","Dropout"]},
+    {"slug":"architecture","title":"编码器与解码器","description":"谁读源句、谁写译文，以及两种注意力如何配合。","order":90,"tags":["Encoder","Decoder"]},
+    {"slug":"mask","title":"因果掩码 · Causal masking","description":"预测未来时为什么不能偷看答案，训练为何能并行。","order":100,"tags":["Mask","Causal"]},
+    {"slug":"end-to-end","title":"端到端翻译示例","description":"从一句英文开始，跟踪分词、嵌入、编码与逐步生成。","order":110,"tags":["翻译","End-to-end"]},
+    {"slug":"beyond-lecture","title":"从这一讲到现代大模型","description":"三种架构与模型训练、应用之间的连接。","order":120,"tags":["架构","预训练"]},
+    {"slug":"deep-dive","title":"补充：规模、训练与现代架构","description":"微调、提示、缩放经验与现代模型的组件变化。","order":130,"tags":["Scaling","MoE","GQA"]}
+  ]
+}

@@ -8,3 +8,6 @@ __pycache__/
 *.pyc
 .venv/
 *.log
+dist/
+test-results/
+playwright-report/

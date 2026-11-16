@@ -1,0 +1,28 @@
+{
+  "name": "ai-learning-notes",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Unified, content-driven AI learning website",
+  "scripts": {
+    "build": "node tools/build-site.mjs",
+    "preview": "node tools/serve-site.mjs",
+    "start": "npm run build && npm run preview",
+    "check": "node tools/check-site.mjs",
+    "test": "npm run test:content && npm run build && npm run check && playwright test",
+    "new:article": "node tools/new-article.mjs",
+    "test:content": "node --test tools/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "gray-matter": "4.0.3",
+    "marked": "15.0.12",
+    "parse5": "8.1.1",
+    "postcss": "8.5.33",
+    "postcss-selector-parser": "7.2.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.1"
+  }
+}

@@ -1,52 +1,102 @@
 # AI Learning Notes · AI 学习笔记
 
-用于持续整理 AI 相关课程与知识，包括原始学习资料、详细中文笔记与可交互 HTML 图解。
+一个统一风格、可部署的 AI 学习站。内容覆盖课程、模型原理和开发框架，保留“概念 → 为什么 → 具体例子 → 易错点”的讲解方式。
 
-当前学习课程为 Stanford CME295 Transformers & LLMs（所提供材料标记为 2026 年秋季）。
+当前内容：CME295 第一讲的 13 个完整章节，以及 LangChain、LangGraph、Eino 三篇概念导读。框架 API 教程和实战尚待整理。
 
-## 开始学习
+## 运行
 
-- [课程目录与学习进度](study-notes/cme295-fall2026/README.md)
-- [第一讲：Transformers 详细笔记](study-notes/cme295-fall2026/lecture-01-transformers.md)
-- [第一讲：交互图解](study-notes/cme295-fall2026/lecture-01-visual.html)，从 Introduction 开始，使用浏览器打开。
-- [第一讲原始课件](fall26-cme295-lecture1.pdf)
-- [参考读物：《大语言模型基础 - 大模型技术与发展》副本](references/llm-foundations.md)，用于补充前置动机与现代架构背景。
-
-## 目录组织
-
-```text
-.
-├── README.md
-├── AGENTS.md
-├── fall26-cme295-lecture1.pdf
-├── [Chinese Traditional] ... [DownSub.com].txt
-├── references/
-│   └── llm-foundations.md
-└── study-notes/
-    └── cme295-fall2026/
-        ├── README.md
-        ├── lecture-01-transformers.md
-        └── lecture-01-visual.html
-```
-
-课件及字幕保留来源内容；笔记和图解用于个人学习。原始资料的权利归相应权利人所有。公开分发资料之前，应核实其授权条件。
-
-## 查看 HTML
-
-页面无需构建、安装依赖或联网。用浏览器（Chrome、Safari 或 Firefox）直接打开 HTML 文件即可。
-
-注意：Finder 的“快速预览”（空格键）以及部分编辑器、AI 应用的内置预览会禁用 JavaScript。页面因此不依赖脚本：分词、向量查表、注意力预设、掩码与各类切换全部用纯 CSS 实现；只有注意力滑块需要脚本，且只在允许脚本时出现。已在禁用脚本的环境中验证这些交互仍可点击。
-
-如果需要通过本地服务器查看，可在本仓库目录运行：
+需要 Node.js 20 或以上版本：
 
 ```bash
-python3 -m http.server 8000 --bind 127.0.0.1
+npm ci
+npm start
 ```
 
-然后访问 <http://127.0.0.1:8000/study-notes/cme295-fall2026/lecture-01-visual.html>。按 `Ctrl+C` 停止服务。
+打开 <http://127.0.0.1:8000/>。`npm start` 会构建一次再启动预览；修改内容后运行 `npm run build` 并刷新页面。预览端口可用 `PORT=8080 npm start` 指定。
 
-## 维护原则
+页面入口：
 
-先用通俗语言解释问题，再提供例子、公式、推导和理解检查。课程内容需关联 PDF 页码；补充解释和教学数据需要明确标注。学习中的疑问与澄清持续更新到对应讲次，未经确认不标记为已经掌握。
+- `/index.html`：统一首页
+- `/courses.html`：课程与框架专题
+- `/library.html`：知识库与正文搜索
+- `/labs.html`：可交互实验
+- `/map.html`：建议的学习路径
+- `/collections/cme295.html`：第一讲目录
+- `/topics/cme295/basics.html`：完整基础概念内页
 
-参考外部资料时，先核对数字与结论再采用。`references/` 中的文档只作为线索，其中过度简化的说法（例如把 one-hot 描述为模型“学不到”任何关系、把特定配置下的参数比例当作通用定律）不直接转述。
+早期 Demo 的 `course.html`、`docs.html`、`basics.html` 地址保留过渡入口。`demos/` 仅保留旧设计参考，不再是发布目录。
+
+## 新增内容
+
+已有专题里新增一篇文章：
+
+```bash
+npm run new:article -- langgraph checkpoints "检查点与恢复"
+```
+
+它生成 `content/collections/langgraph/checkpoints.md` 草稿。填写正文和简介、设置 `order`，完成核对后改为 `status: published`。构建时自动加入：
+
+- 专题目录
+- 知识库
+- 搜索索引
+- 文章目录与前后篇
+- 站点链接检查
+
+新专题只需在 `content/catalog.json` 的 `collections` 中登记，再添加内容。详细说明见 [内容维护与代码结构](docs/site-architecture.md)。
+
+## 代码结构
+
+```text
+content/
+  catalog.json                  # 站点信息、专题与第一讲覆盖清单
+  collections/<topic>/*.md       # 带元数据的内容文件
+site/
+  lib/content.mjs               # 解析、校验、Markdown 转换与目录提取
+  lib/layout.mjs                # 所有页面共享的头部、导航与页脚
+  lib/pages.mjs                 # 首页、列表、阅读页、实验室等模板
+  assets/site.css               # 全站统一主题与响应式布局
+  assets/site.js                # 分类、搜索、复制链接
+  assets/lesson.css              # 第一讲已有图解组件的作用域样式
+  assets/lesson.js               # 已有注意力滑块
+ tools/
+  build-site.mjs                # 静态构建
+  serve-site.mjs                # 本地预览
+  check-site.mjs                # 页面、导航、文件、锚点与索引检查
+  new-article.mjs               # 新建草稿
+ tests/site.spec.mjs            # 桌面/手机、有/无脚本验收
+ deploy/nginx.conf              # 静态服务配置
+```
+
+原始 PDF、字幕、参考材料、旧第一讲 HTML 与笔记均保留。当前发布直接读取拆分后的 `content/`，不要求每次从旧 HTML 重新提取。`tools/import-lecture.mjs` 是一次性迁移工具，勿对已编辑的内容反复运行。
+
+## 验证
+
+```bash
+npm run build
+npm run check
+npm test
+```
+
+浏览器检查默认使用本机 Chrome。没有 Chrome 时可运行 `npx playwright install chromium`，然后 `PLAYWRIGHT_CHANNEL=chromium npm test`。检查覆盖第一讲所有页面、框架导读、断链、重复 ID、手机横向溢出、分类、正文搜索和已有实验；禁用脚本仍能阅读和切换主要预设。
+
+## 部署
+
+```bash
+npm run build
+```
+
+把 `dist/` 上传到 Nginx 或静态托管服务。也可：
+
+```bash
+docker build -t ai-learning-notes .
+docker run --rm -p 8080:80 ai-learning-notes
+```
+
+Docker 运行层仅使用 Nginx，访问 <http://127.0.0.1:8080/>。当前环境 Docker daemon 未启动，因此镜像构建与容器运行未验收；本地 HTTP 预览及浏览器检查已通过。远程服务器尚未发布。
+
+## 内容边界
+
+课程原意、补充说明、教学数据和参考来源需要区分。原始 PDF、字幕与参考文档没有自动包含到公开构建；原始资料权利归相应权利人所有。框架导读提供概念介绍，后续 API 示例需注明实际测试的版本。
+
+旧资料入口：[课程笔记](study-notes/cme295-fall2026/README.md)、[原第一讲 HTML](study-notes/cme295-fall2026/lecture-01-visual.html)、[参考读物副本](references/llm-foundations.md)。

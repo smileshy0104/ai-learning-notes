@@ -1,0 +1,12 @@
+**
+!package.json
+!package-lock.json
+!tools/
+!tools/build-site.mjs
+!site/
+!site/**
+!content/
+!content/**
+!deploy/
+!deploy/nginx.conf
+!Dockerfile

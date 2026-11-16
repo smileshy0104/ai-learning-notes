@@ -16,6 +16,16 @@ This repository stores personal study materials for Stanford CME295 Transformers
 - Label synthetic tokenization, vectors, and outputs as teaching examples rather than real model results.
 - Do not mark topics as mastered without evidence from the learner.
 
+## Website architecture
+
+- Publish from `content/collections/**/*.md` through shared templates in `site/lib/`; keep navigation and visual design in the shared layout and theme.
+- Register new collections in `content/catalog.json`; new articles should be discoverable without hard-coded page edits.
+- Keep the first lecture's 13 content sections present. `catalog.chapters` is its coverage manifest.
+- The original HTML and `demos/` are reference archives, not the current publishing source. Do not rerun `tools/import-lecture.mjs` over edited content files.
+- Use `npm run build`, `npm run check`, and `npm test` for website delivery. Tests use Chrome by default or `PLAYWRIGHT_CHANNEL=chromium` with an installed Playwright browser.
+- Run previews with `npm start` (or `npm run preview` after building). Output is static `dist/`; never hand-edit generated pages.
+- Framework API guides must declare the tested dependency versions. Current LangChain/LangGraph/Eino overview pages are conceptual introductions, not tested API tutorials.
+
 ## Editing and verification
 
 - Preserve original PDFs and transcripts; do not rewrite source materials to correct errors.
