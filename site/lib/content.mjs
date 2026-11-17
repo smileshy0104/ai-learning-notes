@@ -3,6 +3,7 @@ import path from 'node:path';
 import matter from 'gray-matter';
 import { marked } from 'marked';
 import { parseFragment, serialize } from 'parse5';
+import { renderLecture2Lab } from './lecture2-examples.mjs';
 
 export const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 export function decorate(html) {
@@ -55,10 +56,17 @@ export async function loadContent(root) {
     const url=`topics/${data.collection}/${data.slug}.html`;
     if(urls.has(url)) throw new Error(`${file}: duplicate article URL`);
     urls.add(url);
-    const processed=decorate(marked.parse(content));
-    articles.push({...data,...processed,url,file});
+    const lecture = data.lecture ?? (data.collection === 'cme295' ? 1 : undefined);
+    if (lecture !== undefined && (!Number.isInteger(lecture) || lecture < 1)) throw new Error(`${file}: invalid lecture`);
+    const expanded = content.replace(/<!-- lab:([a-z0-9-]+) -->/g, (_, name) => renderLecture2Lab(name));
+    const processed=decorate(marked.parse(expanded));
+    articles.push({...data,lecture,...processed,url,file});
   }
-  articles.sort((a,b)=>a.collection.localeCompare(b.collection)||a.order-b.order||a.slug.localeCompare(b.slug));
+  articles.sort((a,b)=>a.collection.localeCompare(b.collection)||(a.lecture??0)-(b.lecture??0)||a.order-b.order||a.slug.localeCompare(b.slug));
   for(const chapter of catalog.chapters) if(!articles.some(a=>a.collection==='cme295' && a.slug===chapter.slug)) throw new Error('Missing lecture chapter: '+chapter.slug);
+  for (const lecture of catalog.lectures ?? []) {
+    if (!collections.has(lecture.collection)) throw new Error('Unknown lecture collection');
+    for (const slug of lecture.chapters) if (!articles.some(a => a.collection === lecture.collection && a.lecture === lecture.number && a.slug === slug)) throw new Error(`Missing lecture ${lecture.number} chapter: ${slug}`);
+  }
   return {...catalog,articles};
 }

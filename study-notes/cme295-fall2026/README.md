@@ -1,14 +1,23 @@
 # Stanford CME295：Transformers & LLMs 学习记录
 
-本目录用于记录课程学习、讨论和复习。课程版本按所提供材料标记为 2026 年秋季；目前已收到第一讲 PDF 和繁体中文字幕稿。
+本目录用于记录课程学习、讨论和复习。课程版本按所提供材料标记为 2026 年秋季；目前已收到第一、第二讲 PDF 和繁体中文字幕稿。
 
 ## 学习资料
 
 | 讲次 | 主题 | 资料 | 笔记 |
 | --- | --- | --- | --- |
-| Lecture 1 | Transformers | [PDF](../../fall26-cme295-lecture1.pdf)，仓库根目录的繁体中文字幕稿（文件名含 `DownSub.com`） | [第一讲笔记](lecture-01-transformers.md) |
+| Lecture 1 | Transformers | [PDF](../../materials/cme295/lecture-01/fall26-cme295-lecture1.pdf)、[字幕](../../materials/cme295/lecture-01/transcript.zh-Hant.txt) | [第一讲笔记](lecture-01-transformers.md) |
+| Lecture 2 | Large Language Models | [PDF](../../materials/cme295/lecture-02/fall26-cme295-lecture2.pdf)、[字幕](../../materials/cme295/lecture-02/transcript.zh-Hant.txt) | [第二讲完整笔记](lecture-02-large-language-models.md) |
 
 PDF 是概念、术语及页码定位的主要依据；字幕补充课堂解释和问答。字幕存在机器翻译错误，需要结合英文课件校正。笔记中的页码均指 PDF 的物理页码，从封面第 1 页起计数。
+
+## 第二讲网站与笔记
+
+启动站点后访问 [第二讲导读](http://127.0.0.1:8000/topics/cme295/l2-overview.html) 或 [课程分讲目录](http://127.0.0.1:8000/collections/cme295.html#lecture-2)。第二讲包含 10 篇内容：导读、模型家族、缩放法则、MoE、位置机制、注意力与缓存、归一化、解码、上下文与推理、总复习。
+
+新增三个无需 JavaScript 的交互：Dense／Top-k 专家路由、滑动窗口多层可达范围、温度分布。数值测试覆盖归一化、Top-p、MoE 辅助损失、RoPE 与 KV Cache 字节估算。
+
+第二讲笔记从网站同一内容源导出，修改 `content/collections/cme295/l2-*.md` 后运行 `npm run notes:lecture2`。已读 138 页 PDF 提取文字与完整字幕，视觉核对 12 张重点页；其余图表尚未逐页核对。
 
 ## 可视化学习
 
@@ -25,10 +34,10 @@ PDF 是概念、术语及页码定位的主要依据；字幕补充课堂解释�
 | ②′ 神经网络 | Word2vec 结构图与训练前后概率、RNN 展开图、LSTM 门控、早期注意力 |
 | ③ Self-attention | 5 组 Q 预设的完整计算、5 个位置的手算示例 |
 | ③′ 其他组件 | 位置编码、多头、FFN 数值示例、残差图、LayerNorm 与 Pre/Post-Norm |
-| ④ 因果掩码 | 逐位置可读范围 |
-| ⑤ 编码器与解码器 | 两者定义、子层分工、结构图、含形状的 8 步数据流、逐步生成演示、三种架构对照 |
+| ⑤ 因果掩码 | 逐位置可读范围 |
+| ④ 编码器与解码器 | 两者定义、子层分工、结构图、含形状的 8 步数据流、逐步生成演示、三种架构对照 |
 | ⑥ 端到端示例 | 「A cute teddy bear is reading.」六步翻译全流程：分词、嵌入+位置、编码器、解码器首轮、逐轮生成、训练 vs 推理 |
-| ⑥ 深入补充 | 训练循环手算、交叉熵、三代范式、缩放法则、现代架构改动（默认折叠） |
+| ⑧ 深入补充 | 训练循环手算、交叉熵、三代范式、缩放法则、现代架构改动（默认折叠） |
 
 参考读物《大语言模型基础 - 大模型技术与发展》的副本位于 [references/llm-foundations.md](../../references/llm-foundations.md)，用于补充动机与后续背景；页面已标注哪些是补充内容。
 

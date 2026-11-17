@@ -1,5 +1,7 @@
 # Lecture 1：Transformers
 
+原始资料：[第一讲 PDF](../../materials/cme295/lecture-01/fall26-cme295-lecture1.pdf)、[繁体中文字幕稿](../../materials/cme295/lecture-01/transcript.zh-Hant.txt)。原文件统一保存在 `materials/`，笔记和可视化另行维护。
+
 ## 0. 基础工具箱：十四个概念，每个配一个例子
 
 通用机器学习基础，不属于课件章节，配套 [HTML ⓿ 基础概念](lecture-01-visual.html#basics)。每个概念按“定义 → 为什么需要 → 本例数字”组织。

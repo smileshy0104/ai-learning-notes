@@ -20,7 +20,9 @@ This repository stores personal study materials for Stanford CME295 Transformers
 
 - Publish from `content/collections/**/*.md` through shared templates in `site/lib/`; keep navigation and visual design in the shared layout and theme.
 - Register new collections in `content/catalog.json`; new articles should be discoverable without hard-coded page edits.
-- Keep the first lecture's 13 content sections present. `catalog.chapters` is its coverage manifest.
+- Keep the first lecture's 13 content sections present. `catalog.chapters` is its legacy coverage manifest; `catalog.lectures` records the required chapter slugs per lecture.
+- CME295 articles carry a positive integer `lecture` field (legacy missing values default to 1). Group collection directories by lecture and scope article siblings to the same lecture.
+- Lecture 2 content lives in `content/collections/cme295/l2-*.md`; regenerate its combined Markdown with `npm run notes:lecture2` after edits. Keep source materials under `materials/cme295/lecture-02/` out of the published build.
 - The original HTML and `demos/` are reference archives, not the current publishing source. Do not rerun `tools/import-lecture.mjs` over edited content files.
 - Use `npm run build`, `npm run check`, and `npm test` for website delivery. Tests use Chrome by default or `PLAYWRIGHT_CHANNEL=chromium` with an installed Playwright browser.
 - Run previews with `npm start` (or `npm run preview` after building). Output is static `dist/`; never hand-edit generated pages.
@@ -28,6 +30,7 @@ This repository stores personal study materials for Stanford CME295 Transformers
 
 ## Editing and verification
 
+- Store original course PDFs and transcripts together under `materials/<course>/lecture-XX/`, including a README that records original names. Maintain `materials/manifest.json` with sizes and SHA-256 hashes.
 - Preserve original PDFs and transcripts; do not rewrite source materials to correct errors.
 - Correct subtitle mistranslations in the notes, with the original term where useful.
 - Keep links relative so the repository works after moving or cloning.

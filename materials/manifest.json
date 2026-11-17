@@ -1,0 +1,30 @@
+{
+  "files": [
+    {
+      "lecture": 1,
+      "path": "cme295/lecture-01/fall26-cme295-lecture1.pdf",
+      "sha256": "556f3df511a4c2f6f935f1ceb432dff9d4093e8b545e8b840beb355a7c88ca42",
+      "bytes": 4072402,
+      "pages": 118
+    },
+    {
+      "lecture": 1,
+      "path": "cme295/lecture-01/transcript.zh-Hant.txt",
+      "sha256": "89789d7a6b16ae0d9ad1c35e31eaa081591abb8b962103a4729ad10bd50fb529",
+      "bytes": 66870
+    },
+    {
+      "lecture": 2,
+      "path": "cme295/lecture-02/fall26-cme295-lecture2.pdf",
+      "sha256": "cd6fb64ada1ac430d362042e32e237149d93ab010ae88a869f1c27dcc4b71af3",
+      "bytes": 6772522,
+      "pages": 138
+    },
+    {
+      "lecture": 2,
+      "path": "cme295/lecture-02/transcript.zh-Hant.txt",
+      "sha256": "5e72b09e6b5e2433844a18db217da455f08d34487f978c40ca9ebe29537276f1",
+      "bytes": 64970
+    }
+  ]
+}

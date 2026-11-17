@@ -51,6 +51,21 @@ test('missing metadata fails before publishing',()=>fixture(async(root,dir)=>{
  await fs.writeFile(path.join(dir,'broken.md'),article('broken').replace('description: Example description\n',''));
  await assert.rejects(loadContent(root),/missing description/);
 }));
+test('lecture metadata groups pages and labels lecture two correctly',()=>fixture(async(root,dir)=>{
+ await fs.writeFile(path.join(dir,'one.md'),article('one').replace('kind: lesson','lecture: 1\nkind: lesson'));
+ await fs.writeFile(path.join(dir,'two.md'),article('two').replace('kind: lesson','lecture: 2\nkind: lesson'));
+ const catalogFile=path.join(root,'content/catalog.json');
+ const catalog=JSON.parse(await fs.readFile(catalogFile,'utf8'));
+ catalog.lectures=[{collection:'new-course',number:1,title:'First',pages:10,chapters:['one']},{collection:'new-course',number:2,title:'Second',pages:20,chapters:['two']}];
+ await fs.writeFile(catalogFile,JSON.stringify(catalog));
+ const data=await loadContent(root);
+ assert(collectionPage(data,data.collections[0]).includes('id="lecture-2"'));
+ const html=articlePage(data,data.articles.find(a=>a.slug==='two'));
+ assert(html.includes('Lecture 2'));
+ assert(!html.includes('>New topic one</a>'));
+ await fs.unlink(path.join(dir,'two.md'));
+ await assert.rejects(loadContent(root),/Missing lecture 2 chapter/);
+}));
 test('duplicate article addresses fail before publishing',()=>fixture(async(root,dir)=>{
  await fs.writeFile(path.join(dir,'one.md'),article('same'));
  await fs.writeFile(path.join(dir,'two.md'),article('same'));

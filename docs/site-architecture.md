@@ -82,6 +82,12 @@ npm run new:article -- rag introduction "RAG 入门"
 
 **不要在正常编辑流程重复运行这个迁移脚本**，因为它会从旧 HTML 重新覆盖文章。后续发布以 `content/` 为内容源。
 
+## 第二讲内容与实验
+
+第二讲正文在 `content/collections/cme295/l2-*.md`，带有 `lecture: 2`。正文可写 `<!-- lab:temperature -->`、`<!-- lab:routing -->` 或 `<!-- lab:window -->`，构建时由 `site/lib/lecture2-examples.mjs` 生成离线 CSS 交互。`tools/lecture2.test.mjs` 验证温度分布、Top-p、旋转关系、缓存字节数和辅助损失等数值。
+
+`npm run notes:lecture2` 将这些同源正文合并成可独立阅读的 Markdown 笔记，不再手工维护两套第二讲正文。原始 PDF 与字幕在 `materials/` 保留，构建只取 `content/` 和 `site/assets/`，不会自动公开资料。
+
 ## 发布与检查
 
 构建流程：
@@ -100,6 +106,6 @@ npm run new:article -- rag introduction "RAG 入门"
 - 第一讲内容中仍含原 HTML 图解，这属于渐进迁移。后续可把通用实验抽成组件函数或独立内容块，避免在新文档里复制图解。
 - 知识地图现在是精简的建议路线，并非自动生成的复杂依赖图。
 - 搜索索引在客户端加载，适合当前规模；规模明显增长后可换分片索引或 Pagefind。
-- 课程仍以第一讲为目录单元；第二讲加入时可扩充 lecture 元数据，生成讲次分组，不需要修改站点整体主题。
+- 课程现在支持 `lecture` 元数据与 `catalog.lectures` 覆盖清单；目录按讲次分组，文章侧栏与前后篇限于同一讲。第一讲 13 篇、第二讲 10 篇均由元数据生成。后续讲次沿用相同结构。
 - 同一个概念若要归属多门课，后续可增加独立 concepts 集合与课程引用列表；本次没有复制多套正文。
 - 暂无持久化用户进度、账号或评论服务。

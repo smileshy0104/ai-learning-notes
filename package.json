@@ -10,7 +10,8 @@
     "check": "node tools/check-site.mjs",
     "test": "npm run test:content && npm run build && npm run check && playwright test",
     "new:article": "node tools/new-article.mjs",
-    "test:content": "node --test tools/*.test.mjs"
+    "test:content": "node --test tools/*.test.mjs",
+    "notes:lecture2": "node tools/export-lecture2-notes.mjs"
   },
   "engines": {
     "node": ">=20"
