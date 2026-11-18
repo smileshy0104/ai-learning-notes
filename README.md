@@ -2,7 +2,7 @@
 
 一个统一风格、可部署的 AI 学习站。内容覆盖课程、模型原理和开发框架，保留“概念 → 为什么 → 具体例子 → 易错点”的讲解方式。
 
-当前内容：CME295 第一讲的 13 个完整章节、第二讲的 10 篇详细讲解，以及 LangChain、LangGraph、Eino 三篇概念导读。框架 API 教程和实战尚待整理。
+当前内容：CME295 第一讲13个章节、第二讲10篇、第三讲12篇详细讲解，以及 LangChain、LangGraph、Eino 三篇概念导读。框架 API 教程和实战尚待整理。
 
 ## 运行
 
@@ -13,7 +13,7 @@ npm ci
 npm start
 ```
 
-打开 <http://127.0.0.1:8000/>。`npm start` 会构建一次再启动预览；修改内容后运行 `npm run build` 并刷新页面。第二讲完整 Markdown 笔记可用 `npm run notes:lecture2` 从相同内容源导出。预览端口可用 `PORT=8080 npm start` 指定。
+打开 <http://127.0.0.1:8000/>。`npm start` 会构建一次再启动预览；修改内容后运行 `npm run build` 并刷新页面。第二、第三讲完整 Markdown 笔记可分别用 `npm run notes:lecture2`、`npm run notes:lecture3` 从相同内容源导出。预览端口可用 `PORT=8080 npm start` 指定。
 
 页面入口：
 
@@ -22,15 +22,16 @@ npm start
 - `/library.html`：知识库与正文搜索
 - `/labs.html`：可交互实验
 - `/map.html`：建议的学习路径
-- `/collections/cme295.html`：按第一、第二讲分组的课程目录
+- `/collections/cme295.html`：按第一至第三讲分组的课程目录
 - `/topics/cme295/l2-overview.html`：第二讲导读与页码索引
+- `/topics/cme295/l3-overview.html`：第三讲训练流程与页码索引
 - `/topics/cme295/basics.html`：完整基础概念内页
 
 早期 Demo 的 `course.html`、`docs.html`、`basics.html` 地址保留过渡入口。`demos/` 仅保留旧设计参考，不再是发布目录。
 
 ## 原始资料
 
-PDF 和文字稿统一存放在 [materials/ 资料索引](materials/README.md)，按课程和讲次分目录。第一讲和第二讲都已实际归档 PDF 与繁体中文字幕稿；每个文件的 SHA-256 与大小记录在 `materials/manifest.json`。这些原材料不包含在网站公开构建中。
+PDF 和文字稿统一存放在 [materials/ 资料索引](materials/README.md)，按课程和讲次分目录。第一至第三讲都已归档 PDF 与相应语言字幕；每个文件的 SHA-256 与大小记录在 `materials/manifest.json`。这些原材料不包含在网站公开构建中。
 
 ## 新增内容
 

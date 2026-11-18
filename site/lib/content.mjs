@@ -4,6 +4,9 @@ import matter from 'gray-matter';
 import { marked } from 'marked';
 import { parseFragment, serialize } from 'parse5';
 import { renderLecture2Lab } from './lecture2-examples.mjs';
+import { renderLecture3Lab } from './lecture3-examples.mjs';
+
+const renderLab = name => name.startsWith('l3-') ? renderLecture3Lab(name.slice(3)) : renderLecture2Lab(name);
 
 export const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 export function decorate(html) {
@@ -58,7 +61,7 @@ export async function loadContent(root) {
     urls.add(url);
     const lecture = data.lecture ?? (data.collection === 'cme295' ? 1 : undefined);
     if (lecture !== undefined && (!Number.isInteger(lecture) || lecture < 1)) throw new Error(`${file}: invalid lecture`);
-    const expanded = content.replace(/<!-- lab:([a-z0-9-]+) -->/g, (_, name) => renderLecture2Lab(name));
+    const expanded = content.replace(/<!-- lab:([a-z0-9-]+) -->/g, (_, name) => renderLab(name));
     const processed=decorate(marked.parse(expanded));
     articles.push({...data,lecture,...processed,url,file});
   }

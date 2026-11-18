@@ -215,6 +215,27 @@
         "l2-context-reasoning",
         "l2-review"
       ]
+    },
+    {
+      "collection": "cme295",
+      "number": 3,
+      "title": "LLM training",
+      "description": "预训练、数据与长上下文、SFT 与 LoRA、偏好优化、推理训练、蒸馏及端到端训练案例。",
+      "pages": 165,
+      "chapters": [
+        "l3-overview",
+        "l3-pretraining",
+        "l3-data",
+        "l3-sft",
+        "l3-lora",
+        "l3-preferences",
+        "l3-rlhf",
+        "l3-dpo",
+        "l3-reasoning",
+        "l3-distillation",
+        "l3-end-to-end",
+        "l3-review"
+      ]
     }
   ]
 }

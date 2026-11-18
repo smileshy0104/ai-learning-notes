@@ -1,6 +1,6 @@
 # Stanford CME295：Transformers & LLMs 学习记录
 
-本目录用于记录课程学习、讨论和复习。课程版本按所提供材料标记为 2026 年秋季；目前已收到第一、第二讲 PDF 和繁体中文字幕稿。
+本目录用于记录课程学习、讨论和复习。课程版本按所提供材料标记为 2026 年秋季；目前已收到第一至第三讲 PDF，以及对应的繁体中文字幕或英文自动字幕。
 
 ## 学习资料
 
@@ -8,8 +8,17 @@
 | --- | --- | --- | --- |
 | Lecture 1 | Transformers | [PDF](../../materials/cme295/lecture-01/fall26-cme295-lecture1.pdf)、[字幕](../../materials/cme295/lecture-01/transcript.zh-Hant.txt) | [第一讲笔记](lecture-01-transformers.md) |
 | Lecture 2 | Large Language Models | [PDF](../../materials/cme295/lecture-02/fall26-cme295-lecture2.pdf)、[字幕](../../materials/cme295/lecture-02/transcript.zh-Hant.txt) | [第二讲完整笔记](lecture-02-large-language-models.md) |
+| Lecture 3 | LLM training | [PDF](../../materials/cme295/lecture-03/fall26-cme295-lecture3.pdf)、[英文字幕](../../materials/cme295/lecture-03/transcript.en.txt) | [第三讲完整笔记](lecture-03-llm-training.md) |
 
 PDF 是概念、术语及页码定位的主要依据；字幕补充课堂解释和问答。字幕存在机器翻译错误，需要结合英文课件校正。笔记中的页码均指 PDF 的物理页码，从封面第 1 页起计数。
+
+## 第三讲：训练流程
+
+从 [第三讲内容导读](../../content/collections/cme295/l3-overview.md) 开始，或启动网站后访问 `topics/cme295/l3-overview.html`，课程目录的 `#lecture-3` 是第三讲入口。
+
+12篇内容覆盖课件全部六条主线：预训练、SFT、偏好优化、推理、蒸馏、讨论。额外分开 LoRA、RLHF、DPO，保留端到端训练案例、模型塌缩与灾难性遗忘。每节包含定义、动机、例子、页码和理解检查。
+
+三个无脚本交互演示：loss mask、奖励分差、组内优势。完整笔记从相同内容文件生成，修改后运行 `npm run notes:lecture3`。已阅读165页PDF提取文字和3118行英文字幕，视觉核对20张重点页；其余图示尚未逐页核对。
 
 ## 第二讲网站与笔记
 

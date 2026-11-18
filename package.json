@@ -11,7 +11,8 @@
     "test": "npm run test:content && npm run build && npm run check && playwright test",
     "new:article": "node tools/new-article.mjs",
     "test:content": "node --test tools/*.test.mjs",
-    "notes:lecture2": "node tools/export-lecture2-notes.mjs"
+    "notes:lecture2": "node tools/export-lecture2-notes.mjs",
+    "notes:lecture3": "node tools/export-lecture-notes.mjs 3"
   },
   "engines": {
     "node": ">=20"
