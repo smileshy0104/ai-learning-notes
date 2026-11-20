@@ -51,6 +51,19 @@
       "path": "cme295/lecture-04/transcript.en.txt",
       "sha256": "a8df6bb68195582428a42cdf1f51ea1686c98f31df22e3e4e528aac09ec38470",
       "bytes": 70589
+    },
+    {
+      "lecture": 5,
+      "path": "cme295/lecture-05/fall26-cme295-lecture5.pdf",
+      "sha256": "8458b0ccf6391b620c8b9349f737e7834065466f5e7637d96ff688b4ceb8fbe9",
+      "bytes": 5439970,
+      "pages": 156
+    },
+    {
+      "lecture": 5,
+      "path": "cme295/lecture-05/transcript.en.txt",
+      "sha256": "d7242e9b14f0b5d343b5cb77875b5bd0f5f06613c31f157f5538a6e8c7cb83f2",
+      "bytes": 71621
     }
   ]
 }

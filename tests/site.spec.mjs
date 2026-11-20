@@ -39,6 +39,28 @@ for(const javaScriptEnabled of [true,false]) for(const width of [1440,390]) {
   await expect(page.locator('#lecture-2 .reading-row')).toHaveCount(10);
   await expect(page.locator('#lecture-3 .reading-row')).toHaveCount(12);
   await expect(page.locator('#lecture-4 .reading-row')).toHaveCount(11);
+  await expect(page.locator('#lecture-5 .reading-row')).toHaveCount(12);
+  for(const [slug,name,presets] of [
+   ['l5-flash','online',['6.0000','1001.3863']],
+   ['l5-zero','zero',['16.0000','7.0000','5.5000','4.0000']],
+   ['l5-latency-roofline','roofline',['10 TFLOP/s','ridge point','100 TFLOP/s']],
+   ['l5-kv-paging','paging',['36','40','48']],
+   ['l5-speculative','speculative',['0.4000','0.3900']]
+  ]) {
+   await page.goto(`http://127.0.0.1:18766/topics/cme295/${slug}.html`);
+   await expect(page.locator('.article-heading .eyebrow')).toContainText('Lecture 5');
+   for(const [i,text] of presets.entries()) {
+    await page.locator(`label[for=${name}-${i}]`).click();
+    await expect(page.locator(`.${name}-panel-${i}`)).toBeVisible();
+    await expect(page.locator(`.${name}-panel-${i}`)).toContainText(text);
+    await expect(page.locator('.l5-panel:visible')).toHaveCount(1);
+   }
+   if(width===390 && name==='speculative') {
+    await expect(page.locator('.l5-scroll-hint')).toBeVisible();
+    const scrolled=await page.locator('.l5-lab').evaluate(el=>{el.scrollLeft=el.scrollWidth;return el.scrollLeft;});
+    expect(scrolled).toBeGreaterThan(0);
+   }
+  }
   await page.goto('http://127.0.0.1:18766/topics/cme295/l4-baselines.html');
   await expect(page.locator('.article-heading .eyebrow')).toContainText('Lecture 4');
   await page.locator('label[for=baseline-1]').click();

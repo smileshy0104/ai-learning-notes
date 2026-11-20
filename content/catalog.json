@@ -256,6 +256,27 @@
         "l4-opd",
         "l4-review"
       ]
+    },
+    {
+      "collection": "cme295",
+      "number": 5,
+      "title": "LLM Systems",
+      "description": "从GPU内存与FlashAttention到分布式训练、推理瓶颈、KV缓存管理和推测解码。",
+      "pages": 156,
+      "chapters": [
+        "l5-overview",
+        "l5-hardware",
+        "l5-flash",
+        "l5-training-memory",
+        "l5-zero",
+        "l5-parallel",
+        "l5-latency-roofline",
+        "l5-kv-paging",
+        "l5-gqa-mla",
+        "l5-speculative",
+        "l5-mtp",
+        "l5-review"
+      ]
     }
   ]
 }

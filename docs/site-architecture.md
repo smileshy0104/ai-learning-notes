@@ -102,6 +102,14 @@ npm run new:article -- rag introduction "RAG 入门"
 
 运行 `npm run notes:lecture4` 导出完整Markdown。数值、内容与导出链接由 `tools/lecture4.test.mjs` 检查，浏览器测试在桌面／手机、有／无脚本下切换实验。资料归档在 `materials/cme295/lecture-04/`，维护记录不放入公开正文。
 
+## 第五讲内容与实验
+
+第五讲为12篇 `l5-*.md`，使用 `lecture: 5` 与 `catalog.lectures` 覆盖清单。`site/lib/lecture5-examples.mjs` 提供在线注意力递推、ZeRO预算、Roofline、分页槽位、KV大小和推测采样质量恢复的教学计算。
+
+五个标记为 `<!-- lab:l5-online -->`、`<!-- lab:l5-zero -->`、`<!-- lab:l5-roofline -->`、`<!-- lab:l5-paging -->`、`<!-- lab:l5-speculative -->`，由 `site/assets/lecture5.css` 提供无脚本切换。数值、源资料哈希、导出链接和章节渲染在 `tools/lecture5.test.mjs` 检查；浏览器测试覆盖桌面／手机、有／无JavaScript。
+
+运行 `npm run notes:lecture5` 导出同源完整笔记，资料放在 `materials/cme295/lecture-05/`，不公开原稿。架构变更（GQA／MLA／MTP）、等价算子重排和保持分布的采样校正，在正文中分别说明，不能统称无损替换。
+
 ## 发布与检查
 
 构建流程：
@@ -120,6 +128,6 @@ npm run new:article -- rag introduction "RAG 入门"
 - 第一讲内容中仍含原 HTML 图解，这属于渐进迁移。后续可把通用实验抽成组件函数或独立内容块，避免在新文档里复制图解。
 - 知识地图现在是精简的建议路线，并非自动生成的复杂依赖图。
 - 搜索索引在客户端加载，适合当前规模；规模明显增长后可换分片索引或 Pagefind。
-- 课程现在支持 `lecture` 元数据与 `catalog.lectures` 覆盖清单；目录按讲次分组，文章侧栏与前后篇限于同一讲。第一讲13篇、第二讲10篇、第三讲12篇、第四讲11篇均由元数据生成。后续讲次沿用相同结构。
+- 课程现在支持 `lecture` 元数据与 `catalog.lectures` 覆盖清单；目录按讲次分组，文章侧栏与前后篇限于同一讲。第一讲13篇、第二讲10篇、第三讲12篇、第四讲11篇、第五讲12篇均由元数据生成。后续讲次沿用相同结构。
 - 同一个概念若要归属多门课，后续可增加独立 concepts 集合与课程引用列表；本次没有复制多套正文。
 - 暂无持久化用户进度、账号或评论服务。

@@ -1,6 +1,6 @@
 # Stanford CME295：Transformers & LLMs 学习记录
 
-本目录用于记录课程学习、讨论和复习。课程版本按所提供材料标记为 2026 年秋季；目前已收到第一至第四讲 PDF，以及对应的繁体中文字幕或英文自动字幕。
+本目录用于记录课程学习、讨论和复习。课程版本按所提供材料标记为 2026 年秋季；目前已收到第一至第五讲 PDF，以及对应的繁体中文字幕或英文字幕。
 
 ## 学习资料
 
@@ -10,8 +10,17 @@
 | Lecture 2 | Large Language Models | [PDF](../../materials/cme295/lecture-02/fall26-cme295-lecture2.pdf)、[字幕](../../materials/cme295/lecture-02/transcript.zh-Hant.txt) | [第二讲完整笔记](lecture-02-large-language-models.md) |
 | Lecture 3 | LLM training | [PDF](../../materials/cme295/lecture-03/fall26-cme295-lecture3.pdf)、[英文字幕](../../materials/cme295/lecture-03/transcript.en.txt) | [第三讲完整笔记](lecture-03-llm-training.md) |
 | Lecture 4 | Reinforcement Learning with LLMs | [PDF](../../materials/cme295/lecture-04/fall26-cme295-lecture4.pdf)、[英文字幕](../../materials/cme295/lecture-04/transcript.en.txt) | [第四讲完整笔记](lecture-04-reinforcement-learning.md) |
+| Lecture 5 | LLM Systems | [PDF](../../materials/cme295/lecture-05/fall26-cme295-lecture5.pdf)、[英文字幕](../../materials/cme295/lecture-05/transcript.en.txt) | [第五讲完整笔记](lecture-05-llm-systems.md) |
 
 PDF 是概念、术语及页码定位的主要依据；字幕补充课堂解释和问答。字幕存在机器翻译错误，需要结合英文课件校正。笔记中的页码均指 PDF 的物理页码，从封面第 1 页起计数。
+
+## 第五讲：LLM系统
+
+从 [第五讲导读](../../content/collections/cme295/l5-overview.md) 开始；网站入口 `topics/cme295/l5-overview.html`，课程目录锚点 `#lecture-5`。
+
+12篇文章按课件顺序覆盖GPU与单位、FlashAttention在线Softmax、训练内存、DP与ZeRO、TP／PP／CP／EP、延迟与Roofline、KV与分页、GQA与MLA、推测解码、蒸馏与MTP及复习。五个无脚本实验分别展示在线累积、状态分片、Roofline、块尾碎片和残差采样。
+
+修改 `content/collections/cme295/l5-*.md` 后运行 `npm run notes:lecture5`。原始名称与核对范围见 [第五讲资料说明](../../materials/cme295/lecture-05/README.md)；所有性能算例明确为假设计算，不是真实跑分。
 
 ## 第四讲：强化学习与LLM
 

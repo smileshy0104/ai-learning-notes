@@ -6,8 +6,9 @@ import { parseFragment, serialize } from 'parse5';
 import { renderLecture2Lab } from './lecture2-examples.mjs';
 import { renderLecture3Lab } from './lecture3-examples.mjs';
 import { renderLecture4Lab } from './lecture4-examples.mjs';
+import { renderLecture5Lab } from './lecture5-examples.mjs';
 
-const renderLab = name => name.startsWith('l4-') ? renderLecture4Lab(name.slice(3)) : name.startsWith('l3-') ? renderLecture3Lab(name.slice(3)) : renderLecture2Lab(name);
+const renderLab = name => name.startsWith('l5-') ? renderLecture5Lab(name.slice(3)) : name.startsWith('l4-') ? renderLecture4Lab(name.slice(3)) : name.startsWith('l3-') ? renderLecture3Lab(name.slice(3)) : renderLecture2Lab(name);
 
 export const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 export function decorate(html) {
