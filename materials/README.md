@@ -9,6 +9,7 @@
 | CME295 | Lecture 3 · LLM training | [课件](cme295/lecture-03/fall26-cme295-lecture3.pdf) | [英文自动字幕](cme295/lecture-03/transcript.en.txt) | 165 |
 | CME295 | Lecture 4 · Reinforcement Learning with LLMs | [课件](cme295/lecture-04/fall26-cme295-lecture4.pdf) | [英文自动字幕](cme295/lecture-04/transcript.en.txt) | 135 |
 | CME295 | Lecture 5 · LLM Systems | [课件](cme295/lecture-05/fall26-cme295-lecture5.pdf) | [英文字幕](cme295/lecture-05/transcript.en.txt) | 156 |
+| CME295 | Lecture 6 · AI Agents | [课件](cme295/lecture-06/fall26-cme295-lecture6.pdf) | [英文字幕](cme295/lecture-06/transcript.en.txt) | 152 |
 
 ```text
 materials/
@@ -31,9 +32,13 @@ materials/
     │   ├── README.md
     │   ├── fall26-cme295-lecture4.pdf
     │   └── transcript.en.txt
-    └── lecture-05/
+    ├── lecture-05/
+    │   ├── README.md
+    │   ├── fall26-cme295-lecture5.pdf
+    │   └── transcript.en.txt
+    └── lecture-06/
         ├── README.md
-        ├── fall26-cme295-lecture5.pdf
+        ├── fall26-cme295-lecture6.pdf
         └── transcript.en.txt
 ```
 

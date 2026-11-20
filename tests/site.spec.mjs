@@ -40,6 +40,23 @@ for(const javaScriptEnabled of [true,false]) for(const width of [1440,390]) {
   await expect(page.locator('#lecture-3 .reading-row')).toHaveCount(12);
   await expect(page.locator('#lecture-4 .reading-row')).toHaveCount(11);
   await expect(page.locator('#lecture-5 .reading-row')).toHaveCount(12);
+  await expect(page.locator('#lecture-6 .reading-row')).toHaveCount(13);
+  for(const [slug,name,presets] of [
+   ['l6-metrics','retrieval-metrics',['0.53072','0.76536','1.00000']],
+   ['l6-tools','tool-gate',['允许进入执行','暂停等待确认','允许进入执行','参数缺失或越界','权限不允许']],
+   ['l6-caching','prefix',['0个块','1个块','0个块']],
+   ['l6-harness','agent-loop',['传感器读到65°F','只有计划','不能说实际室温已经70°F']],
+   ['l6-memory','compaction',['不要购买，只比较','未发生交易']]
+  ]) {
+   await page.goto(`http://127.0.0.1:18766/topics/cme295/${slug}.html`);
+   await expect(page.locator('.article-heading .eyebrow')).toContainText('Lecture 6');
+   for(const [i,text] of presets.entries()) {
+    await page.locator(`label[for=${name}-${i}]`).click();
+    await expect(page.locator(`.${name}-panel-${i}`)).toContainText(text);
+    await expect(page.locator(`.${name}-panel-${i}`)).toBeVisible();
+    await expect(page.locator('.l6-panel:visible')).toHaveCount(1);
+   }
+  }
   for(const [slug,name,presets] of [
    ['l5-flash','online',['6.0000','1001.3863']],
    ['l5-zero','zero',['16.0000','7.0000','5.5000','4.0000']],

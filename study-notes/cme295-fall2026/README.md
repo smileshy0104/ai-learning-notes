@@ -1,6 +1,6 @@
 # Stanford CME295：Transformers & LLMs 学习记录
 
-本目录用于记录课程学习、讨论和复习。课程版本按所提供材料标记为 2026 年秋季；目前已收到第一至第五讲 PDF，以及对应的繁体中文字幕或英文字幕。
+本目录用于记录课程学习、讨论和复习。课程版本按所提供材料标记为 2026 年秋季；目前已收到第一至第六讲 PDF，以及对应的繁体中文字幕或英文字幕。
 
 ## 学习资料
 
@@ -11,8 +11,17 @@
 | Lecture 3 | LLM training | [PDF](../../materials/cme295/lecture-03/fall26-cme295-lecture3.pdf)、[英文字幕](../../materials/cme295/lecture-03/transcript.en.txt) | [第三讲完整笔记](lecture-03-llm-training.md) |
 | Lecture 4 | Reinforcement Learning with LLMs | [PDF](../../materials/cme295/lecture-04/fall26-cme295-lecture4.pdf)、[英文字幕](../../materials/cme295/lecture-04/transcript.en.txt) | [第四讲完整笔记](lecture-04-reinforcement-learning.md) |
 | Lecture 5 | LLM Systems | [PDF](../../materials/cme295/lecture-05/fall26-cme295-lecture5.pdf)、[英文字幕](../../materials/cme295/lecture-05/transcript.en.txt) | [第五讲完整笔记](lecture-05-llm-systems.md) |
+| Lecture 6 | AI Agents | [PDF](../../materials/cme295/lecture-06/fall26-cme295-lecture6.pdf)、[英文字幕](../../materials/cme295/lecture-06/transcript.en.txt) | [第六讲完整笔记](lecture-06-ai-agents.md) |
 
 PDF 是概念、术语及页码定位的主要依据；字幕补充课堂解释和问答。字幕存在机器翻译错误，需要结合英文课件校正。笔记中的页码均指 PDF 的物理页码，从封面第 1 页起计数。
+
+## 第六讲：AI Agents
+
+从 [第六讲导读](../../content/collections/cme295/l6-overview.md) 开始；网站入口 `topics/cme295/l6-overview.html`，分讲目录锚点 `#lecture-6`。
+
+13篇同源文章按课件顺序覆盖RAG、切块、候选检索与重排、指标、工具与路由、MCP、缓存、Harness／ReAct／A2A、压缩与记忆、Coding Agents、Computer use和多Agent协作。五个无脚本实验展示排序指标、调用执行门、稳定前缀、温控状态和摘要保真，全部为合成数据，不执行真实外部操作。
+
+修改 `content/collections/cme295/l6-*.md` 后运行 `npm run notes:lecture6`。原始名称与核对范围见 [第六讲资料说明](../../materials/cme295/lecture-06/README.md)。
 
 ## 第五讲：LLM系统
 

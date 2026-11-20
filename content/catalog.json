@@ -277,6 +277,28 @@
         "l5-mtp",
         "l5-review"
       ]
+    },
+    {
+      "collection": "cme295",
+      "number": 6,
+      "title": "AI Agents",
+      "description": "从RAG、检索评估与工具调用到MCP、Harness、ReAct、记忆、Coding Agents及多Agent协作。",
+      "pages": 152,
+      "chapters": [
+        "l6-overview",
+        "l6-rag",
+        "l6-retrieval",
+        "l6-metrics",
+        "l6-tools",
+        "l6-selection",
+        "l6-mcp",
+        "l6-caching",
+        "l6-harness",
+        "l6-memory",
+        "l6-coding",
+        "l6-orchestration",
+        "l6-review"
+      ]
     }
   ]
 }
