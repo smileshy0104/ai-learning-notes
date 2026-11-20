@@ -96,6 +96,12 @@ npm run new:article -- rag introduction "RAG 入门"
 
 `npm run notes:lecture3` 从相同内容生成完整笔记。第二讲旧命令保持兼容，底层已共用 `tools/export-lecture-notes.mjs`；第三讲增加时无需复制另一套导出逻辑。
 
+## 第四讲内容与实验
+
+第四讲正文为 `l4-*.md`，带 `lecture: 4`，11篇文章在 `catalog.lectures` 注册。`site/lib/lecture4-examples.mjs` 计算有限动作策略梯度、基线方差、重要性采样、PPO裁剪、GAE、KL与长度权重。四个实验标记为 `<!-- lab:l4-baseline -->`、`<!-- lab:l4-ppo-clip -->`、`<!-- lab:l4-length-weight -->`、`<!-- lab:l4-kl-direction -->`；对应样式为 `site/assets/lecture4.css`，不依赖JavaScript。
+
+运行 `npm run notes:lecture4` 导出完整Markdown。数值、内容与导出链接由 `tools/lecture4.test.mjs` 检查，浏览器测试在桌面／手机、有／无脚本下切换实验。资料归档在 `materials/cme295/lecture-04/`，维护记录不放入公开正文。
+
 ## 发布与检查
 
 构建流程：
@@ -114,6 +120,6 @@ npm run new:article -- rag introduction "RAG 入门"
 - 第一讲内容中仍含原 HTML 图解，这属于渐进迁移。后续可把通用实验抽成组件函数或独立内容块，避免在新文档里复制图解。
 - 知识地图现在是精简的建议路线，并非自动生成的复杂依赖图。
 - 搜索索引在客户端加载，适合当前规模；规模明显增长后可换分片索引或 Pagefind。
-- 课程现在支持 `lecture` 元数据与 `catalog.lectures` 覆盖清单；目录按讲次分组，文章侧栏与前后篇限于同一讲。第一讲13篇、第二讲10篇、第三讲12篇均由元数据生成。后续讲次沿用相同结构。
+- 课程现在支持 `lecture` 元数据与 `catalog.lectures` 覆盖清单；目录按讲次分组，文章侧栏与前后篇限于同一讲。第一讲13篇、第二讲10篇、第三讲12篇、第四讲11篇均由元数据生成。后续讲次沿用相同结构。
 - 同一个概念若要归属多门课，后续可增加独立 concepts 集合与课程引用列表；本次没有复制多套正文。
 - 暂无持久化用户进度、账号或评论服务。

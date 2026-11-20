@@ -236,6 +236,26 @@
         "l3-end-to-end",
         "l3-review"
       ]
+    },
+    {
+      "collection": "cme295",
+      "number": 4,
+      "title": "Reinforcement Learning with LLMs",
+      "description": "从强化学习与奖励建模到策略梯度、PPO、GRPO及On-policy蒸馏，按动机逐步推导目标。",
+      "pages": 135,
+      "chapters": [
+        "l4-overview",
+        "l4-rl-rewards",
+        "l4-policy-gradient",
+        "l4-baselines",
+        "l4-importance",
+        "l4-ppo",
+        "l4-kl-policies",
+        "l4-grpo",
+        "l4-grpo-refinements",
+        "l4-opd",
+        "l4-review"
+      ]
     }
   ]
 }

@@ -38,6 +38,28 @@ for(const javaScriptEnabled of [true,false]) for(const width of [1440,390]) {
   await expect(page.locator('#lecture-1 .reading-row')).toHaveCount(13);
   await expect(page.locator('#lecture-2 .reading-row')).toHaveCount(10);
   await expect(page.locator('#lecture-3 .reading-row')).toHaveCount(12);
+  await expect(page.locator('#lecture-4 .reading-row')).toHaveCount(11);
+  await page.goto('http://127.0.0.1:18766/topics/cme295/l4-baselines.html');
+  await expect(page.locator('.article-heading .eyebrow')).toContainText('Lecture 4');
+  await page.locator('label[for=baseline-1]').click();
+  await expect(page.locator('.baseline-panel-1')).toContainText('0.0000');
+  await expect(page.locator('.baseline-panel-0')).toBeHidden();
+  await page.locator('label[for=baseline-0]').click();
+  await expect(page.locator('.baseline-panel-0')).toContainText('2525.0625');
+  await page.goto('http://127.0.0.1:18766/topics/cme295/l4-ppo.html');
+  await page.locator('label[for=ppo-clip-1]').click();
+  await expect(page.locator('.ppo-clip-panel-1')).toContainText('-1.5000');
+  await expect(page.locator('.ppo-clip-panel-0')).toBeHidden();
+  await page.goto('http://127.0.0.1:18766/topics/cme295/l4-grpo-refinements.html');
+  await page.locator('label[for=length-weight-1]').click();
+  await expect(page.locator('.length-weight-panel-1')).toContainText('0.1250');
+  await expect(page.locator('.length-weight-panel-0')).toBeHidden();
+  await page.goto('http://127.0.0.1:18766/topics/cme295/l4-opd.html');
+  for(const preset of [1,2,0]) {
+   await page.locator(`label[for=kl-direction-${preset}]`).click();
+   await expect(page.locator(`.kl-direction-panel-${preset}`)).toBeVisible();
+  }
+  await expect(page.locator('.kl-direction-panel-0')).toContainText('0.0000');
   await page.goto('http://127.0.0.1:18766/topics/cme295/l3-sft.html');
   await expect(page.locator('.article-heading .eyebrow')).toContainText('Lecture 3');
   await page.locator('label[for=loss-mask-0]').click();

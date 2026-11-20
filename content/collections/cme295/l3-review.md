@@ -71,12 +71,8 @@ LoRA 是参数更新方式，不是另一个与 SFT 平行互斥的训练任务�
 - 蒸馏目标接近不等于独立任务能力提高。
 - 模型塌缩与灾难性遗忘需要分开检测。
 
-## 6. 来源、核对与后续学习
+## 6. 参考来源与后续学习
 
-原资料：第三讲PDF 165页，英文自动字幕3118行，完整保存在 `materials/cme295/lecture-03/`。已阅读全部提取文字和字幕，视觉核对20张重点页，尚未逐页核对全部图表。
+课件引用包括：数据受限缩放（2023）、DataComp-LM与RegMix（2024）、LoRA（2021）、InstructGPT/RLHF（2022）、DPO（2023）、DeepSeekMath/GRPO（2024）、DeepSeek-R1（2025）等。产品示例与新闻以资料日期为准。
 
-数值与交互由 `site/lib/lecture3-examples.mjs` 生成，测试见 `tools/lecture3.test.mjs`。公式用文本与小图表示，可离线阅读；更完整的强化学习推导按课件安排留到第四讲。
-
-课件引用线索包括：数据受限缩放（2023）、DataComp-LM与RegMix（2024）、LoRA（2021）、InstructGPT/RLHF（2022）、DPO（2023）、DeepSeekMath/GRPO（2024）、DeepSeek-R1（2025）等。更新的模型报告、产品界面、论文与新闻按资料日期快照理解，本文未独立验证所有现行外部状态。
-
-后续重点：策略梯度为什么出现log概率；PPO／GRPO的裁剪和reference约束；OPD不同KL方向与采样估计。读者理解程度仍需讨论和自测确认，尚未标成已掌握。
+第四讲可重点关注：策略梯度为什么使用 log 概率，PPO／GRPO 的裁剪与 reference 约束，以及 OPD 的 KL 方向与采样估计。

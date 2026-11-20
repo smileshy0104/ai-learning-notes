@@ -3,7 +3,7 @@ slug: l2-review
 title: 第二讲复习：一张对照表串起 LLM
 collection: cme295
 lecture: 2
-description: 六条课程主线的回顾、字幕术语校正、自测解析与资料核对范围。
+description: 六条课程主线的回顾、字幕术语校正、自测解析与参考来源。
 order: 100
 kind: lesson
 status: published
@@ -71,10 +71,8 @@ tags: [复习, 术语, Lecture 2]
 - 约束解码限制形式，不证明事实或业务正确。
 - 更多上下文、更多示例、更多采样均需要实测收益与成本。
 
-## 6. 核对范围与来源
-
-已读：138 页 PDF 的提取文本与完整 771 行字幕。已视觉核对 12 张重点页，未声称逐页看清所有图表。原始文件存于 `materials/cme295/lecture-02/`。
+## 6. 参考来源
 
 重点论文线索来自课件：BERT（2018）、GPT（2018）、Kaplan 缩放研究（2020）、Chinchilla（2022）、稀疏 MoE（2017）、Switch Transformer（2021）、DeepSeekMoE（2024）、RoFormer（2021）、Longformer（2020）、LayerNorm（2016）、RMSNorm（2019）、Few-shot（2020）、CoT 与 Self-consistency（2022）。论文年份采用课件与通常引用口径，不照抄所有字幕中的日期。
 
-课件具体产品榜单与规格仅作为材料快照，不在本站维护为现行榜单。本文新增数值是教学构造，计算由 `tools/lecture2.test.mjs` 检查；读者自测尚不等同于已确认掌握。
+课件中的产品榜单与规格以资料日期为准，文中的数值例子为教学构造。

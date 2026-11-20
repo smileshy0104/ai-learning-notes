@@ -1,10 +1,10 @@
 # Lecture 2：Large Language Models
 
-本笔记由网站同一份 Markdown 内容生成。修改内容请编辑 `content/collections/cme295/l2-*.md`，再运行 `npm run notes:lecture2`。
+本笔记由网站相同的 Markdown 内容生成。请编辑 `content/collections/cme295/l2-*.md` 后运行 `npm run notes:lecture2`，不要独立修改此生成笔记。
 
-原始资料：[第二讲 PDF](../../materials/cme295/lecture-02/fall26-cme295-lecture2.pdf)、[字幕](../../materials/cme295/lecture-02/transcript.zh-Hant.txt)。
+原始资料：[PDF](../../materials/cme295/lecture-02/fall26-cme295-lecture2.pdf)、[文字稿](../../materials/cme295/lecture-02/transcript.zh-Hant.txt)。
 
-内容入口：[第二讲导读源文档](../../content/collections/cme295/l2-overview.md)。交互网站请按项目 README 构建与启动，再访问 `topics/cme295/l2-overview.html`。
+内容入口：[本讲导读](../../content/collections/cme295/l2-overview.md)。启动网站后可访问 `topics/cme295/l2-overview.html`。
 
 
 ## 第二讲导读：从 Transformer 到 LLM
@@ -56,21 +56,13 @@
 
 这些例子说明组件职责，不声称真实模型必然按照人类语义把某个 token 路由到“语法专家”或“数学专家”。
 
-### 材料使用说明
+### 阅读说明
 
-本次已阅读 138 页 PDF 的提取文字与完整字幕，并视觉核对 12 张关键公式/图示页：45、58、71、73、82、85、86、87、108、112、125、137。尚未逐页视觉核对全部 138 页。
-
-原材料保存在仓库 `materials/cme295/lecture-02/`，不随公开站点自动发布。本站正文是整理与教学补充，非官方讲义翻译。公式用可离线阅读的文本表示，例子中的数字由脚本复算。
-
-课件第 49–50、126–128 页出现带日期的模型榜单和产品规格。它们属于这份资料的快照；本文不把这些名称、参数规模和上下文上限外推为当前市场事实。
-
-字幕中存在明显机器误译，详见[术语校正与总复习](../../content/collections/cme295/l2-review.md)。
+内容根据第二讲课件与字幕整理，包含教学补充。模型榜单与产品规格以课件日期为准，术语校正见[总复习](../../content/collections/cme295/l2-review.md)。
 
 ### 读完后应该能做什么？
 
 能解释三类架构的注意力范围；算清一个 top-k 路由或温度 softmax；区分总参数与激活参数、FLOPs 与 FLOP/s；说明 GQA 为什么能节省 KV 缓存；理解格式约束和事实正确是不同的保证。
-
-这些是学习目标，尚未据此标记你已经掌握。
 
 
 ## 模型家族：BERT、GPT 与三类架构
@@ -298,7 +290,7 @@ y=0.6875×[2,0]+0.3125×[0,4]=[1.375,1.25]
 ```
 
 
-交互图解（routing）对应 [章节源文档](../../content/collections/cme295/l2-moe.md)。构建网站后可在该章节页面操作。
+交互图解（routing）见[对应章节源文档](../../content/collections/cme295/l2-moe.md)，构建网站后可在该章节操作。
 
 
 ### 4. 总参数与激活参数
@@ -495,7 +487,7 @@ SWA = Sliding Window Attention。例如每个位置只能读自己和左侧 2 �
 **为什么仍可传播较远信息？**第 6 个位置这一层读到第 4 个位置，而第 4 个位置上一层已经读取更早输入。经过多层可以间接扩大感受野。
 
 
-交互图解（window）对应 [章节源文档](../../content/collections/cme295/l2-attention-cache.md)。构建网站后可在该章节页面操作。
+交互图解（window）见[对应章节源文档](../../content/collections/cme295/l2-attention-cache.md)，构建网站后可在该章节操作。
 
 
 若每层向左读 r 个额外位置，L 层后理论可达左侧 Lr 个位置，连自身范围约 Lr+1。这里 r=2，1、2、3 层对第 6 个位置的覆盖分别是 3、5、6 个输入位置。
@@ -746,7 +738,7 @@ pᵢ(T) = exp(zᵢ/T) / Σⱼ exp(zⱼ/T)，T>0
 - 高 T：更平，较低分候选更容易出现。
 
 
-交互图解（temperature）对应 [章节源文档](../../content/collections/cme295/l2-decoding.md)。构建网站后可在该章节页面操作。
+交互图解（temperature）见[对应章节源文档](../../content/collections/cme295/l2-decoding.md)，构建网站后可在该章节操作。
 
 
 <strong>重要：</strong>任何有限正温度下，如果仍做采样，就不是严格的贪心。T=0 时公式除零没有定义，API 中的 `temperature=0` 通常是约定进入贪心或近似确定性模式。T→0⁺ 在最大分唯一时集中到最大项；若并列还要看 tie-break 规则。
@@ -972,10 +964,8 @@ CoT = Chain-of-Thought。课件介绍通过分步示例改善多步任务表现�
 - 约束解码限制形式，不证明事实或业务正确。
 - 更多上下文、更多示例、更多采样均需要实测收益与成本。
 
-### 6. 核对范围与来源
-
-已读：138 页 PDF 的提取文本与完整 771 行字幕。已视觉核对 12 张重点页，未声称逐页看清所有图表。原始文件存于 `materials/cme295/lecture-02/`。
+### 6. 参考来源
 
 重点论文线索来自课件：BERT（2018）、GPT（2018）、Kaplan 缩放研究（2020）、Chinchilla（2022）、稀疏 MoE（2017）、Switch Transformer（2021）、DeepSeekMoE（2024）、RoFormer（2021）、Longformer（2020）、LayerNorm（2016）、RMSNorm（2019）、Few-shot（2020）、CoT 与 Self-consistency（2022）。论文年份采用课件与通常引用口径，不照抄所有字幕中的日期。
 
-课件具体产品榜单与规格仅作为材料快照，不在本站维护为现行榜单。本文新增数值是教学构造，计算由 `tools/lecture2.test.mjs` 检查；读者自测尚不等同于已确认掌握。
+课件中的产品榜单与规格以资料日期为准，文中的数值例子为教学构造。

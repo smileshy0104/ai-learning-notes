@@ -24,6 +24,7 @@ This repository stores personal study materials for Stanford CME295 Transformers
 - CME295 articles carry a positive integer `lecture` field (legacy missing values default to 1). Group collection directories by lecture and scope article siblings to the same lecture.
 - Lecture 2 content lives in `content/collections/cme295/l2-*.md`; regenerate its combined Markdown with `npm run notes:lecture2` after edits. Keep source materials under `materials/cme295/lecture-02/` out of the published build.
 - Lecture 3 lives in `content/collections/cme295/l3-*.md`; regenerate its combined notes with `npm run notes:lecture3`. Shared note export is in `tools/export-lecture-notes.mjs`; preserve relative links and keep material hashes current.
+- Lecture 4 lives in `content/collections/cme295/l4-*.md`; regenerate its combined notes with `npm run notes:lecture4`. Static experiments use `site/lib/lecture4-examples.mjs` and `site/assets/lecture4.css`; preserve the distinction between current, old, and reference policies.
 - The original HTML and `demos/` are reference archives, not the current publishing source. Do not rerun `tools/import-lecture.mjs` over edited content files.
 - Use `npm run build`, `npm run check`, and `npm test` for website delivery. Tests use Chrome by default or `PLAYWRIGHT_CHANNEL=chromium` with an installed Playwright browser.
 - Run previews with `npm start` (or `npm run preview` after building). Output is static `dist/`; never hand-edit generated pages.

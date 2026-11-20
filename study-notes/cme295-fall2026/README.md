@@ -1,6 +1,6 @@
 # Stanford CME295：Transformers & LLMs 学习记录
 
-本目录用于记录课程学习、讨论和复习。课程版本按所提供材料标记为 2026 年秋季；目前已收到第一至第三讲 PDF，以及对应的繁体中文字幕或英文自动字幕。
+本目录用于记录课程学习、讨论和复习。课程版本按所提供材料标记为 2026 年秋季；目前已收到第一至第四讲 PDF，以及对应的繁体中文字幕或英文自动字幕。
 
 ## 学习资料
 
@@ -9,8 +9,17 @@
 | Lecture 1 | Transformers | [PDF](../../materials/cme295/lecture-01/fall26-cme295-lecture1.pdf)、[字幕](../../materials/cme295/lecture-01/transcript.zh-Hant.txt) | [第一讲笔记](lecture-01-transformers.md) |
 | Lecture 2 | Large Language Models | [PDF](../../materials/cme295/lecture-02/fall26-cme295-lecture2.pdf)、[字幕](../../materials/cme295/lecture-02/transcript.zh-Hant.txt) | [第二讲完整笔记](lecture-02-large-language-models.md) |
 | Lecture 3 | LLM training | [PDF](../../materials/cme295/lecture-03/fall26-cme295-lecture3.pdf)、[英文字幕](../../materials/cme295/lecture-03/transcript.en.txt) | [第三讲完整笔记](lecture-03-llm-training.md) |
+| Lecture 4 | Reinforcement Learning with LLMs | [PDF](../../materials/cme295/lecture-04/fall26-cme295-lecture4.pdf)、[英文字幕](../../materials/cme295/lecture-04/transcript.en.txt) | [第四讲完整笔记](lecture-04-reinforcement-learning.md) |
 
 PDF 是概念、术语及页码定位的主要依据；字幕补充课堂解释和问答。字幕存在机器翻译错误，需要结合英文课件校正。笔记中的页码均指 PDF 的物理页码，从封面第 1 页起计数。
+
+## 第四讲：强化学习与LLM
+
+从 [第四讲导读](../../content/collections/cme295/l4-overview.md) 开始；网站入口为 `topics/cme295/l4-overview.html`，分讲目录锚点为 `#lecture-4`。
+
+11篇同源文章按课件顺序覆盖RL与奖励、策略梯度、REINFORCE、基线与信用分配、重要性采样、PPO、参考KL、GRPO、长度／难度／探索改进、On-policy蒸馏与复习。四个无脚本实验对照基线方差、正负优势裁剪、长度归一化和KL方向。
+
+修改正文后运行 `npm run notes:lecture4`，不要单独编辑导出的完整笔记。资料核对范围和原始名称见 [第四讲资料说明](../../materials/cme295/lecture-04/README.md)。
 
 ## 第三讲：训练流程
 

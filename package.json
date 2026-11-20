@@ -12,7 +12,8 @@
     "new:article": "node tools/new-article.mjs",
     "test:content": "node --test tools/*.test.mjs",
     "notes:lecture2": "node tools/export-lecture2-notes.mjs",
-    "notes:lecture3": "node tools/export-lecture-notes.mjs 3"
+    "notes:lecture3": "node tools/export-lecture-notes.mjs 3",
+    "notes:lecture4": "node tools/export-lecture-notes.mjs 4"
   },
   "engines": {
     "node": ">=20"
