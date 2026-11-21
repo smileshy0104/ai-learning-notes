@@ -11,11 +11,15 @@ for(const file of manifest.pages) {
  const source=await fs.readFile(path.join(root,file),'utf8');
  const document=parse(source);
  const ids=new Set(),refs=[];
- let nav=[];
+ let nav=[],githubLinks=[];
  function walk(node,inNav=false) {
   const attrs=Object.fromEntries((node.attrs??[]).map(a=>[a.name,a.value]));
   if(attrs.id) {assert(!ids.has(attrs.id),`${file}: duplicate ID ${attrs.id}`);ids.add(attrs.id);}
-  if(node.tagName==='a' && attrs.href) refs.push(attrs.href);
+  if(node.tagName==='a' && attrs.href) {
+   refs.push(attrs.href);
+   if(attrs.target==='_blank') assert(/noopener/.test(attrs.rel??''),`${file}: target=_blank 缺少 rel=noopener → ${attrs.href}`);
+   if(attrs.class==='icon-link') githubLinks.push(attrs.href);
+  }
   if(node.tagName==='script' && attrs.src) refs.push(attrs.src);
   if(node.tagName==='link' && attrs.href) refs.push(attrs.href);
   const mainNav=inNav || (node.tagName==='nav'&&attrs['aria-label']==='主导航');
@@ -24,6 +28,8 @@ for(const file of manifest.pages) {
  }
  walk(document);
  assert.deepEqual(nav,['index.html','courses.html','library.html','labs.html','map.html'],`${file}: inconsistent navigation`);
+ assert.equal(githubLinks.length,1,`${file}: expected exactly one GitHub entry`);
+ assert(/^https:\/\/github\.com\/[^/]+\/[^/]+$/.test(githubLinks[0]),`${file}: unexpected GitHub entry ${githubLinks[0]}`);
  documents.set(file,{source,ids,refs});
 }
 for(const [file,{refs}] of documents) for(const ref of refs) {

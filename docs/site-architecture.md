@@ -75,6 +75,20 @@ npm run new:article -- rag introduction "RAG 入门"
 
 构建还会检查：每篇文章都必须在所属讲次的 `catalog.lectures[].chapters` 注册（未注册的文章不会出现在课程目录里，所以直接报错而不是静默隐藏），`lecture` 字段必须显式写出，不得依赖默认值。
 
+## 配色与主题
+
+显示配色由 CSS 变量加 `color-scheme` 驱动，浅色与深色值写在同一条 `light-dark(浅色, 深色)` 声明里，因此不存在两份需要同步的样式表：
+
+- `:root` 给出浅色默认值和 `color-scheme: light dark`，所以没有脚本时也跟随系统偏好。
+- `@supports (color: light-dark(#fff,#000))` 内重写同一批令牌，给出暗色值；不支持的浏览器只使用浅色值。
+- `<html data-theme="light|dark">` 由 `site/assets/theme.js` 写入，覆盖系统偏好；无该属性时跟随系统。
+- 第一讲图解的蓝／琥珀／灰色写在 `site/assets/lesson.css`（由 `tools/import-lecture.mjs` 生成），其暗色对应值在 `site.css` 里覆盖，避免改生成文件。
+- `tools/theme.test.mjs` 检查：每个颜色令牌都有暗色值、每个 `light-dark()` 恰好两个参数、讲次样式表的裸色值都有暗色后继声明、两套调色板的正文对比度。
+
+顶栏最右侧是仓库入口（`a.icon-link`），地址来自 `site/lib/layout.mjs` 的 `REPO_URL` 常量，与 `git remote get-url origin` 对应；`check-site` 断言每页恰好一个该入口，并要求所有 `target="_blank"` 链接带 `rel="noopener"`。
+
+切换按钮默认带 `hidden`，由脚本显示，因此禁用脚本时不会出现一个无效控件。CSP 为 `script-src 'self'`，主题脚本必须是外部文件，且在首屏前同步加载以避免闪烁。
+
 ## 交互实验清单
 
 实验在正文中写成 `<!-- lab:l6-metrics -->`，讲次前缀必填。`loadContent` 渲染实验、读取其标题段（`.l<N>-title` 或 `.l<N>-lab-title`），把结果收集到 `data.labs`；`labs.html` 由这份注册表按讲次生成，新增实验不需要改页面代码。每页只加载本讲 `lecture<N>.css`，第一讲继续使用 `lesson.css`。

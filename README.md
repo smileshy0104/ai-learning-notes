@@ -13,7 +13,7 @@ npm ci
 npm start
 ```
 
-打开 <http://127.0.0.1:8000/>。`npm start` 会构建一次再启动预览；修改内容后运行 `npm run build` 并刷新页面。第二至第六讲完整 Markdown 笔记可分别用 `npm run notes:lecture2`、`npm run notes:lecture3`、`npm run notes:lecture4`、`npm run notes:lecture5`、`npm run notes:lecture6` 从相同内容源导出。预览端口可用 `PORT=8080 npm start` 指定。
+打开 <http://127.0.0.1:8000/>。顶栏有配色按钮，可在跟随系统、浅色、深色之间切换；禁用脚本时站点仍按系统偏好显示。最右侧的 GitHub 图标直达本仓库源码。`npm start` 会构建一次再启动预览；修改内容后运行 `npm run build` 并刷新页面。第二至第六讲完整 Markdown 笔记可分别用 `npm run notes:lecture2`、`npm run notes:lecture3`、`npm run notes:lecture4`、`npm run notes:lecture5`、`npm run notes:lecture6` 从相同内容源导出。预览端口可用 `PORT=8080 npm start` 指定。
 
 页面入口：
 

@@ -139,8 +139,49 @@ for(const javaScriptEnabled of [true,false]) for(const width of [1440,390]) {
    await expect.poll(()=>page.locator('.article-card:visible').count()).toBeGreaterThan(0);
    await page.locator('#knowledge-query').fill('does-not-exist-anywhere-1234');
    await expect(page.locator('[data-empty]')).toBeVisible();
+   await page.goto('http://127.0.0.1:18766/index.html');
+   const github=page.locator('a.icon-link');
+   await expect(github).toBeVisible();
+   await expect(github).toHaveAttribute('href','https://github.com/smileshy0104/ai-learning-notes');
+   await expect(github).toHaveAttribute('target','_blank');
+   await expect(github).toHaveAttribute('rel',/noopener/);
+   await expect(github).toHaveAttribute('aria-label',/GitHub/);
+   const themeToggle=page.locator('[data-theme-toggle]');
+   await expect(themeToggle).toBeVisible();
+   await themeToggle.click();
+   await expect(page.locator('html')).toHaveAttribute('data-theme','light');
+   await themeToggle.click();
+   await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
+   await expect(page.locator('body')).toHaveCSS('background-color','rgb(14, 19, 16)');
+   const darkSizes=await page.evaluate(()=>({full:document.documentElement.scrollWidth,view:innerWidth}));
+   expect(darkSizes.full,`${width}px dark: document overflow`).toBeLessThanOrEqual(darkSizes.view+1);
+   await page.goto('http://127.0.0.1:18766/topics/cme295/attention.html');
+   await expect(page.locator('html')).toHaveAttribute('data-theme','dark');
+   await expect(page.locator('body')).toHaveCSS('background-color','rgb(14, 19, 16)');
+   await page.locator('label[for=qpreset-2]').click();
+   await expect(page.locator('.panel-p2')).toBeVisible();
+   await expect(page.locator('.panel-p2')).toContainText('0.955, 0.277');
+   await page.locator('[data-theme-toggle]').click();
+   await expect(page.locator('html')).not.toHaveAttribute('data-theme',/.*/);
+  }else{
+   await expect(page.locator('[data-theme-toggle]')).toBeHidden();
   }
   expect(errors).toEqual([]);
   await context.close();
  });
 }
+
+test('system dark preference is readable without scripts',async({browser})=>{
+ const context=await browser.newContext({javaScriptEnabled:false,colorScheme:'dark',viewport:{width:390,height:900}});
+ const page=await context.newPage();
+ await page.goto('http://127.0.0.1:18766/index.html');
+ await expect(page.locator('[data-theme-toggle]')).toBeHidden();
+ await expect(page.locator('a.icon-link')).toBeVisible();
+ await expect(page.locator('body')).toHaveCSS('background-color','rgb(14, 19, 16)');
+ await expect(page.locator('.article-card').first()).toHaveCSS('background-color','rgb(22, 29, 24)');
+ await expect(page.getByRole('navigation',{name:'主导航'})).toBeVisible();
+ await page.goto('http://127.0.0.1:18766/topics/cme295/basics.html');
+ await page.locator('label[for=upd-after]').click();
+ await expect(page.locator('.panel-upd-after')).toBeVisible();
+ await context.close();
+});
