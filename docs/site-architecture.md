@@ -91,7 +91,7 @@ npm run new:article -- rag introduction "RAG 入门"
 
 ## 交互实验清单
 
-实验在正文中写成 `<!-- lab:l6-metrics -->`，讲次前缀必填。`loadContent` 渲染实验、读取其标题段（`.l<N>-title` 或 `.l<N>-lab-title`），把结果收集到 `data.labs`；`labs.html` 由这份注册表按讲次生成，新增实验不需要改页面代码。每页只加载本讲 `lecture<N>.css`，第一讲继续使用 `lesson.css`。
+实验在正文中写成 `<!-- lab:l6-metrics -->`，讲次前缀必填。`loadContent` 渲染实验、读取其标题段（`.l<N>-title` 或 `.l<N>-lab-title`），把结果收集到 `data.labs`；`labs.html` 由这份注册表按讲次生成，新增实验不需要改页面代码。第一讲的 4 个图解早于实验标记，在 `pages.mjs` 的 `labs()` 里静态登记并固定排在各讲次之前。分组标题、简介与计数同样取自 `catalog.lectures`，卡片标题沿用「实验：…？」句式，所属文章标题从 frontmatter 读取，因此六组结构与文案完全一致。每页只加载本讲 `lecture<N>.css`，第一讲继续使用 `lesson.css`。
 
 实验模板必须单行输出：标记会在 Markdown 解析前被替换，模板里出现空行会让 `marked` 把解说当正文重新解析，构建会直接拒绝含换行的实验输出。新增实验的解说文字应写在 Markdown 正文里，渲染模块只负责计算数值和填充面板。
 

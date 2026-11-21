@@ -28,6 +28,11 @@ for(const file of manifest.pages) {
  }
  walk(document);
  assert.deepEqual(nav,['index.html','courses.html','library.html','labs.html','map.html'],`${file}: inconsistent navigation`);
+ // 所有内容都必须在 .wrap 里；多余的闭合标签会把 main / 后续小节挤到 body 下。
+ const htmlEl=document.childNodes.find(n=>n.tagName==='html');
+ const bodyEl=htmlEl?.childNodes.find(n=>n.tagName==='body');
+ const bodyChildren=(bodyEl?.childNodes??[]).filter(n=>n.tagName).map(n=>n.tagName+'.'+((n.attrs??[]).find(a=>a.name==='class')?.value??''));
+ assert.deepEqual(bodyChildren,['a.skip','div.wrap'],`${file}: body 直接子元素异常，内容可能跑到了 .wrap 之外`);
  assert.equal(githubLinks.length,1,`${file}: expected exactly one GitHub entry`);
  assert(/^https:\/\/github\.com\/[^/]+\/[^/]+$/.test(githubLinks[0]),`${file}: unexpected GitHub entry ${githubLinks[0]}`);
  documents.set(file,{source,ids,refs});

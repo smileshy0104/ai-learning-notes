@@ -76,16 +76,25 @@ test('labs are registered with a title and published on the labs page',()=>fixtu
  const catalogFile=path.join(root,'content/catalog.json');
  const catalog=JSON.parse(await fs.readFile(catalogFile,'utf8'));
  catalog.collections[0].slug='cme295';
- catalog.lectures=[{collection:'cme295',number:6,title:'Sixth',pages:1,chapters:['metrics']}];
+ // 第一讲的 4 个图解在 labs() 里静态登记，因此这里也要提供它们所属的文章。
+ const demo=['basics','tokens','mask','attention'];
+ catalog.lectures=[{collection:'cme295',number:6,title:'Sixth',pages:1,chapters:['metrics']},
+  {collection:'cme295',number:1,title:'First',pages:1,chapters:demo}];
  await fs.writeFile(catalogFile,JSON.stringify(catalog));
- await fs.mkdir(path.join(root,'content/collections/cme295'),{recursive:true});
- await fs.writeFile(path.join(root,'content/collections/cme295/metrics.md'),article('metrics').replace('collection: new-course','collection: cme295\nlecture: 6').replace('## Example','<!-- lab:l6-metrics -->\n\n## Example'));
+ const courseDir=path.join(root,'content/collections/cme295');
+ await fs.mkdir(courseDir,{recursive:true});
+ await fs.writeFile(path.join(courseDir,'metrics.md'),article('metrics').replace('collection: new-course','collection: cme295\nlecture: 6').replace('## Example','<!-- lab:l6-metrics -->\n\n## Example'));
+ for(const slug of demo) await fs.writeFile(path.join(courseDir,`${slug}.md`),article(slug).replace('collection: new-course','collection: cme295\nlecture: 1'));
  await fs.rm(dir,{recursive:true,force:true});
  const data=await loadContent(root);
  assert.equal(data.labs.length,1);
  assert.equal(data.labs[0].name,'l6-metrics');
  assert(data.labs[0].title.startsWith('实验：'),data.labs[0].title);
- assert(labsPage(data).includes(`href="${data.labs[0].url}"`));
+ const page=labsPage(data);
+ assert(page.includes(`href="${data.labs[0].url}"`));
+ assert(page.includes('First'),'第一讲分组未使用 catalog 标题');
+ assert(page.includes('4 个实验'),'第一讲分组计数未渲染');
+ for(const slug of demo) assert(page.includes(`href="topics/cme295/${slug}.html"`),`图解卡片缺少 ${slug}`);
 }));
 test('a lab marker without its lecture prefix fails instead of falling back',()=>fixture(async(root,dir)=>{
  await fs.writeFile(path.join(dir,'lab.md'),article('lab').replace('## Example','<!-- lab:metrics -->\n\n## Example'));
