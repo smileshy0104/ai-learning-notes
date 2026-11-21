@@ -9,7 +9,7 @@ for(const javaScriptEnabled of [true,false]) for(const width of [1440,390]) {
   page.on('pageerror',error=>errors.push(error.message));
   for(const url of ['index.html','courses.html','library.html','map.html','labs.html',...manifest.articles.map(a=>a.url)]) {
    await page.goto(`http://127.0.0.1:18766/${url}`);
-   await expect(page.getByRole('navigation',{name:'主导航'})).toBeVisible();
+   await expect(page.locator('nav.topnav')).toBeVisible();
    await expect(page.locator('link[rel="icon"][type="image/svg+xml"]')).toHaveCount(1);
    await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveCount(1);
    await expect(page.locator('main h1')).toHaveCount(1);
@@ -181,7 +181,7 @@ test('system dark preference is readable without scripts',async({browser})=>{
  await expect(page.locator('a.icon-link')).toBeVisible();
  await expect(page.locator('body')).toHaveCSS('background-color','rgb(14, 19, 16)');
  await expect(page.locator('.article-card').first()).toHaveCSS('background-color','rgb(22, 29, 24)');
- await expect(page.getByRole('navigation',{name:'主导航'})).toBeVisible();
+ await expect(page.locator('nav.topnav')).toBeVisible();
  await page.goto('http://127.0.0.1:18766/topics/cme295/basics.html');
  await page.locator('label[for=upd-after]').click();
  await expect(page.locator('.panel-upd-after')).toBeVisible();
@@ -193,5 +193,50 @@ test('site icons are served with the right types',async({request})=>{
   const response=await request.get(`http://127.0.0.1:18766/${file}`);
   expect(response.status(),file).toBe(200);
   expect(response.headers()['content-type'],file).toContain(type);
+ }
+});
+
+test('english edition mirrors the chinese site and switches language',async({browser})=>{
+ const context=await browser.newContext({viewport:{width:1440,height:1000}});
+ const page=await context.newPage();
+ const errors=[];
+ page.on('pageerror',error=>errors.push(error.message));
+ await page.goto('http://127.0.0.1:18766/en/index.html');
+ await expect(page.locator('html')).toHaveAttribute('lang','en');
+ await expect(page.locator('nav.topnav a').first()).toHaveText('Home');
+ await expect(page.locator('a.lang-switch')).toHaveAttribute('href','../index.html');
+ await expect(page.locator('a.icon-link')).toBeVisible();
+ await page.goto('http://127.0.0.1:18766/en/topics/cme295/introduction.html');
+ await expect(page.locator('html')).toHaveAttribute('lang','en');
+ await expect(page.locator('h1')).toContainText('Introduction');
+ await expect(page.locator('a.lang-switch')).toHaveAttribute('href','../../../topics/cme295/introduction.html');
+ await page.locator('a.lang-switch').click();
+ await expect(page).toHaveURL('http://127.0.0.1:18766/topics/cme295/introduction.html');
+ await expect(page.locator('html')).toHaveAttribute('lang','zh-CN');
+ await expect(page.locator('a.lang-switch')).toHaveCount(1);
+ // 尚未翻译的章节不应出现语言切换
+ await page.goto('http://127.0.0.1:18766/topics/cme295/l3-overview.html');
+ await expect(page.locator('a.lang-switch')).toHaveCount(0);
+ await page.goto('http://127.0.0.1:18766/en/library.html');
+ await page.locator('#knowledge-query').fill('attention');
+ await expect.poll(()=>page.locator('.article-card:visible').count()).toBeGreaterThan(0);
+ await page.goto('http://127.0.0.1:18766/en/labs.html');
+ await expect(page.locator('.lab')).toBeVisible();
+ await expect(page.locator('body')).not.toContainText('undefined');
+ expect(errors).toEqual([]);
+ await context.close();
+});
+
+test('english pages fit a 390px viewport',async({browser})=>{
+ for(const colorScheme of ['light','dark']){
+  const context=await browser.newContext({viewport:{width:390,height:900},colorScheme});
+  const page=await context.newPage();
+  for(const url of ['en/index.html','en/courses.html','en/library.html','en/labs.html','en/map.html','en/topics/cme295/introduction.html']){
+   await page.goto(`http://127.0.0.1:18766/${url}`);
+   const sizes=await page.evaluate(()=>({full:document.documentElement.scrollWidth,view:innerWidth}));
+   expect(sizes.full,`${url} (${colorScheme})`).toBeLessThanOrEqual(sizes.view+1);
+   await expect(page.locator('nav.topnav')).toBeVisible();
+  }
+  await context.close();
  }
 });

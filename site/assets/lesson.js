@@ -1,7 +1,7 @@
 
 'use strict';
 if (document.getElementById('slider-demo')) {
-const names=['泰迪熊','可爱','阅读'];
+const names=(document.documentElement.dataset.attnNames||'泰迪熊|可爱|阅读').split('|');
 const keys=[[1,0],[0,1],[1,1]];
 const values=[[1,0],[0,2],[1,1]];
 function calculateAttention(q){

@@ -7,7 +7,10 @@
   const root = document.documentElement;
   const key = 'ainotes-theme';
   const states = ['system', 'light', 'dark'];
-  const labels = { system: '跟随系统', light: '浅色', dark: '深色' };
+  const ui = document.documentElement.dataset;
+  const packed = (ui.themeLabels || 'System|Light|Dark').split('|');
+  const labels = { system: packed[0], light: packed[1], dark: packed[2] };
+  const aria = ui.themeAria || 'Colour: {state}. Click to change';
   const icons = { system: '◐', light: '☀', dark: '☾' };
 
   const read = () => {
@@ -43,7 +46,7 @@
       const state = current();
       icon.textContent = icons[state];
       label.textContent = labels[state];
-      button.setAttribute('aria-label', `配色：${labels[state]}。点击切换`);
+      button.setAttribute('aria-label', aria.replace('{state}', labels[state]));
     };
     button.hidden = false;
     render();

@@ -17,7 +17,8 @@
     "notes:lecture4": "node tools/export-lecture-notes.mjs 4",
     "notes:lecture5": "node tools/export-lecture-notes.mjs 5",
     "notes:lecture6": "node tools/export-lecture-notes.mjs 6",
-    "icons": "node tools/make-icons.mjs"
+    "icons": "node tools/make-icons.mjs",
+    "i18n:status": "node tools/i18n-status.mjs"
   },
   "engines": {
     "node": ">=20"

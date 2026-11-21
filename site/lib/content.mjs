@@ -8,14 +8,15 @@ import { renderLecture3Lab } from './lecture3-examples.mjs';
 import { renderLecture4Lab } from './lecture4-examples.mjs';
 import { renderLecture5Lab } from './lecture5-examples.mjs';
 import { renderLecture6Lab } from './lecture6-examples.mjs';
+import { LANGS, langPrefix } from './i18n.mjs';
 
 const labRenderers = new Map([[2,renderLecture2Lab],[3,renderLecture3Lab],[4,renderLecture4Lab],[5,renderLecture5Lab],[6,renderLecture6Lab]]);
 const LAB_PATTERN = /<!-- lab:([a-z0-9-]+) -->/g;
 
-function renderLab(name) {
+function renderLab(name, lang = 'zh') {
   const match = /^l([2-6])-([a-z0-9-]+)$/.exec(name);
   if (!match) throw new Error(`Unknown lab: ${name} (expected l2-… through l6-…); no lecture file was rendered`);
-  const html = labRenderers.get(Number(match[1]))(match[2]);
+  const html = labRenderers.get(Number(match[1]))(match[2], lang);
   // Lab markup is inserted into the Markdown source before parsing: a blank line would end the HTML block
   // and let marked re-read the copy as Markdown. Keep template output on one line.
   if (/[\r\n]/.test(html)) throw new Error(`Lab ${name} renders across multiple lines; keep the template output on one line so marked cannot re-parse it`);
@@ -82,23 +83,57 @@ export async function loadContent(root) {
     if(!Number.isFinite(data.order) || !Array.isArray(data.tags)) throw new Error(`${file}: invalid order/tags`);
     if(data.labs !== undefined) throw new Error(`${file}: "labs" is reserved for rendered experiment metadata and cannot be set in frontmatter`);
     if(data.status==='draft') continue;
-    const url=`topics/${data.collection}/${data.slug}.html`;
+    const lang = data.lang ?? 'zh';
+    if (!LANGS.includes(lang)) throw new Error(`${file}: unsupported lang ${lang}`);
+    const url=`${langPrefix(lang)}topics/${data.collection}/${data.slug}.html`;
     if(urls.has(url)) throw new Error(`${file}: duplicate article URL`);
     urls.add(url);
     const lecture = data.lecture;
     if (lecture !== undefined && (!Number.isInteger(lecture) || lecture < 1)) throw new Error(`${file}: invalid lecture`);
     // 按讲次组织的专题必须在 catalog 里显式声明 "lectures": true；不写死课程 slug。
     if (collections.get(data.collection).lectures === true && lecture === undefined) throw new Error(`${file}: missing lecture`);
+    // <svg> 必须整体留在同一个 Markdown HTML 块内：块内空行会让后续图形元素被移出 SVG。
+    for (const block of content.match(/<svg[\s\S]*?<\/svg>/g) ?? []) {
+      if (/\n[ \t]*\n/.test(block)) throw new Error(`${file}: <svg> 块内出现空行，Markdown 会截断图形`);
+    }
     const labs = [];
     const expanded = content.replace(LAB_PATTERN, (_, name) => {
-      const html = renderLab(name);
+      const html = renderLab(name, lang);
       labs.push({name,title:labTitle(html)});
       return html;
     });
     const processed=decorate(marked.parse(expanded));
-    articles.push({...data,lecture,...processed,url,file,labs});
+    articles.push({...data,lang,lecture,...processed,url,file,labs});
   }
-  articles.sort((a,b)=>a.collection.localeCompare(b.collection)||(a.lecture??0)-(b.lecture??0)||a.order-b.order||a.slug.localeCompare(b.slug));
+  articles.sort((a,b)=>a.collection.localeCompare(b.collection)||(a.lecture??0)-(b.lecture??0)||a.order-b.order||a.lang.localeCompare(b.lang)||a.slug.localeCompare(b.slug));
+  for (const article of articles.filter(a => a.lang !== 'zh')) {
+    const original = articles.find(a => a.lang === 'zh' && a.collection === article.collection && a.slug === article.slug);
+    if (!original) throw new Error(`${article.file}: English article has no Chinese original ${article.collection}/${article.slug}`);
+    if (article.lecture !== original.lecture) throw new Error(`${article.file}: lecture must match the Chinese original (${original.lecture})`);
+    if (article.order !== original.order) throw new Error(`${article.file}: order must match the Chinese original (${original.order})`);
+    article.alternate = original.url;
+    original.alternate = article.url;
+  }
+  // 双语门禁：新的已发布章节必须中英都有。历史存量登记在 content/translations.json，
+  // 该清单只能缩小：补上译文后必须删掉对应条目。
+  const backlogRaw = await fs.readFile(path.join(root, 'content/translations.json'), 'utf8').catch(error => {
+    if (error.code === 'ENOENT') return null;
+    throw error;
+  });
+  const backlog = backlogRaw ? JSON.parse(backlogRaw) : { pending: [] };
+  if (!Array.isArray(backlog.pending)) throw new Error('content/translations.json: pending must be an array');
+  if (new Set(backlog.pending).size !== backlog.pending.length) throw new Error('content/translations.json: 存在重复条目');
+  const pending = new Set(backlog.pending);
+  // 清单缺失时不拦截（便于测试夹具与全新仓库），真实仓库由测试断言该文件必须存在且与现状一致。
+  for (const article of backlogRaw ? articles.filter(a => a.lang === 'zh') : []) {
+    const key = `${article.collection}/${article.slug}`;
+    if (article.alternate) {
+      if (pending.has(key)) throw new Error(`content/translations.json: ${key} 已有英文版，请删除该条目`);
+    } else if (!pending.has(key)) throw new Error(`${article.file}: 新章节必须同时提供英文版（${article.slug}.en.md）；若确为历史存量，请登记到 content/translations.json`);
+  }
+  for (const key of backlog.pending) {
+    if (!articles.some(a => a.lang === 'zh' && `${a.collection}/${a.slug}` === key)) throw new Error(`content/translations.json: ${key} 没有对应的已发布中文文章`);
+  }
   // catalog.chapters is the legacy lecture-1 manifest kept for tools/import-lecture.mjs; it must never drift from lectures[0].
   const primary = lectures.find(l => l.collection === 'cme295' && l.number === 1);
   if (catalog.chapters?.length) {
@@ -109,14 +144,15 @@ export async function loadContent(root) {
   for (const lecture of lectures) {
     if (!collections.has(lecture.collection)) throw new Error('Unknown lecture collection');
     const registered = new Set(lecture.chapters);
-    for (const slug of lecture.chapters) if (!articles.some(a => a.collection === lecture.collection && a.lecture === lecture.number && a.slug === slug)) throw new Error(`Missing lecture ${lecture.number} chapter: ${slug}`);
-    for (const a of articles) if (a.collection === lecture.collection && a.lecture === lecture.number && !registered.has(a.slug)) throw new Error(`${a.file}: lecture ${lecture.number} chapter not registered in catalog: ${a.slug}`);
+    const chinese = articles.filter(a => a.lang === 'zh');
+    for (const slug of lecture.chapters) if (!chinese.some(a => a.collection === lecture.collection && a.lecture === lecture.number && a.slug === slug)) throw new Error(`Missing lecture ${lecture.number} chapter: ${slug}`);
+    for (const a of chinese) if (a.collection === lecture.collection && a.lecture === lecture.number && !registered.has(a.slug)) throw new Error(`${a.file}: lecture ${lecture.number} chapter not registered in catalog: ${a.slug}`);
   }
   for (const a of articles) if (a.lecture !== undefined && !lectures.some(l => l.collection === a.collection && l.number === a.lecture)) throw new Error(`${a.file}: lecture ${a.lecture} is not registered in catalog.lectures`);
   const labs = [];
   for (const article of articles) for (const lab of article.labs) {
-    if (labs.some(l => l.name === lab.name)) throw new Error(`Duplicate lab name: ${lab.name}`);
-    labs.push({...lab,url:article.url,articleTitle:article.title,collection:article.collection,lecture:article.lecture});
+    if (labs.some(l => l.name === lab.name && l.lang === article.lang)) throw new Error(`Duplicate lab name: ${lab.name} (${lang})`);
+    labs.push({...lab,url:article.url,articleTitle:article.title,collection:article.collection,lecture:article.lecture,lang:article.lang});
   }
   return {...catalog,articles,labs};
 }

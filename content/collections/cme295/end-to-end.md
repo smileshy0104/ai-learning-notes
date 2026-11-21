@@ -17,15 +17,15 @@ tags: ["翻译","End-to-end"]
 
 <h2 id="part-2">第 1 步：分词并加上边界标记</h2>
 <div class="flow"><span class="chip">[BOS]</span><span class="chip">A</span><span class="chip">cute</span><span class="chip">teddy bear</span><span class="chip">is</span><span class="chip">reading</span><span class="chip">.</span><span class="chip">[EOS]</span></div>
-<p>源句被切成 7 个 token（含标点）；<code>[BOS]</code>/<code>[EOS]</code> 标出序列边界。序列长度 m = 7。</p>
+<p>源句被切成 7 个 token（含标点与 <code>[EOS]</code>，不含只作边界的 <code>[BOS]</code>）；序列长度 m = 7。</p>
 
 <h2 id="part-3">第 2 步：查表得到嵌入，再加上位置编码</h2>
-<div class="table-wrap"><table><caption>嵌入只是“按 ID 取一行”，位置编码按位置相加（位置编号从 0 起）</caption><thead><tr><th>位置（从 0 计）</th><th>token</th><th>示例 ID</th><th>embedding（d = 4）</th><th>位置编码</th><th>相加后</th></tr></thead><tbody>
-<tr><th>1</th><td>A</td><td>31</td><td>[0.2, −0.1, 0.4, 0.0]</td><td>[0.00, 1.00, 0.00, 1.00]</td><td>[0.2, 0.9, 0.4, 1.0]</td></tr>
-<tr><th>2</th><td>cute</td><td>7</td><td>[0.5, 0.3, −0.2, 0.1]</td><td>[0.84, 0.54, 0.01, 1.00]</td><td>[1.34, 0.84, −0.19, 1.10]</td></tr>
-<tr><th>3</th><td>teddy bear</td><td>412</td><td>[0.6, 0.2, 0.1, −0.3]</td><td>[0.91, −0.42, 0.02, 1.00]</td><td>[1.51, −0.22, 0.12, 0.70]</td></tr>
-<tr><th>4</th><td>is</td><td>9</td><td>[0.1, 0.4, 0.3, 0.2]</td><td>[0.14, −0.99, 0.03, 1.00]</td><td>[0.24, −0.59, 0.33, 1.20]</td></tr>
-<tr><th>5</th><td>reading</td><td>88</td><td>[0.3, −0.2, 0.6, 0.4]</td><td>[−0.76, −0.65, 0.04, 1.00]</td><td>[−0.46, −0.85, 0.64, 1.40]</td></tr>
+<div class="table-wrap"><table><caption>嵌入只是“按 ID 取一行”，位置编码按位置相加（位置编号从 0 起，这里只列出前 5 个位置）</caption><thead><tr><th>位置（从 0 计）</th><th>token</th><th>示例 ID</th><th>embedding（d = 4）</th><th>位置编码</th><th>相加后</th></tr></thead><tbody>
+<tr><th>0</th><td>A</td><td>31</td><td>[0.2, −0.1, 0.4, 0.0]</td><td>[0.00, 1.00, 0.00, 1.00]</td><td>[0.2, 0.9, 0.4, 1.0]</td></tr>
+<tr><th>1</th><td>cute</td><td>7</td><td>[0.5, 0.3, −0.2, 0.1]</td><td>[0.84, 0.54, 0.01, 1.00]</td><td>[1.34, 0.84, −0.19, 1.10]</td></tr>
+<tr><th>2</th><td>teddy bear</td><td>412</td><td>[0.6, 0.2, 0.1, −0.3]</td><td>[0.91, −0.42, 0.02, 1.00]</td><td>[1.51, −0.22, 0.12, 0.70]</td></tr>
+<tr><th>3</th><td>is</td><td>9</td><td>[0.1, 0.4, 0.3, 0.2]</td><td>[0.14, −0.99, 0.03, 1.00]</td><td>[0.24, −0.59, 0.33, 1.20]</td></tr>
+<tr><th>4</th><td>reading</td><td>88</td><td>[0.3, −0.2, 0.6, 0.4]</td><td>[−0.76, −0.65, 0.04, 1.00]</td><td>[−0.46, −0.85, 0.64, 1.40]</td></tr>
 </tbody></table></div>
 <p class="small muted">表中位置编码取自正弦／余弦公式（d = 4 时的前几维），仅示意“同维相加”。真实实现通常一次处理整个矩阵。</p>
 

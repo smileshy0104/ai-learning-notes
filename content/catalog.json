@@ -1,7 +1,8 @@
 {
   "site": {
     "title": "AI Learning Notes",
-    "description": "把 AI 原理、框架和实践连接起来。先理解概念，再用例子与实验验证。"
+    "description": "把 AI 原理、框架和实践连接起来。先理解概念，再用例子与实验验证。",
+    "descriptionEn": "A bilingual learning site connecting AI concepts, frameworks and practice."
   },
   "collections": [
     {
@@ -12,7 +13,11 @@
       "label": "课程学习",
       "description": "按讲次学习 Transformer 与大语言模型：从基本计算到模型家族、MoE、架构优化、解码与提示。",
       "edition": "资料版本：Fall 2026",
-      "icon": "∑"
+      "icon": "∑",
+      "titleEn": "CME295 · Transformers & LLMs",
+      "descriptionEn": "Learn Transformer and large-language-model ideas lecture by lecture: from basic computation to model families, MoE, architecture refinements, decoding, prompting and agents.",
+      "labelEn": "Course",
+      "editionEn": "Edition: Fall 2026"
     },
     {
       "slug": "langchain",
@@ -20,7 +25,10 @@
       "kind": "framework",
       "label": "框架专题",
       "description": "理解模型、消息、工具和检索组件，建立从模型调用到应用开发的基础。",
-      "icon": "↗"
+      "icon": "↗",
+      "titleEn": "LangChain",
+      "descriptionEn": "Models, messages, tools and retrieval components — from a single model call to application development.",
+      "labelEn": "Framework"
     },
     {
       "slug": "langgraph",
@@ -28,7 +36,10 @@
       "kind": "framework",
       "label": "框架专题",
       "description": "从状态、节点与边开始，理解条件分支、执行循环与持久化。",
-      "icon": "⌘"
+      "icon": "⌘",
+      "titleEn": "LangGraph",
+      "descriptionEn": "Start from state, nodes and edges; understand conditional branches, execution loops and persistence.",
+      "labelEn": "Framework"
     },
     {
       "slug": "eino",
@@ -36,7 +47,10 @@
       "kind": "framework",
       "label": "框架专题",
       "description": "用 Go 的类型与组件构建 AI 应用，逐步学习编排、流式处理与工具。",
-      "icon": "◇"
+      "icon": "◇",
+      "titleEn": "Eino",
+      "descriptionEn": "Build AI applications with Go types and components; learn orchestration, streaming and tools step by step.",
+      "labelEn": "Framework"
     }
   ],
   "chapters": [
@@ -196,7 +210,9 @@
         "end-to-end",
         "beyond-lecture",
         "deep-dive"
-      ]
+      ],
+      "titleEn": "Transformers",
+      "descriptionEn": "From text representation to the end-to-end computation of the original Transformer."
     },
     {
       "collection": "cme295",
@@ -216,7 +232,9 @@
         "l2-decoding",
         "l2-context-reasoning",
         "l2-review"
-      ]
+      ],
+      "titleEn": "Large Language Models",
+      "descriptionEn": "Model families, scale and expert routing, modern architecture, decoding strategies, prompting and reasoning."
     },
     {
       "collection": "cme295",
@@ -238,7 +256,9 @@
         "l3-distillation",
         "l3-end-to-end",
         "l3-review"
-      ]
+      ],
+      "titleEn": "LLM training",
+      "descriptionEn": "Pretraining, data and long context, SFT and LoRA, preference optimisation, reasoning training, distillation and an end-to-end case."
     },
     {
       "collection": "cme295",
@@ -259,7 +279,9 @@
         "l4-grpo-refinements",
         "l4-opd",
         "l4-review"
-      ]
+      ],
+      "titleEn": "Reinforcement Learning with LLMs",
+      "descriptionEn": "From reinforcement learning and reward modelling to policy gradients, PPO, GRPO and on-policy distillation, motivated step by step."
     },
     {
       "collection": "cme295",
@@ -281,7 +303,9 @@
         "l5-speculative",
         "l5-mtp",
         "l5-review"
-      ]
+      ],
+      "titleEn": "LLM Systems",
+      "descriptionEn": "From GPU memory and FlashAttention to distributed training, inference bottlenecks, KV cache management and speculative decoding."
     },
     {
       "collection": "cme295",
@@ -304,7 +328,9 @@
         "l6-coding",
         "l6-orchestration",
         "l6-review"
-      ]
+      ],
+      "titleEn": "AI Agents",
+      "descriptionEn": "From RAG, retrieval evaluation and tool calling to MCP, harnesses, ReAct, memory, coding agents and multi-agent collaboration."
     }
   ]
 }

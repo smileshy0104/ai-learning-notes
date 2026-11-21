@@ -36,7 +36,6 @@ tags: ["Encoder","Decoder"]
 </defs>
 <text x="150" y="22" text-anchor="middle" font-size="15" fill="#193049" font-weight="600">编码器（读源句）</text>
 <text x="640" y="22" text-anchor="middle" font-size="15" fill="#193049" font-weight="600">解码器（写译文）</text>
-
 <rect x="55" y="40" width="190" height="42" rx="8" fill="#f6f9fd" stroke="#2166cd"/><text x="150" y="67" text-anchor="middle" font-size="13" fill="#193049">源句 embedding ＋ 位置编码</text>
 <rect x="55" y="100" width="190" height="118" rx="10" fill="#edf4ff" stroke="#2166cd" stroke-dasharray="4 3"/>
 <text x="150" y="120" text-anchor="middle" font-size="12" fill="#53677b">× N 层</text>
@@ -46,7 +45,6 @@ tags: ["Encoder","Decoder"]
 <rect x="55" y="252" width="190" height="44" rx="8" fill="#eff8f0" stroke="#2e7d32"/>
 <text x="150" y="271" text-anchor="middle" font-size="12" fill="#193049">编码器输出：每个源位置</text>
 <text x="150" y="287" text-anchor="middle" font-size="12" fill="#193049">都有一个上下文表示</text>
-
 <rect x="545" y="40" width="190" height="42" rx="8" fill="#fff8ec" stroke="#db8b16"/><text x="640" y="60" text-anchor="middle" font-size="13" fill="#193049">已生成的目标 token</text>
 <text x="640" y="75" text-anchor="middle" font-size="11" fill="#53677b">＋ 位置编码</text>
 <rect x="545" y="100" width="190" height="198" rx="10" fill="#fff6e6" stroke="#db8b16" stroke-dasharray="4 3"/>
@@ -56,21 +54,18 @@ tags: ["Encoder","Decoder"]
 <rect x="560" y="220" width="160" height="34" rx="6" fill="#fff" stroke="#db8b16"/><text x="640" y="242" text-anchor="middle" font-size="12" fill="#193049">前馈网络 FFN</text>
 <text x="640" y="280" text-anchor="middle" font-size="11" fill="#53677b">每层都含残差连接＋归一化</text>
 <rect x="545" y="316" width="190" height="40" rx="8" fill="#f6f9fd" stroke="#2166cd"/><text x="640" y="341" text-anchor="middle" font-size="12" fill="#193049">线性层 → softmax → 下一个 token</text>
-
 <path d="M150 82 V100" fill="none" stroke="#2166cd" stroke-width="2" marker-end="url(#a-arrow)"/>
 <path d="M150 218 V252" fill="none" stroke="#2166cd" stroke-width="2" marker-end="url(#a-arrow)"/>
 <path d="M640 82 V100" fill="none" stroke="#db8b16" stroke-width="2" marker-end="url(#a-arrow)"/>
 <path d="M640 298 V316" fill="none" stroke="#db8b16" stroke-width="2" marker-end="url(#a-arrow)"/>
-
 <path d="M245 274 C 330 274 480 236 560 196" fill="none" stroke="#c0392b" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#a-arrow2)"/>
 <text x="404" y="330" text-anchor="middle" font-size="12" fill="#c0392b">红线：Q 来自解码器，K、V 来自编码器输出</text>
 <text x="404" y="348" text-anchor="middle" font-size="11" fill="#53677b">即“解码器提问，编码器提供可匹配的特征与内容”</text>
-
 <text x="410" y="440" text-anchor="middle" font-size="12" fill="#53677b">左半部分负责“读原文”；右半部分在“写译文”时反复运行</text>
 </svg>
 <p>三个容易忽略的细节：</p>
 <ul><li><strong>编码器的输出会被每一层解码器重复读取</strong>，不是只传给第一层。</li><li><strong>解码器每层都有三块</strong>：掩码自注意力 → 交叉注意力 → FFN，每块后面都接残差与归一化。</li><li><strong>编码器和解码器的层数可以相同</strong>（论文 base 用 N = 6），但参数不共享。</li></ul>
-<p>论文 base 配置：N = 6、d_model = 512、h = 8、d_ff = 2048、d_k = d_v = 64，参数量约 6500 万。</p>
+<p>论文 base 配置：N = 6、d_model = 512、h = 8、d_ff = 2048、d_k = d_v = 64，参数量约 6.5×10⁷。</p>
 
 <h2 id="part-5">概念 4：一次完整翻译的数据流</h2>
 <div class="table-wrap"><table><thead><tr><th>步骤</th><th>做什么</th><th>形状（base 配置，源长 m、目标长 n）</th></tr></thead><tbody>

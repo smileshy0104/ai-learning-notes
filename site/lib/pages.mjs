@@ -1,65 +1,108 @@
 import { escape as e } from './content.mjs';
 import { layout, heading, collectionCard, articleCard, relative } from './layout.mjs';
+import { t, pick, langPrefix, fill, counterpart, countOf } from './i18n.mjs';
 
-export function home(data) {
- const body=`<section class="hero"><div><div class="eyebrow">原理 · 框架 · 实践</div><h1>把 AI 的每一步，<br>都学明白。</h1><p>从基础概念到 Transformer，从 LangChain、LangGraph 到 Eino。用清晰的解释、具体的例子和可操作的图解，连接知识与实践。</p><div class="hero-actions"><a class="btn primary" href="topics/cme295/basics.html">从基础开始 →</a><a class="btn" href="courses.html">浏览课程与专题</a></div><div class="meta">公开阅读 · 中文讲解 · 保留英文术语</div></div><div class="hero-art"><span class="eyebrow">知识怎样连接起来</span><div class="diagram-path"><div class="row"><span>基础概念</span><span>模型原理</span></div><i>↓</i><span class="core">理解 · 验证 · 实践</span><i>↓</i><div class="row"><span>框架与工具</span><span>AI 应用</span></div></div><a class="text-link" href="map.html">探索知识地图 ↗</a></div></section><section class="section-space"><div class="section-top"><div><div class="eyebrow">Learning collections</div><h2>选择你的学习方向</h2><p>课程提供顺序，专题深入工具，知识页可以独立阅读。</p></div><a class="text-link" href="courses.html">全部方向 →</a></div><div class="grid2">${data.collections.map(c=>collectionCard(c,data.articles,'index.html')).join('')}</div></section><section class="banner"><div><h2>先用一个例子，看懂注意力。</h2><p>从 Q 与 K 的匹配，到对 V 的加权求和。调整查询，观察结果。</p></div><a class="btn primary" href="labs.html">进入交互实验 →</a></section><section class="section-space"><div class="section-top"><div><div class="eyebrow">Start here</div><h2>不确定先学什么？</h2></div></div><div class="grid3">${['basics','tokens','attention'].map(slug=>articleCard(data.articles.find(a=>a.collection==='cme295'&&a.slug===slug),'index.html','CME295 · 第一讲')).join('')}</div></section>`;
- return layout({title:'把 AI 的每一步都学明白',description:data.site.description,body});
+const published = (data, lang) => data.articles.filter(a => a.lang === lang);
+
+export function home(data, lang = 'zh') {
+ const s = t(lang), prefix = langPrefix(lang);
+ const first = 'basics';
+ const cards = ['basics', 'tokens', 'attention'];
+ const url = prefix + 'index.html', link = target => relative(url, target);
+ const body = `<section class="hero"><div><div class="eyebrow">${e(s.home.eyebrow)}</div><h1>${s.home.h1}</h1><p>${e(s.home.intro)}</p><div class="hero-actions"><a class="btn primary" href="${link(prefix + `topics/cme295/${first}.html`)}">${e(s.home.start)}</a><a class="btn" href="${link(prefix + 'courses.html')}">${e(s.home.browse)}</a></div><div class="meta">${e(s.home.meta)}</div></div><div class="hero-art"><span class="eyebrow">${e(s.home.artEyebrow)}</span><div class="diagram-path"><div class="row"><span>${e(s.home.artRows[0])}</span><span>${e(s.home.artRows[1])}</span></div><i>↓</i><span class="core">${e(s.home.artCore)}</span><i>↓</i><div class="row"><span>${e(s.home.artRows[2])}</span><span>${e(s.home.artRows[3])}</span></div></div><a class="text-link" href="${link(prefix + 'map.html')}">${e(s.home.artLink)}</a></div></section><section class="section-space"><div class="section-top"><div><div class="eyebrow">Learning collections</div><h2>${e(s.home.sectionTitle)}</h2><p>${e(s.home.sectionNote)}</p></div><a class="text-link" href="${link(prefix + 'courses.html')}">${e(s.home.sectionLink)}</a></div><div class="grid2">${data.collections.map(c => collectionCard(c, data.articles, prefix + 'index.html', lang)).join('')}</div></section><section class="banner"><div><h2>${e(s.home.bannerTitle)}</h2><p>${e(s.home.bannerNote)}</p></div><a class="btn primary" href="${link(prefix + 'labs.html')}">${e(s.home.bannerLink)}</a></section><section class="section-space"><div class="section-top"><div><div class="eyebrow">Start here</div><h2>${e(s.home.startTitle)}</h2></div></div><div class="grid3">${cards.map(slug => articleCard(published(data, lang).find(a => a.collection === 'cme295' && a.slug === slug), prefix + 'index.html', s.home.firstLecture)).join('')}</div></section>`;
+ return layout({ lang, title: s.home.title, description: pick(data.site, 'description', lang), url, alternate: counterpart(prefix + 'index.html'), body });
 }
 
-export function courses(data) {
- return layout({title:'课程与专题',description:'从公开课程到 AI 开发框架，选择适合的学习方向。',current:'courses',url:'courses.html',body:heading('Learning collections','课程与专题','把课程、框架与后续实践放在同一套知识结构里。每个专题都可以独立新增内容。')+`<div class="filter-bar" data-filter-group><span>按内容类型浏览</span><div class="choice-tabs"><button data-filter="all" aria-pressed="true">全部</button><button data-filter="course" aria-pressed="false">课程</button><button data-filter="framework" aria-pressed="false">框架专题</button></div></div><div class="grid2">${data.collections.map(c=>collectionCard(c,data.articles,'courses.html')).join('')}</div><p class="note">CME295 按讲次组织已整理的章节。框架专题目前提供概念导读，具体 API 与实战文章将随学习逐步添加。</p>`});
+export function courses(data, lang = 'zh') {
+ const s = t(lang), prefix = langPrefix(lang);
+ const body = heading('Learning collections', s.courses.title, s.courses.heading) + `<div class="filter-bar" data-filter-group><span>${e(s.courses.filter)}</span><div class="choice-tabs"><button data-filter="all" aria-pressed="true">${e(s.courses.all)}</button><button data-filter="course" aria-pressed="false">${e(s.courses.kindCourse)}</button><button data-filter="framework" aria-pressed="false">${e(s.courses.kindFramework)}</button></div></div><div class="grid2">${data.collections.map(c => collectionCard(c, data.articles, prefix + 'courses.html', lang)).join('')}</div><p class="note">${e(s.courses.note)}</p>`;
+ return layout({ lang, title: s.courses.title, description: s.courses.description, current: 'courses', url: prefix + 'courses.html', alternate: counterpart(prefix + 'courses.html'), body });
 }
-export function collectionPage(data,collection) {
- const url=`collections/${collection.slug}.html`;
- const items=data.articles.filter(a=>a.collection===collection.slug);
- const lectures=(data.lectures??[]).filter(l=>l.collection===collection.slug);
- const row=(a,i)=>`<a class="reading-row" href="${relative(url,a.url)}"><span class="row-number">${String(i+1).padStart(2,'0')}</span><div><h2>${e(a.title)}</h2><p>${e(a.description)}</p></div><span class="row-arrow">→</span></a>`;
- const listing=lectures.length?lectures.map(l=>`<section class="lecture-group" id="lecture-${l.number}"><div class="section-top"><div><div class="eyebrow">Lecture ${l.number}</div><h2>${e(l.title)}</h2><p>${e(l.description)}</p></div><span class="pill">PDF ${l.pages} 页</span></div><div class="reading-list">${items.filter(a=>a.lecture===l.number).map(row).join('')}</div></section>`).join(''):`<div class="reading-list">${items.map(row).join('')}</div>`;
- return layout({title:collection.title,description:collection.description,current:'courses',url,body:`<div class="breadcrumb"><a href="../courses.html">课程与专题</a><span>/</span><span>${e(collection.title)}</span></div>`+heading(collection.label,collection.title,collection.description)+`<div class="collection-meta"><span class="pill">${items.length} 篇已发布</span>${collection.edition?`<span>${e(collection.edition)}</span>`:'<span>概念导读已发布 · API 教程待整理</span>'}</div>${listing}`});
+
+export function collectionPage(data, collection, lang = 'zh') {
+ const s = t(lang), prefix = langPrefix(lang);
+ const url = `${prefix}collections/${collection.slug}.html`;
+ const items = published(data, lang).filter(a => a.collection === collection.slug);
+ const lectures = (data.lectures ?? []).filter(l => l.collection === collection.slug);
+ const row = (a, i) => `<a class="reading-row" href="${relative(url, a.url)}"><span class="row-number">${String(i + 1).padStart(2, '0')}</span><div><h2>${e(a.title)}</h2><p>${e(a.description)}</p></div><span class="row-arrow">→</span></a>`;
+ const groups = lectures
+  .map(l => ({ lecture: l, items: items.filter(a => a.lecture === l.number) }))
+  .filter(group => group.items.length > 0)
+  .map(group => `<section class="lecture-group" id="lecture-${group.lecture.number}"><div class="section-top"><div><div class="eyebrow">Lecture ${group.lecture.number}</div><h2>${e(pick(group.lecture, 'title', lang))}</h2><p>${e(pick(group.lecture, 'description', lang))}</p></div><span class="pill">${fill(s.collection.pdfPages, { n: group.lecture.pages })}</span></div><div class="reading-list">${group.items.map(row).join('')}</div></section>`)
+  .join('');
+ const listing = lectures.length ? groups : `<div class="reading-list">${items.map(row).join('')}</div>`;
+ const empty = lang !== 'zh' && !items.length
+  ? `<p class="note">${e(s.collection.emptyEn)} <a class="text-link" href="${relative(url, `collections/${collection.slug}.html`)}">${e(s.collection.readZh)}</a></p>`
+  : '';
+ const edition = pick(collection, 'edition', lang);
+ return layout({ lang, title: pick(collection, 'title', lang), description: pick(collection, 'description', lang), current: 'courses', url, alternate: counterpart(url), body: `<div class="breadcrumb"><a href="${relative(url, prefix + 'courses.html')}">${e(s.courses.title)}</a><span>/</span><span>${e(pick(collection, 'title', lang))}</span></div>` + heading(pick(collection, 'label', lang), pick(collection, 'title', lang), pick(collection, 'description', lang)) + `<div class="collection-meta"><span class="pill">${fill(s.collection.published, { n: items.length })}</span>${edition ? `<span>${e(edition)}</span>` : `<span>${e(s.collection.frameworkNote)}</span>`}</div>${empty}${listing}` });
 }
-export function library(data) {
- const names=new Map(data.collections.map(c=>[c.slug,c.title]));
- return layout({title:'知识库',description:'按概念查阅机器学习、Transformer 与框架知识。',current:'library',url:'library.html',body:heading('Knowledge library','知识库','每个知识页都有稳定链接。你可以跟随课程阅读，也可以直接查一个概念。')+`<form class="search" role="search" data-library-search><label for="knowledge-query">⌕ <span class="sr-only">搜索知识</span></label><input id="knowledge-query" type="search" placeholder="搜索标题、术语或正文，例如 前向传播、attention、State…" autocomplete="off"><span class="search-count" role="status">${data.articles.length} 篇</span></form><noscript><p class="note">当前显示全部文章，可用浏览器的查找功能定位内容。</p></noscript><div class="grid3 library-grid">${data.articles.map(a=>articleCard(a,'library.html',names.get(a.collection))).join('')}</div><p class="empty" hidden data-empty>没有找到相关内容，试试“注意力”“前向传播”或“状态”。</p>`});
+
+export function library(data, lang = 'zh') {
+ const s = t(lang), prefix = langPrefix(lang);
+ const items = published(data, lang);
+ const names = new Map(data.collections.map(c => [c.slug, pick(c, 'title', lang)]));
+ return layout({ lang, title: s.library.title, description: s.library.description, current: 'library', url: prefix + 'library.html', alternate: counterpart(prefix + 'library.html'), body: heading('Knowledge library', s.library.title, s.library.heading) + `<form class="search" role="search" data-library-search><label for="knowledge-query">⌕ <span class="sr-only">${e(s.library.label)}</span></label><input id="knowledge-query" type="search" placeholder="${e(s.library.placeholder)}" autocomplete="off"><span class="search-count" role="status">${countOf(s.cards.articles, items.length)}</span></form><noscript><p class="note">${e(s.library.noscript)}</p></noscript><div class="grid3 library-grid">${items.map(a => articleCard(a, prefix + 'library.html', names.get(a.collection))).join('')}</div><p class="empty" hidden data-empty>${e(s.library.empty)}</p>` });
 }
-export function articlePage(data,article) {
- const url=article.url;
- const c=data.collections.find(c=>c.slug===article.collection);
- const siblings=data.articles.filter(a=>a.collection===article.collection && a.lecture===article.lecture);
- const lectureLabel=article.lecture?`Lecture ${article.lecture}`:'Getting started';
- const index=siblings.indexOf(article);
- const prev=siblings[index-1], next=siblings[index+1];
- const sidebar=`<aside class="sidebar"><a class="sidebar-back" href="${relative(url,`collections/${c.slug}.html`)}">← ${e(c.title)}</a><nav aria-label="专题目录">${siblings.map(a=>`<a href="${relative(url,a.url)}" ${a===article?'aria-current="page"':''}>${e(a.title)}</a>`).join('')}</nav></aside>`;
+
+export function articlePage(data, article) {
+ const lang = article.lang, s = t(lang), prefix = langPrefix(lang);
+ const url = article.url;
+ const c = data.collections.find(c => c.slug === article.collection);
+ const siblings = published(data, lang).filter(a => a.collection === article.collection && a.lecture === article.lecture);
+ const lectureLabel = article.lecture ? fill(s.article.lecture, { n: article.lecture }) : s.article.gettingStarted;
+ const index = siblings.indexOf(article);
+ const prev = siblings[index - 1], next = siblings[index + 1];
+ const collectionUrl = `${prefix}collections/${c.slug}.html`;
+ const sidebar = `<aside class="sidebar"><a class="sidebar-back" href="${relative(url, collectionUrl)}">← ${e(pick(c, 'title', lang))}</a><nav aria-label="${e(s.article.sidebarLabel)}">${siblings.map(a => `<a href="${relative(url, a.url)}" ${a === article ? 'aria-current="page"' : ''}>${e(a.title)}</a>`).join('')}</nav></aside>`;
  // 没有二三级标题时不要渲染空目录盒；桌面栅格列宽固定，省略后正文宽度不变。
- const toc=article.headings.length?`<aside class="toc"><strong>本页目录</strong><nav aria-label="本页目录">${article.headings.map(h=>`<a href="#${e(h.id)}" class="toc-level-${h.level}">${e(h.title)}</a>`).join('')}</nav></aside>`:'';
- const body=`<div class="breadcrumb"><a href="${relative(url,'courses.html')}">课程与专题</a><span>/</span><a href="${relative(url,`collections/${c.slug}.html`)}">${e(c.title)}</a></div><div class="reading-layout">${sidebar}<article class="article"><header class="article-heading"><div class="eyebrow">${e(c.label)} / ${e(lectureLabel)}</div><h1>${e(article.title)}</h1><p>${e(article.description)}</p><div class="meta">${article.tags.map(t=>`<span>${e(t)}</span>`).join('')}<button class="copy-link" data-copy-link type="button">复制页面链接 ↗</button><span role="status" data-copy-status></span></div></header><div class="lesson-content">${article.html}</div><nav class="pager" aria-label="前后篇">${prev?`<a href="${relative(url,prev.url)}"><small>上一篇</small>${e(prev.title)} ←</a>`:`<a href="${relative(url,`collections/${c.slug}.html`)}">← 专题目录</a>`}${next?`<a href="${relative(url,next.url)}"><small>下一篇</small>${e(next.title)} →</a>`:`<a href="${relative(url,'library.html')}">探索更多知识 →</a>`}</nav></article>${toc}</div>`;
- return layout({title:article.title,description:article.description,current:'library',url,article:true,lecture:article.lecture,body});
+ const toc = article.headings.length ? `<aside class="toc"><strong>${e(s.article.toc)}</strong><nav aria-label="${e(s.article.toc)}">${article.headings.map(h => `<a href="#${e(h.id)}" class="toc-level-${h.level}">${e(h.title)}</a>`).join('')}</nav></aside>` : '';
+ const body = `<div class="breadcrumb"><a href="${relative(url, prefix + 'courses.html')}">${e(s.courses.title)}</a><span>/</span><a href="${relative(url, collectionUrl)}">${e(pick(c, 'title', lang))}</a></div><div class="reading-layout">${sidebar}<article class="article"><header class="article-heading"><div class="eyebrow">${e(pick(c, 'label', lang))} / ${e(lectureLabel)}</div><h1>${e(article.title)}</h1><p>${e(article.description)}</p><div class="meta">${article.tags.map(tag => `<span>${e(tag)}</span>`).join('')}<button class="copy-link" data-copy-link type="button">${e(s.article.copyLink)}</button><span role="status" data-copy-status></span></div></header><div class="lesson-content">${article.html}</div><nav class="pager" aria-label="${e(s.article.pagerLabel)}">${prev ? `<a href="${relative(url, prev.url)}"><small>${e(s.article.previous)}</small>${e(prev.title)} ←</a>` : `<a href="${relative(url, collectionUrl)}">${e(s.article.collectionIndex)}</a>`}${next ? `<a href="${relative(url, next.url)}"><small>${e(s.article.next)}</small>${e(next.title)} →</a>` : `<a href="${relative(url, prefix + 'library.html')}">${e(s.article.explore)}</a>`}</nav></article>${toc}</div>`;
+ return layout({ lang, title: article.title, description: article.description, current: 'library', url, article: true, lecture: article.lecture, alternate: article.alternate, body });
 }
 
-export function labs(data) {
- const lectureGroups=(data.lectures??[]).map(l=>{
-  const items=(data.labs??[]).filter(lab=>lab.collection===l.collection&&lab.lecture===l.number);
-  if(!items.length)return '';
-  return `<section class="section-space"><div class="section-top"><div><div class="eyebrow">Lecture ${l.number}</div><h2>${e(l.title)}</h2><p>${e(l.description)}</p></div><span class="pill">${items.length} 个实验</span></div><div class="grid3">${items.map(lab=>`<a class="card" href="${lab.url}"><h2>${e(lab.title)}</h2><p>位于《${e(lab.articleTitle)}》正文中。所有数值均为教学示例。</p></a>`).join('')}</div></section>`;
+export function labs(data, lang = 'zh') {
+ const s = t(lang), prefix = langPrefix(lang);
+ const url = prefix + 'labs.html', link = target => relative(url, target);
+ const owned = (data.labs ?? []).filter(lab => lab.lang === lang);
+ const demo = [['a', [40.11, 19.78, 40.11], '0.802, 0.797'], ['b', [76.79, 4.54, 18.67], '0.955, 0.277'], ['c', [33.33, 33.33, 33.33], '0.667, 1.000']]
+  .map(([id, weights, result]) => `<div class="lab-panel panel-${id}"><div class="lab-bars">${weights.map((w, i) => `<div class="bar-row"><span>${e(s.labs.demoWords[i])}</span><div class="track"><div class="fill" style="width:${w}%"></div></div><span>${w}%</span></div>`).join('')}</div><div class="lab-output">${lang === 'zh' ? '输出向量 ≈' : 'Output vector ≈'} [${result}]</div></div>`).join('');
+ // 英文版尚无 attention 章节时，"阅读完整解释"指向中文原文。
+ const explanation = data.articles.find(a => a.collection === 'cme295' && a.slug === 'attention' && a.lang === lang) ?? data.articles.find(a => a.collection === 'cme295' && a.slug === 'attention' && a.lang === 'zh');
+ const demoHref = link(explanation ? explanation.url : prefix + 'collections/cme295.html');
+ const demoSection = `<section class="lab"><div class="lab-header"><div><span class="eyebrow">${e(s.labs.eyebrow)}</span><h2>${e(s.labs.demoTitle)}</h2></div><a class="text-link" href="${demoHref}">${e(s.labs.demoLink)}</a></div><div class="switch attention-lab"><input id="lab-a" type="radio" name="lab-q" checked><input id="lab-b" type="radio" name="lab-q"><input id="lab-c" type="radio" name="lab-q"><div class="controls"><label for="lab-a">Q = [1,0]</label><label for="lab-b">Q = [2,−2]</label><label for="lab-c">Q = [0,0]</label></div>${demo}<p>${e(s.labs.demoNote)}</p></div></section>`;
+ const groups = (data.lectures ?? []).map(l => {
+  const items = owned.filter(lab => lab.collection === l.collection && lab.lecture === l.number);
+  if (!items.length) return '';
+  return `<section class="section-space"><div class="section-top"><div><div class="eyebrow">Lecture ${l.number}</div><h2>${e(pick(l, 'title', lang))}</h2><p>${e(pick(l, 'description', lang))}</p></div><span class="pill">${countOf(s.labs.groupCount, items.length)}</span></div><div class="grid3">${items.map(lab => `<a class="card" href="${relative(prefix + 'labs.html', lab.url)}"><h2>${e(lab.title)}</h2><p>${e(fill(s.labs.cardNote, { title: lab.articleTitle }))}</p></a>`).join('')}</div></section>`;
  }).join('');
- // 第一讲的 4 个图解来自早期课程笔记，正文里没有 <!-- lab --> 标记，因此在这里静态登记。
- // 卡片标题与说明沿用注册实验的句式，出处文章标题取自 frontmatter，避免两处维护。
- const base=[['basics','实验：一次参数更新后，概率与损失怎么变？'],
-  ['tokens','实验：分词粒度不同，符号怎样逐步合并？'],
-  ['mask','实验：每个位置能读到哪些 token？'],
-  ['attention','实验：改变查询向量，注意力权重怎样重新分配？']];
- const baseCards=base.map(([slug,title])=>{
-  const article=data.articles.find(a=>a.collection==='cme295'&&a.slug===slug);
-  if(!article) throw new Error(`labs.html: 找不到第一讲图解所属文章 ${slug}`);
-  return `<a class="card" href="${article.url}"><h2>${e(title)}</h2><p>位于《${e(article.title)}》正文中。所有数值均为教学示例。</p></a>`;
- }).join('');
- // 分组标题与说明同样取自 catalog.lectures，保持六组结构一致。
- const firstLecture=(data.lectures??[]).find(l=>l.collection==='cme295'&&l.number===1);
- if(!firstLecture) throw new Error('labs.html: catalog.lectures 缺少第一讲');
- const baseGroup=`<section class="section-space"><div class="section-top"><div><div class="eyebrow">Lecture 1</div><h2>${e(firstLecture.title)}</h2><p>${e(firstLecture.description)}</p></div><span class="pill">${base.length} 个实验</span></div><div class="grid3">${baseCards}</div></section>`;
- const total=(data.labs??[]).length+base.length;
- return layout({title:'实验室',description:'通过可操作的教学示例理解 AI 模型。',current:'labs',url:'labs.html',body:heading('Interactive learning','实验室','先读懂概念，再亲手改变一个输入，观察计算过程和结果。所有数值为教学示例。')+`<section class="lab"><div class="lab-header"><div><span class="eyebrow">01 / Attention</span><h2>改变 Q，会读取哪些信息？</h2></div><a class="text-link" href="topics/cme295/attention.html">阅读完整解释 ↗</a></div><div class="switch attention-lab"><input id="lab-a" type="radio" name="lab-q" checked><input id="lab-b" type="radio" name="lab-q"><input id="lab-c" type="radio" name="lab-q"><div class="controls"><label for="lab-a">Q = [1,0]</label><label for="lab-b">Q = [2,−2]</label><label for="lab-c">Q = [0,0]</label></div>${[['a',[40.11,19.78,40.11],'0.802, 0.797'],['b',[76.79,4.54,18.67],'0.955, 0.277'],['c',[33.33,33.33,33.33],'0.667, 1.000']].map(([id,weights,result])=>`<div class="lab-panel panel-${id}"><div class="lab-bars">${weights.map((w,i)=>`<div class="bar-row"><span>${['泰迪熊','可爱','阅读'][i]}</span><div class="track"><div class="fill" style="width:${w}%"></div></div><span>${w}%</span></div>`).join('')}</div><div class="lab-output">输出向量 ≈ [${result}]</div></div>`).join('')}<p>固定 K=[[1,0],[0,1],[1,1]]，V=[[1,0],[0,2],[1,1]]，dₖ=2。用 softmax(QKᵀ/√2)V 计算，展示值四舍五入。</p></div></section>`+(total?`<section class="section-space"><div class="section-top"><div><div class="eyebrow">全部实验</div><h2>${total} 个交互组件，按讲次排列</h2><p>第一讲是随早期笔记整理的图解，其余按正文中的实验标记自动收集，新增实验后无需再改配置。</p></div><a class="text-link" href="collections/cme295.html">课程目录 →</a></div></section>`+'':'')+baseGroup+lectureGroups});
+ const total = owned.length + s.labs.baseCards.length;
+ const headingBlock = total
+  ? `<section class="section-space"><div class="section-top"><div><div class="eyebrow">${e(s.labs.all)}</div><h2>${fill(s.labs.allTitle, { n: total })}</h2><p>${e(s.labs.allNote)}</p></div><a class="text-link" href="${link(prefix + 'collections/cme295.html')}">${e(s.labs.courseIndex)}</a></div></section>`
+  : `<section class="section-space"><div class="section-top"><div><div class="eyebrow">${e(s.labs.all)}</div><h2>${e(s.labs.title)}</h2><p>${e(s.labs.empty)} <a class="text-link" href="${link('labs.html')}">${e(s.labs.emptyLink)}</a></p></div></div></section>`;
+ return layout({ lang, title: s.labs.title, description: s.labs.description, current: 'labs', url, alternate: counterpart(prefix + 'labs.html'), body: heading('Interactive learning', s.labs.title, s.labs.heading) + demoSection + headingBlock + firstLectureGroup(data, s, lang) + groups });
 }
-export function mapPage(data) {
- const nodes=[['向量与模型训练','topics/cme295/basics.html','先理解输入、参数、损失与更新。'],['分词与词元表示','topics/cme295/embedding.html','从文字变成模型可以处理的向量。'],['注意力与核心组件','topics/cme295/attention.html','理解上下文读取与信息变换。'],['Transformer 架构','topics/cme295/architecture.html','把组件连接成编码器与解码器。'],['框架与编排','collections/langgraph.html','从模型调用走向状态与执行流程。']];
- return layout({title:'知识地图',description:'从基础到应用，看清建议的知识依赖。',current:'map',url:'map.html',body:heading('Connected knowledge','知识地图','把学习内容连接起来。下方表示建议的阅读路径，不要求每个人都按唯一顺序学习。')+`<div class="knowledge-path">${nodes.map(([title,target,desc],i)=>`<a class="path-node" href="${target}"><span class="path-index">${String(i+1).padStart(2,'0')}</span><div><h2>${e(title)}</h2><p>${e(desc)}</p></div><span>↗</span></a>${i<nodes.length-1?'<span class="path-arrow" aria-hidden="true">↓</span>':''}`).join('')}</div><section class="section-space"><div class="section-top"><div><h2>从基础走向三个框架</h2><p>工具调用、消息和状态等通用概念相互联系，各框架的 API 需要分别学习。</p></div></div><div class="grid3">${data.collections.filter(c=>c.kind==='framework').map(c=>collectionCard(c,data.articles,'map.html')).join('')}</div></section>`});
+
+// 第一讲的 4 个图解来自早期课程笔记，正文里没有 <!-- lab --> 标记，因此在这里静态登记。
+// 卡片标题与说明沿用注册实验的句式，出处文章标题取自 frontmatter，避免两处维护。
+function firstLectureGroup(data, s, lang) {
+ const base = s.labs.baseCards;
+ // 语言没有对应译文时回退到中文原文；两处都没有才跳过（真实仓库由测试保证四篇都存在）。
+ const cards = base.map(([slug, title]) => {
+  const article = data.articles.find(a => a.collection === 'cme295' && a.slug === slug && a.lang === lang)
+   ?? data.articles.find(a => a.collection === 'cme295' && a.slug === slug && a.lang === 'zh');
+  if (!article) return '';
+  return `<a class="card" href="${relative(langPrefix(lang) + 'labs.html', article.url)}"><h2>${e(title)}</h2><p>${e(fill(s.labs.cardNote, { title: article.title }))}</p></a>`;
+ }).join('');
+ const first = (data.lectures ?? []).find(l => l.collection === 'cme295' && l.number === 1);
+ if (!first) throw new Error('labs.html: catalog.lectures 缺少第一讲');
+ return `<section class="section-space"><div class="section-top"><div><div class="eyebrow">Lecture 1</div><h2>${e(pick(first, 'title', lang))}</h2><p>${e(pick(first, 'description', lang))}</p></div><span class="pill">${countOf(s.labs.groupCount, base.length)}</span></div><div class="grid3">${cards}</div></section>`;
+}
+
+export function mapPage(data, lang = 'zh') {
+ const s = t(lang), prefix = langPrefix(lang);
+ const url = prefix + 'map.html', link = target => relative(url, target);
+ const targets = ['topics/cme295/basics.html', 'topics/cme295/embedding.html', 'topics/cme295/attention.html', 'topics/cme295/architecture.html', 'collections/langgraph.html'];
+ const body = heading('Connected knowledge', s.map.title, s.map.heading) + `<div class="knowledge-path">${s.map.nodes.map(([title, desc], i) => `<a class="path-node" href="${link(targets[i])}"><span class="path-index">${String(i + 1).padStart(2, '0')}</span><div><h2>${e(title)}</h2><p>${e(desc)}</p></div><span>↗</span></a>${i < s.map.nodes.length - 1 ? '<span class="path-arrow" aria-hidden="true">↓</span>' : ''}`).join('')}</div>${lang === 'zh' ? '' : `<p class="note">${e(s.map.note)}</p>`}<section class="section-space"><div class="section-top"><div><h2>${e(s.map.sectionTitle)}</h2><p>${e(s.map.sectionNote)}</p></div></div><div class="grid3">${data.collections.filter(c => c.kind === 'framework').map(c => collectionCard(c, data.articles, prefix + 'map.html', lang)).join('')}</div></section>`;
+ return layout({ lang, title: s.map.title, description: s.map.description, current: 'map', url, alternate: counterpart(prefix + 'map.html'), body });
 }

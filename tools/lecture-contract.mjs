@@ -16,7 +16,7 @@ export function registerLectureContract({ number, labs }) {
     const data = await loadContent(root);
     const lecture = data.lectures.find(l => l.collection === 'cme295' && l.number === number);
     assert(lecture, `lecture ${number} is not registered in content/catalog.json`);
-    const published = data.articles.filter(a => a.collection === 'cme295' && a.lecture === number);
+    const published = data.articles.filter(a => a.lang === 'zh' && a.collection === 'cme295' && a.lecture === number);
     assert.equal(published.length, lecture.chapters.length, `lecture ${number} published ${published.length} chapters but catalog lists ${lecture.chapters.length}`);
     for (const article of published) {
       assert(!article.text.includes('**'), `${article.slug}: unrendered emphasis`);
@@ -25,7 +25,7 @@ export function registerLectureContract({ number, labs }) {
       // 出处说明里的「已视觉核对第 N 页」是合法内容；这里只拦无证据的掌握声明。
       assert(!/已读完|已掌握/.test(article.text), `${article.slug}: unverified mastery claim leaked into the article`);
     }
-    const listed = data.labs.filter(lab => lab.collection === 'cme295' && lab.lecture === number);
+    const listed = data.labs.filter(lab => lab.lang === 'zh' && lab.collection === 'cme295' && lab.lecture === number);
     assert.equal(listed.length, labs, `lecture ${number} lab count changed; update the contract or the content`);
     const page = labsPage(data);
     for (const lab of listed) {

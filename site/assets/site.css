@@ -23,10 +23,12 @@
 .lesson-content .journey a{border-color:light-dark(#b6cae6,#2b3d52);background:light-dark(#f6f9fd,#1a222a)}
 }
 .topbar-tools{display:flex;align-items:center;gap:20px;min-width:0}
+.lang-switch{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:0 10px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--muted);font-size:11px;font-weight:650;white-space:nowrap}
+.lang-switch:hover{border-color:var(--accent);color:var(--accent)}
 .theme-toggle{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 10px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--muted);font-size:11px;white-space:nowrap}
 .theme-toggle:hover{border-color:var(--accent);color:var(--accent)}
 .theme-toggle [data-theme-icon]{font-size:13px;line-height:1}
 .icon-link{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid var(--line);border-radius:6px;background:var(--card);color:var(--muted)}
 .icon-link:hover{border-color:var(--accent);color:var(--accent)}
 @media(max-width:850px){.topbar-tools{gap:14px}}
-@media(max-width:650px){.theme-toggle .theme-label{display:none}}
+@media(max-width:650px){.theme-toggle .theme-label{display:none}.topbar-tools{gap:10px}.lang-switch{padding:0 8px}}

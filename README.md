@@ -13,11 +13,13 @@ npm ci
 npm start
 ```
 
-打开 <http://127.0.0.1:8000/>。顶栏有配色按钮，可在跟随系统、浅色、深色之间切换；禁用脚本时站点仍按系统偏好显示。最右侧的 GitHub 图标直达本仓库源码。`npm start` 会构建一次再启动预览；修改内容后运行 `npm run build` 并刷新页面。第二至第六讲完整 Markdown 笔记可分别用 `npm run notes:lecture2`、`npm run notes:lecture3`、`npm run notes:lecture4`、`npm run notes:lecture5`、`npm run notes:lecture6` 从相同内容源导出。预览端口可用 `PORT=8080 npm start` 指定。
+打开 <http://127.0.0.1:8000/>。顶栏有配色按钮，可在跟随系统、浅色、深色之间切换；禁用脚本时站点仍按系统偏好显示。最右侧的 GitHub 图标直达本仓库源码。
+
+站点支持中英双语：中文在根目录，英文在 `/en/`（如 <http://127.0.0.1:8000/en/>）。顶栏语言按钮只在对应页面有译文时出现。新增译文：复制中文文章为 `<slug>.en.md`，翻译 frontmatter 的标题、简介与标签，声明 `lang: en`，并保持 `slug`/`collection`/`lecture`/`order` 与原文一致。英文版覆盖站点界面与已翻译章节，进度可用 `npm run i18n:status` 查看（第二讲已全部译完）。`npm start` 会构建一次再启动预览；修改内容后运行 `npm run build` 并刷新页面。第二至第六讲完整 Markdown 笔记可分别用 `npm run notes:lecture2`、`npm run notes:lecture3`、`npm run notes:lecture4`、`npm run notes:lecture5`、`npm run notes:lecture6` 从相同内容源导出。预览端口可用 `PORT=8080 npm start` 指定。
 
 页面入口：
 
-- `/index.html`：统一首页
+- `/index.html`：统一首页（英文首页为 `/en/index.html`）
 - `/courses.html`：课程与框架专题
 - `/library.html`：知识库与正文搜索
 - `/labs.html`：可交互实验（清单从正文中的实验标记自动收集，按讲次分组）
@@ -44,7 +46,9 @@ PDF 和文字稿统一存放在 [materials/ 资料索引](materials/README.md)�
 npm run new:article -- langgraph checkpoints "检查点与恢复"
 ```
 
-它生成 `content/collections/langgraph/checkpoints.md` 草稿。填写正文和简介、设置 `order`，完成核对后改为 `status: published`。构建时自动加入：
+它同时生成 `checkpoints.md` 与 `checkpoints.en.md` 两份草稿（新章节必须中英齐全）。填写正文和简介、设置 `order`，完成核对后把两份草稿都改为 `status: published`。
+
+翻译进度可用 `npm run i18n:status` 查看。历史存量登记在 `content/translations.json`；新章节不允许只发布中文，除非你明确把该篇登记进该清单（清单只能缩小）。构建时自动加入：
 
 - 专题目录
 - 知识库

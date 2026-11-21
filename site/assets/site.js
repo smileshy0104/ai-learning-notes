@@ -1,5 +1,7 @@
 'use strict';
 
+const ui = document.documentElement.dataset;
+
 const filterGroup = document.querySelector('[data-filter-group]');
 if (filterGroup) {
   filterGroup.querySelectorAll('[data-filter]').forEach(button => button.addEventListener('click', () => {
@@ -26,7 +28,10 @@ if (searchForm) {
       card.hidden = !terms.every(term => haystack.includes(term));
       if (!card.hidden) visible++;
     });
-    status.textContent = `${visible} 篇`;
+    {
+   const [one, many] = (ui.i18nCount || '{n}').split('|');
+   status.textContent = (visible === 1 ? one || many : many || one).replace('{n}', visible);
+  }
     document.querySelector('[data-empty]').hidden = visible !== 0;
   };
   searchForm.addEventListener('submit', event => { event.preventDefault(); filter(); });
@@ -35,7 +40,7 @@ if (searchForm) {
   if (query) { input.value = query; filter(); }
   const scriptUrl = document.currentScript?.src;
   if (scriptUrl) {
-    fetch(new URL('search.json', scriptUrl)).then(response => {
+    fetch(new URL(ui.searchIndex || 'search.json', scriptUrl)).then(response => {
       if (!response.ok) throw new Error('Search index unavailable');
       return response.json();
     }).then(data => { index = data; filter(); }).catch(() => { /* Title and tag filtering remains available. */ });
@@ -47,8 +52,8 @@ if (copyButton) copyButton.addEventListener('click', async () => {
   const status = document.querySelector('[data-copy-status]');
   try {
     await navigator.clipboard.writeText(location.href);
-    status.textContent = '链接已复制';
+    status.textContent = ui.i18nCopied || 'Link copied';
   } catch {
-    status.textContent = '请复制浏览器地址栏中的链接';
+    status.textContent = ui.i18nCopyFailed || 'Copy the URL from your address bar';
   }
 });

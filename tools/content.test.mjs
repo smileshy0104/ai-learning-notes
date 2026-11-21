@@ -135,11 +135,187 @@ test('an article without section headings renders no empty table of contents',()
 test('every lecture overview links to each chapter of its lecture',async()=>{
  const data=await loadContent(fileURLToPath(new URL('../',import.meta.url)));
  for(const lecture of data.lectures){
-  const overview=data.articles.find(a=>a.collection===lecture.collection&&a.lecture===lecture.number&&(a.slug===`l${lecture.number}-overview`||a.slug==='introduction'));
+  const overview=data.articles.find(a=>a.lang==='zh'&&a.collection===lecture.collection&&a.lecture===lecture.number&&(a.slug===`l${lecture.number}-overview`||a.slug==='introduction'));
   assert(overview,`lecture ${lecture.number} has no overview page`);
   for(const slug of lecture.chapters){
    if(slug===overview.slug)continue;
    assert(overview.html.includes(`href="${slug}.html"`),`${overview.slug} does not link to ${slug}`);
   }
  }
+});
+
+const bilingual = (root, collection = 'cme295') => `---
+slug: intro
+title: "导读"
+collection: ${collection}
+lecture: 1
+description: "中文简介"
+order: 10
+kind: lesson
+status: published
+tags: [Intro]
+---
+
+<section><h2 id="part-2">一</h2><p>中文正文。</p></section>
+`;
+const english = (overrides = '') => `---
+slug: intro
+title: "Introduction"
+collection: cme295
+lecture: 1
+lang: en
+description: "English description"
+order: 10
+kind: lesson
+status: published
+tags: [Intro]
+${overrides}---
+
+<section><h2 id="part-2">One</h2><p>English body.</p></section>
+`;
+async function bilingualRoot(run) {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'bilingual-'));
+  try {
+    const dir = path.join(root, 'content/collections/cme295');
+    await fs.mkdir(dir, { recursive: true });
+    await fs.writeFile(path.join(root, 'content/catalog.json'), JSON.stringify({
+      site: {}, chapters: [],
+      collections: [{ slug: 'cme295', title: 'Course', kind: 'course', label: 'Course', description: 'd', icon: '+', lectures: true }],
+      lectures: [{ collection: 'cme295', number: 1, title: 'First', pages: 10, chapters: ['intro'] }],
+    }));
+    await fs.writeFile(path.join(dir, 'intro.md'), bilingual(root));
+    await run(root, dir);
+  } finally { await fs.rm(root, { recursive: true, force: true }); }
+}
+
+test('english articles mirror the chinese original and live under /en/', () => bilingualRoot(async (root, dir) => {
+  await fs.writeFile(path.join(dir, 'intro.en.md'), english());
+  const data = await loadContent(root);
+  const zh = data.articles.find(a => a.lang === 'zh');
+  const en = data.articles.find(a => a.lang === 'en');
+  assert.equal(zh.url, 'topics/cme295/intro.html');
+  assert.equal(en.url, 'en/topics/cme295/intro.html');
+  assert.equal(en.alternate, zh.url);
+  assert.equal(zh.alternate, en.url);
+  assert.equal(labsPage(data, 'en').includes('lang-switch'), true);
+  assert(collectionPage(data, data.collections[0], 'en').includes('1 published'));
+}));
+
+test('an english article without its chinese original fails', () => bilingualRoot(async (root, dir) => {
+  await fs.writeFile(path.join(dir, 'intro.en.md'), english());
+  await fs.unlink(path.join(dir, 'intro.md'));
+  await assert.rejects(loadContent(root), /English article has no Chinese original/);
+}));
+
+test('english metadata must match the chinese original and use a known language', () => bilingualRoot(async (root, dir) => {
+  await fs.writeFile(path.join(dir, 'intro.en.md'), english().replace('order: 10', 'order: 99'));
+  await assert.rejects(loadContent(root), /order must match the Chinese original/);
+  await fs.writeFile(path.join(dir, 'intro.en.md'), english().replace('lecture: 1', 'lecture: 2'));
+  await assert.rejects(loadContent(root), /lecture must match the Chinese original/);
+  await fs.writeFile(path.join(dir, 'intro.en.md'), english().replace('lang: en', 'lang: fr'));
+  await assert.rejects(loadContent(root), /unsupported lang fr/);
+}));
+
+test('a new chinese chapter without an english version is blocked by the backlog', async () => {
+  await bilingualRoot(async (root) => {
+    const backlog = path.join(root, 'content/translations.json');
+    await fs.writeFile(backlog, JSON.stringify({ pending: [] }));
+    await assert.rejects(loadContent(root), /必须同时提供英文版/);
+    await fs.writeFile(backlog, JSON.stringify({ pending: ['cme295/intro'] }));
+    await loadContent(root);
+    await fs.writeFile(path.join(root, 'content/collections/cme295/intro.en.md'), english());
+    await assert.rejects(loadContent(root), /已有英文版，请删除该条目/);
+  });
+});
+
+test('the real repository keeps its translation backlog in sync', async () => {
+  const root = fileURLToPath(new URL('../', import.meta.url));
+  const backlog = JSON.parse(await fs.readFile(path.join(root, 'content/translations.json'), 'utf8'));
+  assert(Array.isArray(backlog.pending), 'translations.json 必须包含 pending 数组');
+  assert.deepEqual(backlog.pending, [...backlog.pending].sort(), 'pending 必须按字母序排列');
+  const data = await loadContent(root);
+  const pending = data.articles
+    .filter(a => a.lang === 'zh' && !a.alternate)
+    .map(a => `${a.collection}/${a.slug}`)
+    .sort();
+  assert.deepEqual(backlog.pending, pending, 'translations.json 与实际的待译集合不一致');
+});
+
+// 译文完整性：结构、锚点、数字必须与中文原文一一对应，避免"翻了但漏了"。
+const shape = article => {
+  const text = article.html.replace(/<[^>]+>/g, ' ');
+  const headings = [...article.html.matchAll(/<h[2-4] id="([^"]+)"/g)].map(m => m[1]);
+  const links = [...article.html.matchAll(/href="([^"#][^"]*)"/g)]
+    .map(m => m[1]).filter(href => !/^(https?:|mailto:|tel:)/.test(href)).map(href => href.split('/').pop()).sort();
+  const anchors = [...article.html.matchAll(/href="#([^"]+)"/g)].map(m => m[1]).sort();
+  // 数字按「值」比较：6500 万与 65 million 视为同一个量。
+  const scale = { 万: 1e4, 亿: 1e8, thousand: 1e3, million: 1e6, billion: 1e9 };
+  const numbers = [...new Set([...text.replace(/[−–—]/g, '-').matchAll(/(\d+(?:\.\d+)?)\s*(万|亿|thousand|million|billion)?/g)]
+    .map(m => (Number(m[1]) * (scale[m[2]] ?? 1)).toPrecision(12).replace(/0+$/, '').replace(/\.$/, '')))].sort();
+  return {
+    headings,
+    tables: (article.html.match(/<table/g) ?? []).length,
+    details: (article.html.match(/<details/g) ?? []).length,
+    labs: article.labs.map(l => l.name).sort(),
+    links, anchors, numbers,
+  };
+};
+
+test('every translation mirrors the chinese structure, links and numbers', async () => {
+  const data = await loadContent(fileURLToPath(new URL('../', import.meta.url)));
+  const pairs = data.articles.filter(a => a.lang === 'zh' && a.alternate);
+  for (const zh of pairs) {
+    const en = data.articles.find(a => a.url === zh.alternate);
+    const a = shape(zh), b = shape(en);
+    assert.deepEqual(b.headings, a.headings, `${en.slug}: 标题 id 与中文版不一致`);
+    assert.equal(b.tables, a.tables, `${en.slug}: 表格数量不一致`);
+    assert.equal(b.details, a.details, `${en.slug}: 折叠块数量不一致`);
+    assert.deepEqual(b.labs, a.labs, `${en.slug}: 实验标记不一致`);
+    assert.deepEqual(b.links, a.links, `${en.slug}: 站内链接目标不一致`);
+    assert.deepEqual(b.anchors, a.anchors, `${en.slug}: 页内锚点不一致`);
+    const missing = a.numbers.filter(n => !b.numbers.includes(n));
+    assert.deepEqual(missing, [], `${en.slug}: 译文缺少这些数字 ${missing.join(', ')}`);
+    assert(!en.text.includes('**'), `${en.slug}: 未渲染的 Markdown 强调`);
+    assert(!en.text.includes(']('), `${en.slug}: 未渲染的 Markdown 链接`);
+  }
+  assert(pairs.length > 0, '没有找到任何译文对照');
+});
+
+test('a blank line inside an svg block is rejected', async () => {
+  await bilingualRoot(async (root, dir) => {
+    const withSvg = `---
+slug: intro
+title: "导读"
+collection: cme295
+lecture: 1
+description: "d"
+order: 10
+kind: lesson
+status: published
+tags: [Intro]
+---
+
+<section><h2 id="part-2">一</h2>
+<svg viewBox="0 0 10 10"><rect width="10" height="10"/>
+
+<circle cx="5" cy="5" r="2"/></svg>
+</section>
+`;
+    await fs.writeFile(path.join(dir, 'intro.md'), withSvg);
+    await assert.rejects(loadContent(root), /<svg> 块内出现空行/);
+  });
+});
+
+test('lecture-1 base diagrams exist in both languages and appear on the labs page', async () => {
+  const root = fileURLToPath(new URL('../', import.meta.url));
+  const data = await loadContent(root);
+  const { labs: labsPage } = await import('../site/lib/pages.mjs');
+  for (const lang of ['zh', 'en']) {
+    const page = labsPage(data, lang);
+    for (const slug of ['basics', 'tokens', 'mask', 'attention']) {
+      const article = data.articles.find(a => a.collection === 'cme295' && a.slug === slug && a.lang === lang);
+      assert(article, `${lang}: 缺少第一讲图解文章 ${slug}`);
+      assert(page.includes(slug + '.html'), `${lang} 实验室页缺少 ${slug} 卡片`);
+    }
+  }
 });
