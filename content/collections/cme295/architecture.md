@@ -2,6 +2,7 @@
 slug: architecture
 title: "编码器与解码器"
 collection: cme295
+lecture: 1
 description: "谁读源句、谁写译文，以及两种注意力如何配合。"
 order: 90
 kind: lesson

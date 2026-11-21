@@ -2,6 +2,7 @@
 slug: embedding
 title: "词元表示 · Token representation"
 collection: cme295
+lecture: 1
 description: "从离散编号到可学习向量，区分初始嵌入与上下文表示。"
 order: 50
 kind: lesson

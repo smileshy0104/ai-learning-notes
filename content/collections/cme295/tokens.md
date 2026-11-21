@@ -2,6 +2,7 @@
 slug: tokens
 title: "分词、词表与特殊 Token"
 collection: cme295
+lecture: 1
 description: "粒度选择、BPE、BOS、EOS 与填充。"
 order: 40
 kind: lesson

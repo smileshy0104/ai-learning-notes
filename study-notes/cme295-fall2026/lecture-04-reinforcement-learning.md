@@ -288,7 +288,7 @@ E_a~π[b(s)∇lnπ(a|s)]
 沿用两回答Bernoulli策略，θ=0时概率各0.5、log概率梯度分别+0.5和−0.5。奖励改为good=101、bad=100。
 
 
-交互图解（l4-baseline）见[对应章节源文档](../../content/collections/cme295/l4-baselines.md)，构建网站后可在该章节操作。
+交互图解「实验：101与100的奖励，减去基线后梯度怎样变化？」见[对应章节源文档](../../content/collections/cme295/l4-baselines.md)，构建网站后可在该章节操作。
 
 
 不减基线：g_good=50.5、g_bad=−50，期望0.25，方差2525.0625。
@@ -465,7 +465,7 @@ J_clip = E_old[min(ρ_t Â_t, clip(ρ_t,1−ε,1+ε) Â_t)]
 - min选保守一项，且我们是**最大化**J。
 
 
-交互图解（l4-ppo-clip）见[对应章节源文档](../../content/collections/cme295/l4-ppo.md)，构建网站后可在该章节操作。
+交互图解「实验：同样的比率，优势正负决定裁剪在哪边」见[对应章节源文档](../../content/collections/cme295/l4-ppo.md)，构建网站后可在该章节操作。
 
 
 #### 为什么不是上下都平掉？
@@ -699,7 +699,7 @@ PDF第95–110页观察部分RL训练中正确率趋稳、平均回答长度却�
 同一组两条回答长度2与6：
 
 
-交互图解（l4-length-weight）见[对应章节源文档](../../content/collections/cme295/l4-grpo-refinements.md)，构建网站后可在该章节操作。
+交互图解「实验：两条回答长度2与6，每个token拿到多大权重？」见[对应章节源文档](../../content/collections/cme295/l4-grpo-refinements.md)，构建网站后可在该章节操作。
 
 
 逐序列平均时每token系数是0.25与0.0833；整条回答总权重均0.5。全批token平均时每个token系数0.125，回答总权重分别0.25与0.75。
@@ -785,7 +785,7 @@ Reverse KL：KL(S∥T)=Σ_i S_i ln(S_i/T_i)
 - KL(S∥T)：学生把质量放到教师很不支持的区域，会受较大惩罚。
 
 
-交互图解（l4-kl-direction）见[对应章节源文档](../../content/collections/cme295/l4-opd.md)，构建网站后可在该章节操作。
+交互图解「实验：教师支持两端、反对中间时，学生放错概率会怎样？」见[对应章节源文档](../../content/collections/cme295/l4-opd.md)，构建网站后可在该章节操作。
 
 
 教师[0.49,0.02,0.49]有两个主要候选。学生[0.89,0.02,0.09]偏向一端；学生[0.3,0.4,0.3]把很多质量放在教师不支持的中间。

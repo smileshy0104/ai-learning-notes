@@ -71,7 +71,19 @@ npm run new:article -- rag introduction "RAG 入门"
 
 原 HTML 的 13 个正式内容区块均迁移为单独文章：Introduction、基础工具箱、N-gram、Tokenization、词元表示、神经网络、自注意力、核心组件、Encoder/Decoder、Mask、端到端示例、展望、深入补充。
 
-原“学习地图”是导航页，没有重复成为文章。`catalog.chapters` 保留每个章节的 slug，构建发现缺章会直接报错；文章内容、顺序和标题以 Markdown 元数据为准。
+原“学习地图”是导航页，没有重复成为文章。`catalog.chapters` 是供 `tools/import-lecture.mjs` 使用的旧清单，构建会断言它与 `catalog.lectures` 中第一讲完全一致，因此两份清单不会漂移；文章内容、顺序和标题以 Markdown 元数据为准。
+
+构建还会检查：每篇文章都必须在所属讲次的 `catalog.lectures[].chapters` 注册（未注册的文章不会出现在课程目录里，所以直接报错而不是静默隐藏），`lecture` 字段必须显式写出，不得依赖默认值。
+
+## 交互实验清单
+
+实验在正文中写成 `<!-- lab:l6-metrics -->`，讲次前缀必填。`loadContent` 渲染实验、读取其标题段（`.l<N>-title` 或 `.l<N>-lab-title`），把结果收集到 `data.labs`；`labs.html` 由这份注册表按讲次生成，新增实验不需要改页面代码。每页只加载本讲 `lecture<N>.css`，第一讲继续使用 `lesson.css`。
+
+实验模板必须单行输出：标记会在 Markdown 解析前被替换，模板里出现空行会让 `marked` 把解说当正文重新解析，构建会直接拒绝含换行的实验输出。新增实验的解说文字应写在 Markdown 正文里，渲染模块只负责计算数值和填充面板。
+
+各讲共用的不变量放在 `tools/lecture-contract.mjs`：已发布章节数、未渲染的 Markdown 强调、无证据的掌握声明、实验注册与 `labs.html` 收录、生成笔记的相对链接、原始资料的页数与 SHA-256。章节数、页数和笔记文件名都从 `catalog.lectures` 的 `chapters`、`pages`、`note` 读取，因此新增讲次只需调用 `registerLectureContract({number, labs})`，并在 catalog 登记该讲。第一讲没有 `note` 字段，合并笔记仍由人工维护，导出脚本会明确报错而不是覆盖它。
+
+`tools/materials.test.mjs` 跨讲检查全部归档：每个文件的字节数与 SHA-256、每讲一个 PDF 与一个文字稿、README 必须列出文件名。
 
 `tools/import-lecture.mjs` 为一次性迁移脚本：
 

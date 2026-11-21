@@ -170,7 +170,7 @@ u_new=αu_old+exp(s_new−m_new)v_new
 α把旧累积值从旧刻度换到新刻度。只缩放新项、不缩放旧项，会把不同比例尺的数混加。
 
 
-交互图解（l5-online）见[对应章节源文档](../../content/collections/cme295/l5-flash.md)，构建网站后可在该章节操作。
+交互图解「实验：只保留当前刻度与累积值」见[对应章节源文档](../../content/collections/cme295/l5-flash.md)，构建网站后可在该章节操作。
 
 
 上例三步为：(m,ℓ,u)=(0,1,2)、(ln2,1.5,5)、(ln4,1.75,10.5)，最终6。整体得分加1000，权重与结果都不变，稳定算法也不必计算exp(1000)。
@@ -296,7 +296,7 @@ ZeRO = Zero Redundancy Optimizer。各卡仍为自己的数据执行完整模型
 | ZeRO-3 | (2P+2P+12P)/D |
 
 
-交互图解（l5-zero）见[对应章节源文档](../../content/collections/cme295/l5-zero.md)，构建网站后可在该章节操作。
+交互图解「实验：1B参数、4卡，每卡长期训练状态」见[对应章节源文档](../../content/collections/cme295/l5-zero.md)，构建网站后可在该章节操作。
 
 
 P=1 billion、D=4：每卡分别16、7、5.5、4 GB。别误读成整个集群只需4 GB；ZeRO-3理想状态总量仍是16 GB，只是不再每卡复制一份。
@@ -428,7 +428,7 @@ W：内存带宽，bytes/s
 这是乐观模型，假定可有效重叠等，不计所有调度、网络和同步；预测上界不是实测保证。
 
 
-交互图解（l5-roofline）见[对应章节源文档](../../content/collections/cme295/l5-latency-roofline.md)，构建网站后可在该章节操作。
+交互图解「实验：100 TFLOP/s算力、1 TB/s带宽」见[对应章节源文档](../../content/collections/cme295/l5-latency-roofline.md)，构建网站后可在该章节操作。
 
 
 教学硬件C=100 TFLOP/s、W=1 TB/s，ridge point为C/W=100 FLOPs/byte。I=10时带宽上限10 TFLOP/s，I=200时计算上限100 TFLOP/s。
@@ -507,7 +507,7 @@ PDF第111–120页。把逻辑token位置划成固定大小块，每条请求维
 不是把模型attention变成稀疏：逻辑上所有允许历史token仍要被关注，只是物理地址管理更灵活。
 
 
-交互图解（l5-paging）见[对应章节源文档](../../content/collections/cme295/l5-kv-paging.md)，构建网站后可在该章节操作。
+交互图解「实验：有效长度5、9、13，换块大小会怎样？」见[对应章节源文档](../../content/collections/cme295/l5-kv-paging.md)，构建网站后可在该章节操作。
 
 
 教学请求长度[5,9,13]，有效27 token；块长4时分配[8,12,16]，共36个token槽、尾部浪费9；块长8时[8,16,16]，共40槽、浪费13。一个token槽包含其对应层与KV信息，不是一个标量byte。
@@ -620,7 +620,7 @@ draft本身通常仍自回归，只是更便宜；target验证不是判断整句
 已接受分支已经贡献一部分概率质量。再次直接从T采会重复分配，必须从尚未被接受分支覆盖的残差里补齐。
 
 
-交互图解（l5-speculative）见[对应章节源文档](../../content/collections/cme295/l5-speculative.md)，构建网站后可在该章节操作。
+交互图解「实验：拒绝以后从哪里重采？」见[对应章节源文档](../../content/collections/cme295/l5-speculative.md)，构建网站后可在该章节操作。
 
 
 教学三候选：D=[0.6,0.3,0.1]，T=[0.3,0.4,0.3]。

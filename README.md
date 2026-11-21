@@ -20,7 +20,7 @@ npm start
 - `/index.html`：统一首页
 - `/courses.html`：课程与框架专题
 - `/library.html`：知识库与正文搜索
-- `/labs.html`：可交互实验
+- `/labs.html`：可交互实验（清单从正文中的实验标记自动收集，按讲次分组）
 - `/map.html`：建议的学习路径
 - `/collections/cme295.html`：按第一至第六讲分组的课程目录
 - `/topics/cme295/l2-overview.html`：第二讲导读与页码索引
@@ -73,6 +73,7 @@ site/
   serve-site.mjs                # 本地预览
   check-site.mjs                # 页面、导航、文件、锚点与索引检查
   new-article.mjs               # 新建草稿
+  lecture-contract.mjs          # 各讲共用的覆盖、实验、笔记与原始资料校验
  tests/site.spec.mjs            # 桌面/手机、有/无脚本验收
  deploy/nginx.conf              # 静态服务配置
 ```

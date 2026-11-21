@@ -26,9 +26,9 @@ tags: [BERT, GPT, MLM, NSP, 预训练]
 
 BERT = Bidirectional Encoder Representations from Transformers，课件介绍 2018 年论文。
 
-**定义：**利用 Transformer 编码器，让一个位置同时参考左右文，得到上下文表示。句首常加入 `[CLS]`，句子边界使用 `[SEP]`。
+**定义**：利用 Transformer 编码器，让一个位置同时参考左右文，得到上下文表示。句首常加入 `[CLS]`，句子边界使用 `[SEP]`。
 
-**为什么需要：**“bank”在河岸和银行语境下需要不同表示。仅查固定词向量表不能直接区分当前含义；编码器使用整段上下文更新表示。
+**为什么需要**：“bank”在河岸和银行语境下需要不同表示。仅查固定词向量表不能直接区分当前含义；编码器使用整段上下文更新表示。
 
 <div class="flow"><span class="chip">[CLS] 这只熊 很 可爱 [SEP]</span><span class="arrow">→ 编码器 →</span><span class="chip">各位置的上下文向量</span><span class="arrow">→ [CLS] 接分类层 →</span><span class="chip">正面 / 负面</span></div>
 
@@ -50,7 +50,7 @@ MLM = Masked Language Modeling。它是预训练代理任务：目标不是最�
 L = [−ln(0.6) − ln(0.5)] / 2 ≈ 0.602
 ```
 
-**补充原论文细节：**经典 BERT 选择约 15% 的 token 作为预测位置，其中约 80% 换 `[MASK]`、10% 换随机 token、10% 保持原样。不是所有被选位置都显示 `[MASK]`，这是缓解训练与实际输入差异的一部分。课件只概括了破坏与恢复过程。
+**补充原论文细节**：经典 BERT 选择约 15% 的 token 作为预测位置，其中约 80% 换 `[MASK]`、10% 换随机 token、10% 保持原样。不是所有被选位置都显示 `[MASK]`，这是缓解训练与实际输入差异的一部分。课件只概括了破坏与恢复过程。
 
 ## 4. NSP：两个句子原本相邻吗？
 

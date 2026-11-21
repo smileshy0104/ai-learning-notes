@@ -1,10 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import fs from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
-import path from 'node:path';
-import crypto from 'node:crypto';
-import { loadContent } from '../site/lib/content.mjs';
+import { registerLectureContract } from './lecture-contract.mjs';
 import { meanNll,bitsPerByte,matmul,rewardPair,dpoPair,groupAdvantages,klDivergence,softCrossEntropy,bestFitDecreasing,lossExample,renderLecture3Lab } from '../site/lib/lecture3-examples.mjs';
 const near=(actual,expected,tolerance=1e-10)=>assert(Math.abs(actual-expected)<tolerance,`${actual} != ${expected}`);
 
@@ -64,21 +60,4 @@ test('lecture three interactive components have a default and all preset panels'
  }
  assert.throws(()=>renderLecture3Lab('unknown'));
 });
-test('lecture three chapters render Markdown emphasis and preserve all required sections',async()=>{
- const root=fileURLToPath(new URL('../',import.meta.url));
- const data=await loadContent(root);
- const chapters=data.articles.filter(a=>a.collection==='cme295'&&a.lecture===3);
- assert.equal(chapters.length,12);
- for(const chapter of chapters) assert(!chapter.text.includes('**'),`${chapter.slug}: unrendered Markdown emphasis`);
-});
-test('all material manifest entries exist with unchanged content hashes',async()=>{
- const root=fileURLToPath(new URL('../materials/',import.meta.url));
- const manifest=JSON.parse(await fs.readFile(path.join(root,'manifest.json'),'utf8'));
- for(const item of manifest.files){
-  const bytes=await fs.readFile(path.join(root,item.path));
-  assert.equal(bytes.length,item.bytes,item.path);
-  assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),item.sha256,item.path);
- }
- const lecture=manifest.files.filter(item=>item.lecture===3);
- assert.equal(lecture.length,2);assert.equal(lecture.find(item=>item.path.endsWith('.pdf')).pages,165);
-});
+registerLectureContract({number:3, labs:3});

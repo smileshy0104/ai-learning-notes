@@ -10,7 +10,7 @@ const output = path.join(root, 'dist');
 const data = await loadContent(root);
 const pages = new Map([
  ['index.html',home(data)],['courses.html',courses(data)],['library.html',library(data)],
- ['labs.html',labs()],['map.html',mapPage(data)],
+ ['labs.html',labs(data)],['map.html',mapPage(data)],
 ]);
 for (const c of data.collections) pages.set(`collections/${c.slug}.html`,collectionPage(data,c));
 for (const a of data.articles) pages.set(a.url,articlePage(data,a));

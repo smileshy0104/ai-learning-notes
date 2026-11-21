@@ -2,6 +2,7 @@
 slug: attention
 title: "自注意力 · Self-attention"
 collection: cme295
+lecture: 1
 description: "Q/K/V、矩阵维度、手算过程与可交互的权重实验。"
 order: 70
 kind: lesson

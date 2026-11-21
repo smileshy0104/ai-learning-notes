@@ -2,6 +2,7 @@
 slug: beyond-lecture
 title: "从这一讲到现代大模型"
 collection: cme295
+lecture: 1
 description: "三种架构与模型训练、应用之间的连接。"
 order: 120
 kind: lesson

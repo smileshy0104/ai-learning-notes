@@ -1,9 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import fs from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
-import crypto from 'node:crypto';
-import {loadContent} from '../site/lib/content.mjs';
+import { registerLectureContract } from './lecture-contract.mjs';
 import {onlineAttention,zeroBytes,roofline,pagedSlots,speculativeMass,kvBytes,expectedSpeculativeTokens,renderLecture5Lab} from '../site/lib/lecture5-examples.mjs';
 const near=(actual,expected,tolerance=1e-9)=>assert(Math.abs(actual-expected)<tolerance,`${actual} != ${expected}`);
 
@@ -82,15 +79,4 @@ test('all lecture five static labs have one default and every named preset',()=>
  }
  assert.throws(()=>renderLecture5Lab('unknown'));
 });
-test('lecture five coverage, source archives and generated note links are consistent',async()=>{
- const root=fileURLToPath(new URL('../',import.meta.url)),data=await loadContent(root);
- const articles=data.articles.filter(a=>a.collection==='cme295'&&a.lecture===5);assert.equal(articles.length,12);
- for(const a of articles){assert(!a.text.includes('**'),`${a.slug}: unrendered emphasis`);assert(!/视觉核对|已读完/.test(a.text),a.slug);}
- const noteUrl=new URL('../study-notes/cme295-fall2026/lecture-05-llm-systems.md',import.meta.url);
- const notes=await fs.readFile(noteUrl,'utf8');assert(!/127\.0\.0\.1|http:\/\/localhost/.test(notes));
- for(const [,link] of notes.matchAll(/\]\(([^)]+)\)/g))if(!/^(https?:|#)/.test(link))await fs.access(new URL(link.split('#')[0],noteUrl));
- const manifest=JSON.parse(await fs.readFile(new URL('../materials/manifest.json',import.meta.url),'utf8'));
- const materials=manifest.files.filter(item=>item.lecture===5);assert.equal(materials.length,2);
- assert.equal(materials.find(item=>item.path.endsWith('.pdf')).pages,156);
- for(const item of materials){const bytes=await fs.readFile(new URL('../materials/'+item.path,import.meta.url));assert.equal(bytes.length,item.bytes);assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),item.sha256);}
-});
+registerLectureContract({number:5, labs:5});

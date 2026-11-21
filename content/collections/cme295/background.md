@@ -2,6 +2,7 @@
 slug: background
 title: "前置动机：从计数到学习表示"
 collection: cme295
+lecture: 1
 description: "N-gram、神经语言模型与向量相似度。"
 order: 30
 kind: lesson

@@ -203,6 +203,7 @@
       "title": "Large Language Models",
       "description": "模型家族、规模与专家路由、现代架构、解码策略以及提示与推理。",
       "pages": 138,
+      "note": "lecture-02-large-language-models.md",
       "chapters": [
         "l2-overview",
         "l2-model-families",
@@ -222,6 +223,7 @@
       "title": "LLM training",
       "description": "预训练、数据与长上下文、SFT 与 LoRA、偏好优化、推理训练、蒸馏及端到端训练案例。",
       "pages": 165,
+      "note": "lecture-03-llm-training.md",
       "chapters": [
         "l3-overview",
         "l3-pretraining",
@@ -243,6 +245,7 @@
       "title": "Reinforcement Learning with LLMs",
       "description": "从强化学习与奖励建模到策略梯度、PPO、GRPO及On-policy蒸馏，按动机逐步推导目标。",
       "pages": 135,
+      "note": "lecture-04-reinforcement-learning.md",
       "chapters": [
         "l4-overview",
         "l4-rl-rewards",
@@ -263,6 +266,7 @@
       "title": "LLM Systems",
       "description": "从GPU内存与FlashAttention到分布式训练、推理瓶颈、KV缓存管理和推测解码。",
       "pages": 156,
+      "note": "lecture-05-llm-systems.md",
       "chapters": [
         "l5-overview",
         "l5-hardware",
@@ -284,6 +288,7 @@
       "title": "AI Agents",
       "description": "从RAG、检索评估与工具调用到MCP、Harness、ReAct、记忆、Coding Agents及多Agent协作。",
       "pages": 152,
+      "note": "lecture-06-ai-agents.md",
       "chapters": [
         "l6-overview",
         "l6-rag",

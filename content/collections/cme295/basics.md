@@ -2,6 +2,7 @@
 slug: basics
 title: "基础工具箱：模型怎样学习"
 collection: cme295
+lecture: 1
 description: "14 个基础概念，各配一个例子，走完一次前向、反向与更新。"
 order: 20
 kind: lesson

@@ -2,6 +2,7 @@
 slug: introduction
 title: "导读 · Introduction"
 collection: cme295
+lecture: 1
 description: "课程目标、模型发展与本讲学习顺序。"
 order: 10
 kind: lesson

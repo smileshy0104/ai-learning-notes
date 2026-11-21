@@ -82,7 +82,7 @@ R(φ) = [[cosφ, −sinφ],
 R(φ) [x,y]ᵀ = [x cosφ−y sinφ, x sinφ+y cosφ]ᵀ
 ```
 
-**例子：**向量 [1,0] 旋转 90° 得 [0,1]；长度仍为 1。真实位置角通常以弧度计算，此处用度数只是帮助理解几何。
+**例子**：向量 [1,0] 旋转 90° 得 [0,1]；长度仍为 1。真实位置角通常以弧度计算，此处用度数只是帮助理解几何。
 
 <svg viewBox="0 0 520 220" role="img" aria-label="二维向量旋转：原向量朝右，旋转九十度后朝上" style="width:100%;max-width:520px"><defs><marker id="rope-arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0 0L6 3L0 6Z" fill="#326947"/></marker></defs><g stroke="#a4b6a3"><path d="M80 175H435M110 195V20"/></g><g stroke="#326947" stroke-width="3" marker-end="url(#rope-arrow)"><path d="M110 175H280"/><path d="M110 175V55"/></g><path d="M180 175A70 70 0 0 0 110 105" fill="none" stroke="#b98836" stroke-dasharray="5 3"/><g fill="#24382d" font-size="15"><text x="290" y="180">[1,0]，原方向</text><text x="125" y="55">[0,1]，旋转后</text><text x="170" y="115">90°</text></g></svg>
 
@@ -99,7 +99,7 @@ q̃ₘᵀ k̃ₙ = qₘᵀ R(mθ)ᵀ R(nθ) kₙ
 
 因为旋转的转置相当于反向旋转，两个绝对角度相消，剩相对角度。
 
-**手算例子：**θ=30°，m=1、n=3，q=k=[1,0]。
+**手算例子**：θ=30°，m=1、n=3，q=k=[1,0]。
 
 ```text
 q̃=[cos30°,sin30°]≈[0.8660,0.5]

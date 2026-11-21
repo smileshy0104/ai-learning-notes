@@ -14,8 +14,8 @@ tags: [Pre-Norm, Post-Norm, LayerNorm, RMSNorm]
 
 PDF 第 84–88 页讨论两条彼此独立的变化：
 
-1. **位置：**归一化在残差相加之前还是之后？Pre-Norm / Post-Norm。
-2. **公式：**减均值再缩放，还是只按均方根缩放？LayerNorm / RMSNorm。
+1. **位置**：归一化在残差相加之前还是之后？Pre-Norm / Post-Norm。
+2. **公式**：减均值再缩放，还是只按均方根缩放？LayerNorm / RMSNorm。
 
 “Pre-Norm 就是 RMSNorm”是错误的。一个讨论放置顺序，一个讨论具体算子。
 
@@ -30,7 +30,7 @@ Pre-Norm： y = x + f(Norm(x))
 
 <div class="flow"><span class="chip">Post：x → f → 与 x 相加 → Norm</span><span class="chip">Pre：x → Norm → f → 与 x 相加</span></div>
 
-**为什么 Pre-Norm 经常用于深层模型？**它让残差主通路上的 x 不必在每个子层后穿过归一化，能改善梯度传递与训练稳定性。
+**为什么 Pre-Norm 经常用于深层模型**？它让残差主通路上的 x 不必在每个子层后穿过归一化，能改善梯度传递与训练稳定性。
 
 但“梯度永远无损”“从此不需要 warmup”都不是保证。初始化、优化器、训练精度、深度以及其他结构仍影响训练。
 

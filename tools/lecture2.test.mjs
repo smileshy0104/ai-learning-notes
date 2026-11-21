@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { registerLectureContract } from './lecture-contract.mjs';
 import { temperatureDistribution, temperatures, candidates, nucleus, rotate, dot, kvBytes, auxiliaryLoss, rmsNorm, renderLecture2Lab } from '../site/lib/lecture2-examples.mjs';
 const near=(a,b,tolerance=1e-10)=>assert(Math.abs(a-b)<tolerance,`${a} != ${b}`);
 
@@ -50,3 +51,5 @@ test('static labs have default selected state and all named panels',()=>{
  }
  assert.throws(()=>renderLecture2Lab('not-a-lab'));
 });
+
+registerLectureContract({number:2, labs:3});

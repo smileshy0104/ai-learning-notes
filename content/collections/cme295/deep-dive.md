@@ -2,6 +2,7 @@
 slug: deep-dive
 title: "补充：规模、训练与现代架构"
 collection: cme295
+lecture: 1
 description: "微调、提示、缩放经验与现代模型的组件变化。"
 order: 130
 kind: lesson

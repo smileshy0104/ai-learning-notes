@@ -2,6 +2,7 @@
 slug: mask
 title: "因果掩码 · Causal masking"
 collection: cme295
+lecture: 1
 description: "预测未来时为什么不能偷看答案，训练为何能并行。"
 order: 100
 kind: lesson

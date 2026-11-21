@@ -1,9 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import fs from 'node:fs/promises';
-import crypto from 'node:crypto';
-import {fileURLToPath} from 'node:url';
-import {loadContent} from '../site/lib/content.mjs';
+import { registerLectureContract } from './lecture-contract.mjs';
 import {retrievalMetrics,chunkRanges,cosine,sharedPrefixLength,cachedInputCost,toolDecision,fahrenheitToCelsius,renderLecture6Lab} from '../site/lib/lecture6-examples.mjs';
 const near=(a,b,tolerance=1e-9)=>assert(Math.abs(a-b)<tolerance,`${a} != ${b}`);
 
@@ -65,15 +62,4 @@ test('lecture six labs have all presets and a single checked default without net
  }
  assert.throws(()=>renderLecture6Lab('unknown'));
 });
-test('lecture six coverage, rendering, note links and archived bytes are consistent',async()=>{
- const data=await loadContent(fileURLToPath(new URL('../',import.meta.url)));
- const articles=data.articles.filter(a=>a.collection==='cme295'&&a.lecture===6);assert.equal(articles.length,13);
- for(const a of articles){assert(!a.text.includes('**'),`${a.slug}: unrendered emphasis`);assert(!/视觉核对|已读完/.test(a.text),a.slug);}
- const note=new URL('../study-notes/cme295-fall2026/lecture-06-ai-agents.md',import.meta.url);
- const text=await fs.readFile(note,'utf8');assert(!/127\.0\.0\.1|http:\/\/localhost/.test(text));
- for(const [,link] of text.matchAll(/\]\(([^)]+)\)/g))if(!/^(https?:|#)/.test(link))await fs.access(new URL(link.split('#')[0],note));
- const manifest=JSON.parse(await fs.readFile(new URL('../materials/manifest.json',import.meta.url),'utf8'));
- const materials=manifest.files.filter(item=>item.lecture===6);assert.equal(materials.length,2);
- assert.equal(materials.find(item=>item.path.endsWith('.pdf')).pages,152);
- for(const item of materials){const bytes=await fs.readFile(new URL('../materials/'+item.path,import.meta.url));assert.equal(bytes.length,item.bytes);assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),item.sha256);}
-});
+registerLectureContract({number:6, labs:5});

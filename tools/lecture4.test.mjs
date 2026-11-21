@@ -1,8 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import fs from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
-import { loadContent } from '../site/lib/content.mjs';
+import { registerLectureContract } from './lecture-contract.mjs';
 import {sigmoid,bernoulliGradient,importanceExpectation,clippedSurrogate,kl,nonnegativeKlSample,normalizationWeights,gae,renderLecture4Lab} from '../site/lib/lecture4-examples.mjs';
 const near=(a,b,tolerance=1e-9)=>assert(Math.abs(a-b)<tolerance,`${a} != ${b}`);
 
@@ -63,19 +61,4 @@ test('static lecture four labs render complete presets and valid default choices
  }
  assert.throws(()=>renderLecture4Lab('unknown'));
 });
-test('lecture four covers the manifest and has no unrendered emphasis or maintenance prose',async()=>{
- const root=fileURLToPath(new URL('../',import.meta.url));const data=await loadContent(root);
- const articles=data.articles.filter(a=>a.collection==='cme295'&&a.lecture===4);
- assert.equal(articles.length,11);
- for(const a of articles){assert(!a.text.includes('**'),a.slug);assert(!a.text.includes('视觉核对'),a.slug);}
- const notes=await fs.readFile(new URL('../study-notes/cme295-fall2026/lecture-04-reinforcement-learning.md',import.meta.url),'utf8');
- assert(!/127\.0\.0\.1|http:\/\/localhost/.test(notes));
- for(const [,link] of notes.matchAll(/\]\(([^)]+)\)/g)) {
-  if(/^(https?:|#)/.test(link))continue;
-  await fs.access(new URL(link.split('#')[0],new URL('../study-notes/cme295-fall2026/lecture-04-reinforcement-learning.md',import.meta.url)));
- }
- const manifest=JSON.parse(await fs.readFile(new URL('../materials/manifest.json',import.meta.url),'utf8'));
- const materials=manifest.files.filter(item=>item.lecture===4);
- assert.equal(materials.length,2);
- assert.equal(materials.find(item=>item.path.endsWith('.pdf')).pages,135);
-});
+registerLectureContract({number:4, labs:4});

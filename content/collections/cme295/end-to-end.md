@@ -2,6 +2,7 @@
 slug: end-to-end
 title: "端到端翻译示例"
 collection: cme295
+lecture: 1
 description: "从一句英文开始，跟踪分词、嵌入、编码与逐步生成。"
 order: 110
 kind: lesson

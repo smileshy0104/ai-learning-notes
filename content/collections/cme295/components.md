@@ -2,6 +2,7 @@
 slug: components
 title: "Transformer 的核心组件"
 collection: cme295
+lecture: 1
 description: "位置、多头、FFN、残差、归一化、Dropout 与标签平滑。"
 order: 80
 kind: lesson

@@ -2,6 +2,7 @@
 slug: neural-nets
 title: "Word2Vec、RNN 与 LSTM"
 collection: cme295
+lecture: 1
 description: "从浅层网络到序列建模，理解早期注意力的动机。"
 order: 60
 kind: lesson
