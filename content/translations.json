@@ -1,17 +1,8 @@
 {
   "pending": [
-    "cme295/l3-data",
     "cme295/l3-distillation",
-    "cme295/l3-dpo",
     "cme295/l3-end-to-end",
-    "cme295/l3-lora",
-    "cme295/l3-overview",
-    "cme295/l3-preferences",
-    "cme295/l3-pretraining",
-    "cme295/l3-reasoning",
     "cme295/l3-review",
-    "cme295/l3-rlhf",
-    "cme295/l3-sft",
     "cme295/l4-baselines",
     "cme295/l4-grpo",
     "cme295/l4-grpo-refinements",

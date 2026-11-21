@@ -215,7 +215,7 @@ test('english edition mirrors the chinese site and switches language',async({bro
  await expect(page.locator('html')).toHaveAttribute('lang','zh-CN');
  await expect(page.locator('a.lang-switch')).toHaveCount(1);
  // 尚未翻译的章节不应出现语言切换
- await page.goto('http://127.0.0.1:18766/topics/cme295/l3-overview.html');
+ await page.goto('http://127.0.0.1:18766/topics/cme295/l4-overview.html');
  await expect(page.locator('a.lang-switch')).toHaveCount(0);
  await page.goto('http://127.0.0.1:18766/en/library.html');
  await page.locator('#knowledge-query').fill('attention');
