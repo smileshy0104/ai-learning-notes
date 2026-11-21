@@ -74,6 +74,7 @@ site/
   check-site.mjs                # 页面、导航、文件、锚点与索引检查
   new-article.mjs               # 新建草稿
   lecture-contract.mjs          # 各讲共用的覆盖、实验、笔记与原始资料校验
+  make-icons.mjs                # 由 icon.svg 生成 32px / 180px 图标
  tests/site.spec.mjs            # 桌面/手机、有/无脚本验收
  deploy/nginx.conf              # 静态服务配置
 ```
@@ -103,7 +104,7 @@ docker build -t ai-learning-notes .
 docker run --rm -p 8080:80 ai-learning-notes
 ```
 
-Docker 运行层仅使用 Nginx，访问 <http://127.0.0.1:8080/>。当前环境 Docker daemon 未启动，因此镜像构建与容器运行未验收；本地 HTTP 预览及浏览器检查已通过。远程服务器尚未发布。
+Docker 运行层仅使用 Nginx（配置里已引入 `mime.types`，否则 `nosniff` 会让 CSS/JS 失效），访问 <http://127.0.0.1:8080/>。当前环境 Docker daemon 未启动，因此镜像构建与容器运行未验收；本地 HTTP 预览及浏览器检查已通过。远程服务器尚未发布。
 
 ## 内容边界
 

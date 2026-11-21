@@ -10,6 +10,8 @@ for(const javaScriptEnabled of [true,false]) for(const width of [1440,390]) {
   for(const url of ['index.html','courses.html','library.html','map.html','labs.html',...manifest.articles.map(a=>a.url)]) {
    await page.goto(`http://127.0.0.1:18766/${url}`);
    await expect(page.getByRole('navigation',{name:'主导航'})).toBeVisible();
+   await expect(page.locator('link[rel="icon"][type="image/svg+xml"]')).toHaveCount(1);
+   await expect(page.locator('link[rel="apple-touch-icon"]')).toHaveCount(1);
    await expect(page.locator('main h1')).toHaveCount(1);
    const sizes=await page.evaluate(()=>({full:document.documentElement.scrollWidth,view:innerWidth}));
    expect(sizes.full,`${url}: document overflow`).toBeLessThanOrEqual(sizes.view+1);
@@ -184,4 +186,12 @@ test('system dark preference is readable without scripts',async({browser})=>{
  await page.locator('label[for=upd-after]').click();
  await expect(page.locator('.panel-upd-after')).toBeVisible();
  await context.close();
+});
+
+test('site icons are served with the right types',async({request})=>{
+ for(const [file,type] of [['assets/icon.svg','svg'],['assets/icon-32.png','png'],['assets/icon-180.png','png']]) {
+  const response=await request.get(`http://127.0.0.1:18766/${file}`);
+  expect(response.status(),file).toBe(200);
+  expect(response.headers()['content-type'],file).toContain(type);
+ }
 });

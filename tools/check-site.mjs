@@ -11,7 +11,7 @@ for(const file of manifest.pages) {
  const source=await fs.readFile(path.join(root,file),'utf8');
  const document=parse(source);
  const ids=new Set(),refs=[];
- let nav=[],githubLinks=[];
+ let nav=[],githubLinks=[],iconLinks=[],touchIcons=[];
  function walk(node,inNav=false) {
   const attrs=Object.fromEntries((node.attrs??[]).map(a=>[a.name,a.value]));
   if(attrs.id) {assert(!ids.has(attrs.id),`${file}: duplicate ID ${attrs.id}`);ids.add(attrs.id);}
@@ -21,7 +21,11 @@ for(const file of manifest.pages) {
    if(attrs.class==='icon-link') githubLinks.push(attrs.href);
   }
   if(node.tagName==='script' && attrs.src) refs.push(attrs.src);
-  if(node.tagName==='link' && attrs.href) refs.push(attrs.href);
+  if(node.tagName==='link' && attrs.href) {
+   refs.push(attrs.href);
+   if(attrs.rel==='icon') iconLinks.push(attrs.href);
+   if(attrs.rel==='apple-touch-icon') touchIcons.push(attrs.href);
+  }
   const mainNav=inNav || (node.tagName==='nav'&&attrs['aria-label']==='主导航');
   if(mainNav && node.tagName==='a') nav.push(path.posix.basename(attrs.href));
   node.childNodes?.forEach(n=>walk(n,mainNav));
@@ -33,6 +37,10 @@ for(const file of manifest.pages) {
  const bodyEl=htmlEl?.childNodes.find(n=>n.tagName==='body');
  const bodyChildren=(bodyEl?.childNodes??[]).filter(n=>n.tagName).map(n=>n.tagName+'.'+((n.attrs??[]).find(a=>a.name==='class')?.value??''));
  assert.deepEqual(bodyChildren,['a.skip','div.wrap'],`${file}: body 直接子元素异常，内容可能跑到了 .wrap 之外`);
+ assert.equal(iconLinks.length,2,`${file}: expected an SVG icon and a 32px PNG fallback`);
+ assert(iconLinks.some(href=>href.endsWith('icon.svg')),`${file}: missing SVG icon`);
+ assert(iconLinks.some(href=>href.endsWith('icon-32.png')),`${file}: missing PNG icon fallback`);
+ assert.equal(touchIcons.length,1,`${file}: expected exactly one apple-touch-icon`);
  assert.equal(githubLinks.length,1,`${file}: expected exactly one GitHub entry`);
  assert(/^https:\/\/github\.com\/[^/]+\/[^/]+$/.test(githubLinks[0]),`${file}: unexpected GitHub entry ${githubLinks[0]}`);
  documents.set(file,{source,ids,refs});

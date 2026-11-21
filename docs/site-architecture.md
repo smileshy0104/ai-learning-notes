@@ -89,6 +89,15 @@ npm run new:article -- rag introduction "RAG 入门"
 
 切换按钮默认带 `hidden`，由脚本显示，因此禁用脚本时不会出现一个无效控件。CSP 为 `script-src 'self'`，主题脚本必须是外部文件，且在首屏前同步加载以避免闪烁。
 
+## 站点图标
+
+`site/assets/icon.svg` 是唯一源文件：绿色圆角块加 `a.` 字母标（与顶栏 `brand-mark` 同源）。位图由 `npm run icons` 从该 SVG 生成：
+
+- `icon-32.png`：透明背景的圆角版本，供不支持 SVG 图标的浏览器使用。
+- `icon-180.png`：整块铺满、不透明的版本；iOS 会自行裁圆角，因此不留透明角。
+
+每页 `<head>` 声明三个链接（SVG 图标、32px PNG 回退、apple-touch-icon），`check-site` 会校验数量与文件名。修改图标请改 SVG 后重新生成 PNG，不要直接编辑二进制。
+
 ## 交互实验清单
 
 实验在正文中写成 `<!-- lab:l6-metrics -->`，讲次前缀必填。`loadContent` 渲染实验、读取其标题段（`.l<N>-title` 或 `.l<N>-lab-title`），把结果收集到 `data.labs`；`labs.html` 由这份注册表按讲次生成，新增实验不需要改页面代码。第一讲的 4 个图解早于实验标记，在 `pages.mjs` 的 `labs()` 里静态登记并固定排在各讲次之前。分组标题、简介与计数同样取自 `catalog.lectures`，卡片标题沿用「实验：…？」句式，所属文章标题从 frontmatter 读取，因此六组结构与文案完全一致。每页只加载本讲 `lecture<N>.css`，第一讲继续使用 `lesson.css`。
