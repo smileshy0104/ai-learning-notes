@@ -85,6 +85,10 @@ npm run new:article -- rag introduction "RAG 入门"
 
 `tools/materials.test.mjs` 跨讲检查全部归档：每个文件的字节数与 SHA-256、每讲一个 PDF 与一个文字稿、README 必须列出文件名。
 
+按讲次组织的专题在 `catalog.collections` 里标记 `"lectures": true`，构建据此要求文章声明 `lecture`，不再写死课程 slug。合并笔记用 `npm run notes:lecture -- <讲次>` 生成，文件名取自该讲的 `note` 字段，因此新增讲次不需要改代码或加 npm 脚本。
+
+第一讲正文里的手工组件样式（例如表格的 `tr.selected` 目标行）写在 `site/assets/site.css`。`site/assets/lesson.css` 由 `tools/import-lecture.mjs` 生成，重跑会覆盖，不要把手工规则加进去。
+
 `tools/import-lecture.mjs` 为一次性迁移脚本：
 
 1. 按 section ID 从原始 HTML 提取完整区块。

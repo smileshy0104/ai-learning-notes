@@ -7,6 +7,7 @@
     {
       "slug": "cme295",
       "title": "CME295 · Transformers & LLMs",
+      "lectures": true,
       "kind": "course",
       "label": "课程学习",
       "description": "按讲次学习 Transformer 与大语言模型：从基本计算到模型家族、MoE、架构优化、解码与提示。",

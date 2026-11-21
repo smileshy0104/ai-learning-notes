@@ -20,6 +20,8 @@ export function registerLectureContract({ number, labs }) {
     assert.equal(published.length, lecture.chapters.length, `lecture ${number} published ${published.length} chapters but catalog lists ${lecture.chapters.length}`);
     for (const article of published) {
       assert(!article.text.includes('**'), `${article.slug}: unrendered emphasis`);
+      // HTML 块内的 Markdown 不会被解析：页面上会直接显示 [文字](地址)。
+      assert(!article.text.includes(']('), `${article.slug}: unrendered Markdown link`);
       // 出处说明里的「已视觉核对第 N 页」是合法内容；这里只拦无证据的掌握声明。
       assert(!/已读完|已掌握/.test(article.text), `${article.slug}: unverified mastery claim leaked into the article`);
     }

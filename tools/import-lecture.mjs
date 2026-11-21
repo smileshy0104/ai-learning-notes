@@ -45,7 +45,7 @@ for (const chapter of catalog.chapters) {
   content = content.replace(/<h2\b[^>]*>[\s\S]*?<\/h2>/, '');
   content = content.replace(/href="\.\.\/\.\.\/references\/llm-foundations.md"/g, 'href="https://github.com/datawhalechina/hello-agents"');
   content = content.replace(/class="source"/g, 'class="source"');
-  const frontmatter = `---\nslug: ${chapter.slug}\ntitle: ${JSON.stringify(chapter.title)}\ncollection: cme295\ndescription: ${JSON.stringify(chapter.description)}\norder: ${chapter.order}\nkind: lesson\nstatus: published\ntags: ${JSON.stringify(chapter.tags)}\n---\n\n`;
+  const frontmatter = `---\nslug: ${chapter.slug}\ntitle: ${JSON.stringify(chapter.title)}\ncollection: cme295\nlecture: 1\ndescription: ${JSON.stringify(chapter.description)}\norder: ${chapter.order}\nkind: lesson\nstatus: published\ntags: ${JSON.stringify(chapter.tags)}\n---\n\n`;
   const dest = path.join(root, `content/collections/cme295/${chapter.slug}.md`);
   await fs.mkdir(path.dirname(dest), { recursive: true });
   await fs.writeFile(dest, frontmatter + content + '\n');

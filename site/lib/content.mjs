@@ -70,6 +70,7 @@ export async function loadContent(root) {
     if (!/^[a-z0-9-]+$/.test(collection.slug) || collections.has(collection.slug)) throw new Error('Invalid or duplicate collection slug');
     collections.set(collection.slug,collection);
   }
+  const lectures = catalog.lectures ?? [];
   const articles=[];
   const urls=new Set();
   for(const file of await files(path.join(root,'content/collections'))) {
@@ -86,7 +87,8 @@ export async function loadContent(root) {
     urls.add(url);
     const lecture = data.lecture;
     if (lecture !== undefined && (!Number.isInteger(lecture) || lecture < 1)) throw new Error(`${file}: invalid lecture`);
-    if (data.collection === 'cme295' && lecture === undefined) throw new Error(`${file}: missing lecture`);
+    // 按讲次组织的专题必须在 catalog 里显式声明 "lectures": true；不写死课程 slug。
+    if (collections.get(data.collection).lectures === true && lecture === undefined) throw new Error(`${file}: missing lecture`);
     const labs = [];
     const expanded = content.replace(LAB_PATTERN, (_, name) => {
       const html = renderLab(name);
@@ -97,7 +99,6 @@ export async function loadContent(root) {
     articles.push({...data,lecture,...processed,url,file,labs});
   }
   articles.sort((a,b)=>a.collection.localeCompare(b.collection)||(a.lecture??0)-(b.lecture??0)||a.order-b.order||a.slug.localeCompare(b.slug));
-  const lectures = catalog.lectures ?? [];
   // catalog.chapters is the legacy lecture-1 manifest kept for tools/import-lecture.mjs; it must never drift from lectures[0].
   const primary = lectures.find(l => l.collection === 'cme295' && l.number === 1);
   if (catalog.chapters?.length) {

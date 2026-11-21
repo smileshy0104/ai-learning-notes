@@ -20,7 +20,7 @@ tags: ["N-gram","NNLM"]
 <div class="math">P(下一个词 | 当前词) = 两词相邻出现次数 / 当前词作为前文的次数<br>P(agent | [BOS]) = 2/2 = 1<br>P(learns | agent) = 1/2<br>P([EOS] | learns) = 1/1 = 1<br>P(agent learns [EOS] | [BOS]) = 1 × 1/2 × 1 = 1/2</div>
 <div class="grid"><div class="layer"><strong>问题一：没见过的组合怎么办？</strong><br>若 robot 在训练语料里没出现，分母计数为 0，无法直接给出概率估计；即使见过 robot，新组合 robot learns 也可能计数为 0。平滑与回退能缓解，但需要额外规则。</div><div class="layer"><strong>问题二：相似词不能自然共享知识</strong><br>agent learns 出现过，不等于计数表就知道 robot learns 也合理。神经模型通过学习表示与共享参数，获得更多泛化机会。</div></div>
 <p>学习向量的动机因此很具体：把离散符号映射到能计算、能共享统计规律的空间。它不保证每个新组合都合理，但能避免只靠独立的词组计数。</p>
-<h3 id="part-2">从“学表示”到“用表示计算相似”</h3>
+<h2 id="part-2">从“学表示”到“用表示计算相似”</h2>
 <p>2003 年的神经语言模型（NNLM）把两件事合在一起：先给每个词一张稠密向量表，再用前馈网络根据前几个词预测下一个词。收益很直接：<strong>没见过的组合也能得到一个合理的概率</strong>，因为相似词共享相近的参数。</p>
 <div class="flow"><span class="chip">离散词 → 查表得到稠密向量</span><span class="arrow">→</span><span class="chip">拼接前 n−1 个词的向量</span><span class="arrow">→</span><span class="chip">前馈网络</span><span class="arrow">→</span><span class="chip">词表上的概率</span></div>
 <p>一旦词变成了向量，“意思接近”就能用数字衡量。常用<strong>余弦相似度</strong>，它只看方向、不看长度：</p>

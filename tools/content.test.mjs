@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { loadContent } from '../site/lib/content.mjs';
 import { articlePage, collectionPage, labs as labsPage } from '../site/lib/pages.mjs';
 
@@ -94,6 +95,7 @@ test('cme295 articles must declare their lecture and register in catalog.lecture
  const catalogFile=path.join(root,'content/catalog.json');
  const catalog=JSON.parse(await fs.readFile(catalogFile,'utf8'));
  catalog.collections[0].slug='cme295';
+ catalog.collections[0].lectures=true;
  await fs.writeFile(catalogFile,JSON.stringify(catalog));
  await fs.mkdir(path.join(root,'content/collections/cme295'),{recursive:true});
  await fs.rm(dir,{recursive:true,force:true});
@@ -113,3 +115,22 @@ test('frontmatter cannot set the reserved lab metadata field',()=>fixture(async(
  await fs.writeFile(path.join(dir,'reserved.md'),article('reserved').replace('tags: [Example]','tags: [Example]\nlabs: [fake]'));
  await assert.rejects(loadContent(root),/reserved for rendered experiment metadata/);
 }));
+test('an article without section headings renders no empty table of contents',()=>fixture(async(root,dir)=>{
+ await fs.writeFile(path.join(dir,'flat.md'),article('flat').replace('## Motivation\n\nA complete explanation.\n\n## Example\n\nA worked example.','Only one flat paragraph.'));
+ const data=await loadContent(root);
+ assert.equal(data.articles[0].headings.length,0);
+ const html=articlePage(data,data.articles[0]);
+ assert(!html.includes('本页目录'),'empty table of contents rendered');
+ assert(html.includes('Only one flat paragraph.'));
+}));
+test('every lecture overview links to each chapter of its lecture',async()=>{
+ const data=await loadContent(fileURLToPath(new URL('../',import.meta.url)));
+ for(const lecture of data.lectures){
+  const overview=data.articles.find(a=>a.collection===lecture.collection&&a.lecture===lecture.number&&(a.slug===`l${lecture.number}-overview`||a.slug==='introduction'));
+  assert(overview,`lecture ${lecture.number} has no overview page`);
+  for(const slug of lecture.chapters){
+   if(slug===overview.slug)continue;
+   assert(overview.html.includes(`href="${slug}.html"`),`${overview.slug} does not link to ${slug}`);
+  }
+ }
+});

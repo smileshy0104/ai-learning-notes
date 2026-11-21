@@ -15,7 +15,7 @@ tags: ["RNN","LSTM","Word2Vec"]
 
 <p>前面把 token 变成了向量、把位置换成了上下文表示，但还没有看到<strong>神经网络本身</strong>。课件用三张图串起这条历史：Word2vec 学词向量 → RNN 处理顺序 → 注意力解决长距离依赖。</p>
 
-<h3 id="part-2">1. Word2vec：一个很窄的神经网络</h3>
+<h2 id="part-2">1. Word2vec：一个很窄的神经网络</h2>
 <p>课件第 35 页的结构只有三层：输入大小 V，隐藏层大小 d，输出大小 V。中间那层就是我们要的词向量。</p>
 <svg viewBox="0 0 800 290" role="img" aria-label="Word2vec 神经网络结构：输入 V 维 one-hot，隐藏层 d 维，输出 V 维概率" style="width:100%;height:auto;max-width:720px;display:block;margin:14px auto">
 <text x="150" y="14" font-size="13" text-anchor="middle" fill="#53677b">输入 one-hot（V=6）</text>
@@ -35,8 +35,8 @@ tags: ["RNN","LSTM","Word2Vec"]
 <input type="radio" name="w2v" id="w2v-2">
 <div class="controls" role="group" aria-label="Word2vec 训练前后"><span>阶段：</span><label for="w2v-1">训练前（初始权重）</label><label for="w2v-2">训练后（若干次更新）</label></div>
 <div class="panel panel-w2v1">
-<div class="grid"><div><h4 id="part-3">输出层：下一个 token 的概率</h4><div class="bars"><div class="barrow"><span>A</span><div class="track"><div class="fill" style="width:15%"></div></div><span>15%</span></div><div class="barrow"><span>cute</span><div class="track"><div class="fill" style="width:40%"></div></div><span>40%</span></div><div class="barrow"><span>teddy bear</span><div class="track"><div class="fill" style="width:15%"></div></div><span>15%</span></div><div class="barrow"><span>is</span><div class="track"><div class="fill" style="width:10%"></div></div><span>10%</span></div><div class="barrow"><span>reading</span><div class="track"><div class="fill" style="width:10%"></div></div><span>10%</span></div><div class="barrow"><span>.</span><div class="track"><div class="fill" style="width:10%"></div></div><span>10%</span></div></div></div>
-<div><h4 id="part-4">与目标比较</h4>
+<div class="grid"><div><h3 id="part-3">输出层：下一个 token 的概率</h3><div class="bars"><div class="barrow"><span>A</span><div class="track"><div class="fill" style="width:15%"></div></div><span>15%</span></div><div class="barrow"><span>cute</span><div class="track"><div class="fill" style="width:40%"></div></div><span>40%</span></div><div class="barrow"><span>teddy bear</span><div class="track"><div class="fill" style="width:15%"></div></div><span>15%</span></div><div class="barrow"><span>is</span><div class="track"><div class="fill" style="width:10%"></div></div><span>10%</span></div><div class="barrow"><span>reading</span><div class="track"><div class="fill" style="width:10%"></div></div><span>10%</span></div><div class="barrow"><span>.</span><div class="track"><div class="fill" style="width:10%"></div></div><span>10%</span></div></div></div>
+<div><h3 id="part-4">与目标比较</h3>
 <div class="table-wrap"><table><thead><tr><th>项目</th><th>值</th></tr></thead><tbody>
 <tr><th scope="row">输入</th><td>“A” → [1,0,0,0,0,0]</td></tr>
 <tr><th scope="row">隐藏层 d=2</th><td>可学习向量</td></tr>
@@ -48,8 +48,8 @@ tags: ["RNN","LSTM","Word2Vec"]
 </div></div>
 </div>
 <div class="panel panel-w2v2">
-<div class="grid"><div><h4 id="part-5">输出层：下一个 token 的概率</h4><div class="bars"><div class="barrow"><span>A</span><div class="track"><div class="fill" style="width:5%"></div></div><span>5%</span></div><div class="barrow"><span>cute</span><div class="track"><div class="fill" style="width:76%"></div></div><span>76%</span></div><div class="barrow"><span>teddy bear</span><div class="track"><div class="fill" style="width:5%"></div></div><span>5%</span></div><div class="barrow"><span>is</span><div class="track"><div class="fill" style="width:6%"></div></div><span>6%</span></div><div class="barrow"><span>reading</span><div class="track"><div class="fill" style="width:4%"></div></div><span>4%</span></div><div class="barrow"><span>.</span><div class="track"><div class="fill" style="width:4%"></div></div><span>4%</span></div></div></div>
-<div><h4 id="part-6">与目标比较</h4>
+<div class="grid"><div><h3 id="part-5">输出层：下一个 token 的概率</h3><div class="bars"><div class="barrow"><span>A</span><div class="track"><div class="fill" style="width:5%"></div></div><span>5%</span></div><div class="barrow"><span>cute</span><div class="track"><div class="fill" style="width:76%"></div></div><span>76%</span></div><div class="barrow"><span>teddy bear</span><div class="track"><div class="fill" style="width:5%"></div></div><span>5%</span></div><div class="barrow"><span>is</span><div class="track"><div class="fill" style="width:6%"></div></div><span>6%</span></div><div class="barrow"><span>reading</span><div class="track"><div class="fill" style="width:4%"></div></div><span>4%</span></div><div class="barrow"><span>.</span><div class="track"><div class="fill" style="width:4%"></div></div><span>4%</span></div></div></div>
+<div><h3 id="part-6">与目标比较</h3>
 <div class="table-wrap"><table><thead><tr><th>项目</th><th>值</th></tr></thead><tbody>
 <tr><th scope="row">输入</th><td>“A” → [1,0,0,0,0,0]</td></tr>
 <tr><th scope="row">隐藏层 d=2</th><td>可学习向量</td></tr>
@@ -63,7 +63,7 @@ tags: ["RNN","LSTM","Word2Vec"]
 <div class="note">为什么这样能学到语义？因为经常出现在相似上下文里的词，会被同一套权重推向相似的隐藏向量。课件举的例子是“泰迪熊之于柔软”和“巴黎之于法国，柏林之于德国”——这种关系不是人工标注的，而是训练中浮现的。</div>
 <details><summary>交叉熵损失在这里到底在做什么？</summary><p>目标是 “cute” 的 one-hot 向量，模型给出的是 6 个概率。交叉熵只关心目标那一项的概率多大：越接近 1 损失越小。梯度回传后，W₁ 和 W₂ 都会调整，使下次遇到同样的输入时，“cute” 的概率更高。</p><p>课件里隐藏层写作 [0.2, 0.9] 这类二维向量。真实模型 d 通常是几百到几千维。</p></details>
 
-<h3 id="part-7">2. RNN：把顺序信息带进来</h3>
+<h2 id="part-7">2. RNN：把顺序信息带进来</h2>
 <p>词向量本身不知道词序：“孩子抱着泰迪熊”和“泰迪熊抱着孩子”会得到同样的向量集合。RNN 通过一个<strong>隐藏状态</strong>把“已经读过什么”传递下去：</p>
 <div class="math">h_t = f(h_{t-1}, x_t)</div>
 <svg viewBox="0 0 800 200" role="img" aria-label="RNN 按时间展开：每个时刻接收当前 token 与上一时刻的隐藏状态，输出新的隐藏状态" style="width:100%;height:auto;max-width:720px;display:block;margin:14px auto">
@@ -78,7 +78,7 @@ tags: ["RNN","LSTM","Word2Vec"]
 <p>课件第 51 页展示了 RNN 能承担的几类任务：生成（输入文本 → 输出文本）、分类（输入文本 → 一个类别）、多分类（每个位置一个标签，如词性）、情感分析、翻译、命名实体识别。</p>
 <details><summary>RNN 的两个硬伤</summary><p><strong>长距离依赖：</strong>所有历史都被压进一个固定长度的向量里，反复改写后早期信息容易丢失。比如先说“我的泰迪熊有 3 英尺高”，隔了很多词之后再说“它”，此时“它”指谁已经很难从当前隐藏状态里读出来。</p><p><strong>无法并行：</strong>h_t 依赖 h_{t-1}，必须一个接一个算，训练慢。这两点正是 Transformer 想要解决的问题。</p></details>
 
-<h3 id="part-8">3. LSTM：加一条更长的“记忆通道”</h3>
+<h2 id="part-8">3. LSTM：加一条更长的“记忆通道”</h2>
 <p>课件第 52 页提到 LSTM（1997）保留了隐藏状态，但额外引入<strong>细胞状态</strong>，并用门来控制“写入多少、保留多少、输出多少”。这里给出简化示意，不展开公式：</p>
 <div class="grid">
 <div class="layer"><strong>遗忘门</strong><br>决定旧记忆保留多少</div>
@@ -88,7 +88,7 @@ tags: ["RNN","LSTM","Word2Vec"]
 </div>
 <p>它缓解了长距离依赖，但仍然是<strong>顺序计算</strong>，也没有彻底解决信息在长序列中被稀释的问题。这是注意力机制出现的直接动机。</p>
 
-<h3 id="part-9">4. 早期注意力：翻译时“回头看原文”</h3>
+<h2 id="part-9">4. 早期注意力：翻译时“回头看原文”</h2>
 <p>课件第 54–55 页介绍 2014 年 Bahdanau 等人的工作。翻译长句时，seq2seq 模型原本只能靠编码器最后那个隐藏状态记住整句，注意力允许解码器在生成每个词时<strong>直接读取源句的相关位置</strong>：</p>
 <svg viewBox="0 0 800 215" role="img" aria-label="序列到序列翻译中，生成 lit 时通过注意力直接读取源句的 reading" style="width:100%;height:auto;max-width:720px;display:block;margin:14px auto">
 <text x="12" y="24" font-size="12" fill="#53677b">源句（编码器）</text>
@@ -101,9 +101,9 @@ tags: ["RNN","LSTM","Word2Vec"]
 </svg>
 <p>要生成法语 “lit”（读）时，模型可以直接把注意力放到源句的 “reading” 上，而不必依赖一个被反复压缩的状态向量。这就是后来 Transformer 里 self-attention 的思想来源。</p>
 <div class="note">注意区别：这里的注意力连接的是<strong>解码器和编码器</strong>（cross-attention 的前身，2014 年）；Transformer 的核心创新是把注意力用在<strong>同一序列内部</strong>（self-attention），并几乎不再依赖循环结构。</div>
-<h3 id="part-10">训练完只留一张表，网络本身会丢掉</h3>
+<h2 id="part-10">训练完只留一张表，网络本身会丢掉</h2>
 <p>Word2vec 的隐藏层没有激活函数，本质就是“按 ID 取一行向量”。训练结束后，中间那个嵌入矩阵才是产品，其余权重可以丢弃。这解释了为什么它常被叫作“词向量算法”，而不是“语言模型”。</p>
-<h3 id="part-11">词频太高或太低都不好算：负采样</h3>
+<h2 id="part-11">词频太高或太低都不好算：负采样</h2>
 <p>原始做法要对整个词表做 softmax。词表十万级时，每预测一个词都要算十万个分数。负采样把它改造成一组二分类：</p>
 <div class="flow"><span class="chip">正样本：真实相邻的词对<br>(agent, learns) → 1</span><span class="chip">负样本：随机抽 5～15 个不相关的词<br>(agent, apple) → 0</span><span class="arrow">→</span><span class="chip">判断“这两个词是否相邻”</span></div>
 <p>这样就不必遍历整个词表，训练速度大幅提升。代价是它优化的是近似目标，而不是完整的 softmax 概率。</p>

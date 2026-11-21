@@ -37,5 +37,5 @@ tags: ["Scaling","MoE","GQA"]
 <div class="table-wrap"><table><thead><tr><th>层次</th><th>例子</th><th>来源</th></tr></thead><tbody><tr><th>基础能力</th><td>理解、世界知识、多语言、代码</td><td>预训练自然获得</td></tr><tr><th>涌现／指令能力</th><td>上下文学习、分步推理、指令遵循</td><td>规模 + 后训练</td></tr><tr><th>增强能力</th><td>任务分解、工具调用、自我检查</td><td>外部系统：工具、检索、循环</td></tr></tbody></table></div>
 <p>这也解释了为什么同一个基座模型，套上工具与执行循环后“看起来更聪明”：它跨到了第三层。模型本身没有因此改变。</p>
 </details>
-<p class="source">本节的公式、数字与结论均已逐项计算核对；训练示例与参数量估算为教学数据。内容参考 [参考读物副本](../../references/llm-foundations.md)，属于第一讲之外的延伸。</p>
+<p class="source">本节的公式、数字与结论均已逐项计算核对；训练示例与参数量估算为教学数据。内容参考仓库内的 <code>references/llm-foundations.md</code>（不随网站发布），属于第一讲之外的延伸。</p>
 </section>
