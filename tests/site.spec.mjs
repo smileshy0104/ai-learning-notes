@@ -214,9 +214,11 @@ test('english edition mirrors the chinese site and switches language',async({bro
  await expect(page).toHaveURL('http://127.0.0.1:18766/topics/cme295/introduction.html');
  await expect(page.locator('html')).toHaveAttribute('lang','zh-CN');
  await expect(page.locator('a.lang-switch')).toHaveCount(1);
- // 尚未翻译的章节不应出现语言切换
- await page.goto('http://127.0.0.1:18766/topics/cme295/l4-overview.html');
- await expect(page.locator('a.lang-switch')).toHaveCount(0);
+ // 所有中文文章都应有英文版，并在页面上出现语言切换
+ const untranslated = manifest.articles.filter(a => a.lang === 'zh' && !manifest.pages.includes(`en/${a.url}`));
+ expect(untranslated.map(a => a.url), '发现尚未翻译的文章').toEqual([]);
+ await page.goto(`http://127.0.0.1:18766/${manifest.articles.find(a => a.lang === 'zh').url}`);
+ await expect(page.locator('a.lang-switch')).toHaveCount(1);
  await page.goto('http://127.0.0.1:18766/en/library.html');
  await page.locator('#knowledge-query').fill('attention');
  await expect.poll(()=>page.locator('.article-card:visible').count()).toBeGreaterThan(0);

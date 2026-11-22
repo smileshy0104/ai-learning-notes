@@ -42,10 +42,10 @@ Page numbers are physical pages, including the cover. Consecutive pages are ofte
 | Preference tuning: data and collection | 57–69 | [Preference data](l3-preferences.html) |
 | Reward modelling and RLHF | 70–86 | [Reward models and RLHF](l3-rlhf.html) |
 | DPO and method comparison | 87–90 | [DPO](l3-dpo.html) |
-| Reasoning: verification, within-group comparison, GRPO intuition | 91–124 | [Reasoning training](../../../topics/cme295/l3-reasoning.html) |
-| Distillation: on-policy and variants | 125–131 | [Distillation](../../../topics/cme295/l3-distillation.html) |
-| Discussion: a full training case and risks | 132–164 | [End-to-end training case](../../../topics/cme295/l3-end-to-end.html) |
-| Wrap-up and self-test | 165 | [Review and terminology](../../../topics/cme295/l3-review.html) |
+| Reasoning: verification, within-group comparison, GRPO intuition | 91–124 | [Reasoning training](l3-reasoning.html) |
+| Distillation: on-policy and variants | 125–131 | [Distillation](l3-distillation.html) |
+| Discussion: a full training case and risks | 132–164 | [End-to-end training case](l3-end-to-end.html) |
+| Wrap-up and self-test | 165 | [Review and terminology](l3-review.html) |
 
 ## One question runs through the lecture: can the teddy bear be machine washed?
 
