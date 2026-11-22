@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root=fileURLToPath(new URL('../dist/',import.meta.url));
+const base=path.resolve(root);
 const port=Number(process.env.PORT??8000);
 if(!Number.isInteger(port)||port<1||port>65535)throw new Error('PORT must be an integer from 1 to 65535');
 const types={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'text/javascript; charset=utf-8','.json':'application/json; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.jpg':'image/jpeg','.jpeg':'image/jpeg','.webp':'image/webp','.ico':'image/x-icon','.txt':'text/plain; charset=utf-8','.woff2':'font/woff2','.pdf':'application/pdf'};
@@ -11,8 +12,8 @@ const server=http.createServer(async(req,res)=>{
  try {
   const url=new URL(req.url,'http://localhost');
   const pathname=decodeURIComponent(url.pathname);
-  let file=path.resolve(root,'.'+pathname);
-  if(!file.startsWith(root)) {res.writeHead(403);res.end();return;}
+  let file=path.resolve(base,'.'+pathname);
+  if(file!==base&&!file.startsWith(base+path.sep)) {res.writeHead(403);res.end();return;}
   if(pathname.endsWith('/'))file=path.join(file,'index.html');
   if(!path.extname(file))file+='.html';
   let body,status=200;
