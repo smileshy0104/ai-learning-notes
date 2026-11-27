@@ -1,103 +1,203 @@
 ---
 slug: l2-moe
-title: "MoE: which experts does each token choose?"
+title: "MoE: which experts does each token use?"
 collection: cme295
 lecture: 2
 lang: en
-description: "Dense versus sparse MoE, top-k routing, load balancing, shared experts, and the difference between total and activated parameters."
+description: "Start from 'no need to consult everyone', hand-calculate Top-2 routing, separate total from activated parameters, then cover routing collapse, shared and fine-grained experts."
 order: 40
 kind: lesson
 status: published
-tags: [MoE, Router, Top-k, Load balancing]
+tags: [MoE, Router, Top-k, Load balancing, Beginner]
 ---
 
-## 1. What is a mixture of experts?
+## 1. Where the problem comes from
 
-MoE = Mixture of Experts, PDF pages 35–50.
+Pages 35–50 of the PDF.
 
-**Definition**: several learnable subnetworks act as experts, and a router decides each expert’s contribution from the input. A sparse MoE runs only a small subset of experts per call.
+The previous section left a tension: bigger models perform better, but bigger models also cost more compute per forward pass. If I am answering a simple question, must every parameter run?
 
-**Why it matters**: total parameters can grow without per-token compute growing with the expert count. Note this is computational sparsity: it does not mean the memory, communication, bandwidth or training cost of storing every expert disappears.
+The lecture's analogy works well: a room holds people with mathematics, physics and biology backgrounds. You have a maths question. Do you ask everyone? Obviously you ask the maths experts.
 
-The analogy “ask a few specialists about a maths problem” helps as an introduction, but real experts are trained numerical subnetworks: **no subject is assigned in advance, and they do not necessarily end up specialised by subject**.
+Mixture of Experts (MoE) turns this into architecture: <strong>prepare many sub-networks (experts) and send each token through only a few of them.</strong>
 
-## 2. Where does MoE usually sit?
+Hold on to this sentence: <strong>total parameters can be large while the per-token compute is set by the few selected experts.</strong>
 
-Modern Transformers often replace one FFN in some layers with “a router + several FFN experts”; attention still handles interaction across positions.
+## 2. Experts, router, selection
 
-<div class="flow"><span class="chip">post-attention token representation xₜ</span><span class="arrow">→ Router</span><span class="chip">pick top-k experts</span><span class="arrow">→ expert FFNs</span><span class="chip">weighted sum → next layer</span></div>
+Three parts, one job each:
 
-Different tokens in one sentence can enter different experts; the same token can choose different experts in different layers. This is not “one model per request, forever”.
+| Part | Role | Analogy |
+| --- | --- | --- |
+| expert | an independent small network, usually a feed-forward network | one specialist |
+| router (gate) | scores the input and decides who works | triage desk |
+| weighted sum | combines the selected outputs by weight | synthesising several opinions |
 
-## 3. Dense versus sparse
+One common misreading: the experts <strong>are not human-assigned subject roles</strong>. They are learned numeric sub-networks with no "maths expert" or "grammar expert" label; what each specialises in emerges from training.
 
-```text
-routing probabilities g(x) = softmax(W_router x)
-sparse selection S(x) = TopK(g(x))
-y = Σᵢ∈S wᵢ(x) Eᵢ(x)
-```
+## 3. Where MoE sits in the Transformer
 
-Dense sums over all experts; sparse computes only those in S. Whether the selected weights are renormalised and how the output is scaled depends on the implementation.
+Recall lecture 1: each block has attention and a feed-forward network (FFN). Attention exchanges information between positions; the FFN processes features position by position.
 
-### Hand-computing a Top-2
-
-Routing probabilities `[0.55,0.25,0.15,0.05]`; the first two are selected. **This teaching example renormalises**:
+The usual MoE move is to <strong>replace the FFN in some blocks with a set of FFN experts plus a router.</strong> Attention layers normally stay as they are.
 
 ```text
-retained probability mass = 0.55 + 0.25 = 0.8
-weights = [0.6875, 0.3125, 0, 0]
-E₁(x)=[2,0]，E₂(x)=[0,4]
-y=0.6875×[2,0]+0.3125×[0,4]=[1.375,1.25]
+token representation x
+  → attention (exchange information between positions)
+  → router scores every expert
+  → keep Top-k experts
+  → each selected expert processes x
+  → weighted sum
+  → next layer
 ```
+
+Two per-token consequences:
+
+- Different tokens in the same sentence may go to different experts.
+- The same token may choose differently at different layers.
+
+So it is wrong to say "this request used one fixed model": routing happens per token and per layer.
+
+## 4. Reading the formulas
+
+```text
+router scores: g(x) = softmax(W x)
+selected set:  S(x) = TopK(g(x))
+output:        y = Σ_{i∈S} wᵢ(x) · Eᵢ(x)
+```
+
+Line by line:
+
+- `W x`: a matrix turns the current representation into one score per expert.
+- `softmax`: turns scores into probabilities, i.e. budget shares per expert.
+- `TopK`: keeps only the highest k; the rest do not run.
+- `Eᵢ(x)`: expert i maps the same x to a new vector.
+- `Σ`: adds the selected outputs with their weights.
+
+<strong>Dense versus sparse turns on that TopK step:</strong>
+
+| Type | Which experts compute | Benefit | Cost |
+| --- | --- | --- | --- |
+| Dense MoE | all experts, with different weights | smooth combination | compute grows with expert count, so little gain |
+| Sparse MoE | only the Top-k | many parameters, compute proportional to k | routing, communication and balancing get harder |
+
+The lecture stresses that sparse MoE is the useful form.
+
+## 5. Hand-calculating a Top-2 route
+
+Suppose the router produces four probabilities:
+
+```text
+g(x) = [0.55, 0.25, 0.15, 0.05]
+```
+
+Top-2 selects expert 1 and expert 2. This teaching example renormalises over the selected pair:
+
+```text
+retained mass = 0.55 + 0.25 = 0.8
+weights = [0.55/0.8, 0.25/0.8] = [0.6875, 0.3125]
+```
+
+Take two-dimensional expert outputs:
+
+```text
+E₁(x) = [2, 0]
+E₂(x) = [0, 4]
+```
+
+Add coordinate by coordinate:
+
+```text
+dim 1: 0.6875 × 2 + 0.3125 × 0 = 1.375
+dim 2: 0.6875 × 0 + 0.3125 × 4 = 1.25
+y = [1.375, 1.25]
+```
+
+That vector is what the layer hands on. Note that <strong>routing probabilities only allocate work; the values entering the next layer come from expert computation.</strong>
+
+Now switch to Top-1. Expert 1 still ranks first, receives all the weight, and the output becomes `[2, 0]`. Same token, same scores, different k, entirely different result. That is why k is a tuned hyperparameter.
 
 <!-- lab:l2-routing -->
 
-## 4. Total parameters versus activated parameters
+## 6. Total versus activated parameters
 
-Suppose the shared part has 1B parameters, four experts have 0.5B each, every token picks only 2, and the router is ignored:
+This is the easiest number to misread on an MoE spec sheet. Suppose:
 
-- Total parameters: `1 + 4×0.5 = 3B`.
-- Simplified activated parameters per token: `1 + 2×0.5 = 2B`.
-- If two tokens route differently, a whole batch may touch every expert.
+- shared parts (attention, embeddings, normalisation) total 1B parameters;
+- 4 experts, 0.5B each;
+- each token selects 2 experts.
 
-Activated parameters are not a full FLOPs formula; storage still has to hold the total, or manage it through distributed placement and offloading.
-
-## 5. Router collapse: why does the rich get richer?
-
-One expert is slightly better early → selected more often → more updates → better. The others are rarely used, compute is unbalanced, and capacity goes unused.
-
-Slide 45 uses the Switch Transformer auxiliary loss to explain the mitigation:
+Then:
 
 ```text
-L_aux = α N Σᵢ fᵢ Pᵢ
-fᵢ：fraction of tokens routed to expert i
-Pᵢ：mean routing probability for expert i over the batch
+total parameters = 1 + 4 × 0.5 = 3B
+per-token activated parameters (simplified) = 1 + 2 × 0.5 = 2B
 ```
 
-**Top-1 teaching example**: N=4, α=0.01.
+So a "3B parameter" MoE model uses about 2B per token in the forward pass. That is how MoE buys capacity at relatively low compute.
 
-| Case | f | P | auxiliary loss |
+Three cautions:
+
+- <strong>Memory must still hold the total parameters</strong>, or manage them through distributed placement and offloading.
+- <strong>Different tokens in a batch route differently</strong>, so together they may touch every expert.
+- <strong>Activated parameters are not FLOPs</strong>: they describe participating parameter scale, while real compute also depends on sequence length and batch size.
+
+## 7. Routing collapse: the rich get richer
+
+Early in training, one expert happens to do slightly better, so more tokens go to it; it receives more updates and improves; so it attracts even more tokens. The others barely learn.
+
+This is <strong>routing collapse</strong>. Its harm: you think you have N experts, but only a few are effective, so capacity is wasted.
+
+Page 45 explains the remedy with Switch Transformer's auxiliary loss:
+
+```text
+L_aux = α · N · Σᵢ fᵢ · Pᵢ
+```
+
+- `fᵢ`: fraction of tokens actually routed to expert i (real assignment).
+- `Pᵢ`: mean router probability for expert i (model preference).
+- `N`: number of experts.
+- `α`: weight of the auxiliary term.
+
+The product is smallest when both distributions are uniform; if one expert is both preferred and actually used, the product grows, loss rises, and training is pushed back towards balance.
+
+<strong>Hand calculation for Top-1</strong>: N=4, α=0.01.
+
+| Situation | f | P | L_aux |
 | --- | --- | --- | --- |
-| balanced | [0.25,0.25,0.25,0.25] | [0.25,0.25,0.25,0.25] | 0.0100 |
-| skewed to one | [0.75,0.25,0,0] | [0.7,0.2,0.05,0.05] | 0.0230 |
+| fully balanced | [0.25, 0.25, 0.25, 0.25] | [0.25, 0.25, 0.25, 0.25] | 0.0100 |
+| leaning on one | [0.75, 0.25, 0, 0] | [0.7, 0.2, 0.05, 0.05] | 0.0230 |
 
-The auxiliary term is added to the main task loss to trade load balance against task quality. It does not force every token through every expert.
+Check the first row: `0.01 × 4 × (0.25×0.25 × 4) = 0.01 × 4 × 0.25 = 0.01`. The skewed case more than doubles the loss, so the term really does penalise imbalance.
 
-### Top-k is not differentiable — how does the router learn?
+### Hard selection is not differentiable — so how does the router learn
 
-The hard selection index is not a smooth function. Common training treats the realised assignment statistics f as a quantity that receives no gradient, and computes gradients along the routing probabilities, the selected outputs and the auxiliary objective. Details differ between routing algorithms; “top-k itself is directly differentiable” is not a safe claim.
+`TopK` is a hard decision and not differentiable. The common approach: gradients flow through routing probabilities and the selected experts' outputs, while the assignment fractions `fᵢ` are treated as statistics that carry no gradient. Details differ between papers, but they share the principle of <strong>not pushing gradients through the hard index choice</strong>.
 
-## 6. Shared experts and fine-grained experts
+## 8. Current practice: shared and fine-grained experts
 
-- **Shared experts**: run for every token, learning common transformations; routed experts handle the remaining differences.
-- **Fine-grained experts**: more, smaller experts; pick several and combine, widening the combination space.
-- **Engineering cost**: inter-expert communication, capacity limits, overflow and hardware balance all have to be solved; a smaller k does not guarantee end-to-end latency falls proportionally.
+Pages 49–50 describe two recent trends.
 
-The model sizes listed on pages 49–50 are examples dated by the slides; do not treat them as a permanent leaderboard, and do not read “expert” as a human-named role.
+<strong>Shared experts</strong>: some experts always run regardless of routing, because certain general computation is needed by every token and there is no point letting each routed expert relearn it.
 
-## Check your understanding
+<strong>Fine-grained experts</strong>: instead of 8 or 16 large experts, use tens to hundreds of small ones and activate several each time. Experts become narrower and more specialised, and the combination space grows. The slide's chart shows better results with more experts at similar activated size.
 
-<details><summary>Does Top-2 mean the whole model uses only two sets of parameters?</summary><p>No. Typical designs keep shared attention, embeddings and normalisation; Top-2 only means the relevant MoE layer picks two routed experts, and shared experts may also run.</p></details>
-<details><summary>Is MoE the same as multi-head attention?</summary><p>No. Multi-head attention runs several projection heads in parallel; MoE routing picks a few of several FFN subnetworks to execute. Having multiple branches does not make them equivalent.</p></details>
+<strong>Engineering cost</strong>: more experts mean more cross-device communication, capacity limits and token overflow (dropping or forwarding when an expert is full). Shrinking k therefore does not automatically reduce end-to-end latency; the gain depends on the implementation.
 
-Source: PDF pages 35–50 and the related Q&amp;A; numbers are teaching additions, and the auxiliary formula was checked against the diagram on page 45.
+The model specifications on pages 49–50 are a dated snapshot, useful for orders of magnitude, not a permanent ranking.
+
+## 9. Check your understanding
+
+<details><summary>Does Top-2 mean only two sets of parameters run in the whole model?</summary><p>No. Routing only happens in the layers converted to MoE; attention, embeddings and normalisation run as usual. Even inside those layers, shared experts may also participate.</p></details>
+<details><summary>Is MoE the same as multi-head attention?</summary><p>No. Multi-head attention runs several projection sets in parallel inside one layer; MoE chooses a few of many FFN sub-networks. Both have branches, but the division of labour differs completely.</p></details>
+<details><summary>Why does MoE save compute but not memory?</summary><p>Total parameters must still be stored; they simply do not all participate in each forward pass. Saving compute raises throughput, but memory and communication costs do not vanish.</p></details>
+
+## 10. Commonly confused points
+
+- Experts are learned sub-networks, not assigned subjects.
+- Routing happens per token and per layer, not once per request.
+- Activated parameters are fewer than total, but memory does not shrink accordingly.
+- The auxiliary loss is added to the main loss, not a replacement.
+- Sparse means few experts run per step, not that the model as a whole is simple.
+
+Source: PDF pages 35–50 and the matching Q&amp;A. The Top-2 values, auxiliary-loss calculation and parameter split are teaching additions; the formula was checked against page 45.

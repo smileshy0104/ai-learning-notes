@@ -4,125 +4,213 @@ title: "Context, prompting and reasoning: what to give, and how"
 collection: cme295
 lecture: 2
 lang: en
-description: "Separate the context window from the output budget, and use one bear-age example to understand zero-shot, few-shot, CoT and self-consistency."
+description: "Separate the context window from the output budget, then use one age problem to work through zero-shot, few-shot, CoT and self-consistency — including how each fails."
 order: 90
 kind: lesson
 status: published
-tags: [Context, ICL, Few-shot, CoT, Self-consistency]
+tags: [Context, ICL, Few-shot, CoT, Self-consistency, Beginner]
 ---
 
-## 1. Context is more than the sentence you typed
+## 1. What context actually is
 
-Pages 124–137 of the PDF. After every prediction the newly generated token is appended to the sequence and used for the next prediction. So the usable context usually contains: system instructions, message history, the user’s question, tool results, and what has already been generated.
+Pages 124–137 of the PDF.
 
-The **context window** is the length limit the service or model accepts; the **maximum output** is the generation cap set by this request or the product. Specific APIs may count input, output, cached and reasoning tokens differently; check the version documentation.
+The previous section noted that every chosen token is appended to the input before predicting the next. That means <strong>the input the model sees keeps growing</strong>.
 
-### Compute a budget once
-
-Teaching assumptions: total window 8192 tokens, every output token counts against that total, and a separate output cap of 2048:
+Writing this on paper makes it vivid. Start with:
 
 ```text
-system and template 500
-history and sources 3500
-user question       1000
-input total         5000
-window left         8192−5000=3192
-actual output ≤ min(3192,2048)=2048
+A cute teddy bear is
 ```
 
-It is not “the user text is under 8192, so 8192 more must be available”. Tool descriptions, templates or service overhead may also take space.
-
-## 2. Tokens and pages can only be estimated roughly
-
-Slides 129–130 use an English rule of thumb: 1 token ≈ 0.75 English words, a page ≈ 400 words, so about 533 tokens, rounded in class to roughly 500.
-
-That estimate depends on font, language, layout and tokenizer. Chinese text, code and tables have no fixed “one character is one token” conversion. Cost, window and output length should be measured with the target model’s tokenizer.
-
-The product specifications on slides 126–128 are a snapshot dated by the material and do not mean every model shares the same window or output limit.
-
-## 3. Why can a longer context be harder?
-
-“Context rot” names the phenomenon where, as input grows and relevant information is diluted by noise, model performance can drop. A needle-in-a-haystack test places a target fact at different positions in a long context and checks whether it can be retrieved.
+The model picks `reading`, and you write it at the end of the same line:
 
 ```text
-task: find bear A’s age
-relevant fact: bear A is 4 years old this year
+A cute teddy bear is reading
+```
+
+Now cover `reading` with your hand: the next round has lost an important clue. What you covered is exactly what the next round must see — <strong>the token just produced is both this round's output and next round's input.</strong>
+
+That is the <strong>context window</strong>: the maximum length the model handles at once, including system instructions, chat history, the user question, tool results and tokens already generated.
+
+A common beginner error is thinking the context window equals what you typed. It does not; it is the combined volume of input plus output.
+
+| Concept | Meaning | Common misreading |
+| --- | --- | --- |
+| context window | total length the model handles at once | counted as user input only |
+| max output | cap on this generation | assumed equal to the window |
+| input tokens | the prompt side | forgetting system prompt, examples, history |
+| output tokens | the generated side | forgetting generated text also occupies the window |
+
+Counting of input, output, cached and reasoning tokens differs by API; check the current documentation.
+
+## 2. Work out a budget
+
+Teaching assumption: total window 8192 tokens, all output counts against it, separate output cap 2048.
+
+```text
+system and templates   500
+history and documents 3500
+user question         1000
+input total           5000
+
+window left = 8192 − 5000 = 3192
+allowed output = min(3192, 2048) = 2048
+```
+
+It is not "the user's text is under 8192, so 8192 can be generated". If the history is long, the input eats most of the budget and output space shrinks, possibly to nothing usable.
+
+<strong>Tool descriptions, system prompts and boilerplate all occupy space.</strong> Beginners most often forget these.
+
+## 3. Tokens and pages: rough only
+
+Pages 129–130 give English rules of thumb:
+
+- 1 token ≈ 0.75 English words
+- one page ≈ 400 words ≈ 533 tokens, rounded to 500 in class
+
+This depends on font, layout, language and tokeniser. Chinese text, code and tables have no fixed "one character, one token" conversion. Estimate cost and length with the target model's own tokeniser.
+
+The product specifications on pages 126–128 are a snapshot from the material's date, not a statement about every model today.
+
+## 4. Why a longer context can be worse
+
+Intuitively more information is better. In practice there is <strong>context rot</strong>: as the input grows, key facts are diluted by irrelevant text and become harder to use.
+
+The evaluation is <strong>Needle in a Haystack</strong>: hide one key fact at various positions in a long context and check retrieval.
+
+```text
+task: how old is bear A this year?
+key fact: bear A is 4 this year
 noise: hundreds of pages of unrelated toy records
 ```
 
-“The model can accept this many tokens” is a capacity constraint, not “it reliably uses every passage”. Performance differs across tasks and models, so no long input should be declared automatically worse.
+The lesson: <strong>"can accept this many tokens" is a capacity property, not "can reliably use every passage".</strong>
 
-Practical approach: define the task, retrieve relevant material, remove irrelevant repetition, keep the key constraints, and summarise when needed. Compression also loses information, so check afterwards that the task is still answerable.
+Do not overgeneralise to "any long input is worse either". Results vary with task, model and position. Practical steps:
 
-## 4. ICL: adapt to a task through examples in context
+1. decide which information the task needs;
+2. retrieve and include only relevant material;
+3. drop duplication and noise;
+4. summarise first if necessary;
+5. verify afterwards that the task can still be answered.
 
-ICL = In-Context Learning. The model adjusts its answer from instructions or examples in the current input, **without updating weights**, unlike fine-tuning.
+Compression also loses information, so verify after compressing.
 
-### Zero-shot: give the task and the necessary facts
+## 5. ICL: adapt through context without touching weights
 
-```text
-known: bear A is 4 years old in 2024.
-question: how old is bear A in 2025?
-requirement: output only the age number.
-```
+<strong>In-context learning (ICL)</strong> means the model adapts to the task from instructions or examples in the current input, <strong>without updating any parameter</strong>.
 
-Expected output 5. Facts are still required; zero-shot means no task demonstrations, not “no background at all”.
+That is the essential difference from fine-tuning:
 
-### Few-shot: demonstrate inputs and outputs
-
-```text
-example: bear B is 3 years old in 2024 → 4 years old in 2025.
-example: bear C is 6 years old in 2024 → 7 years old in 2025.
-known: bear A is 4 years old in 2024 → in 2025 is ?
-```
-
-The examples show the “add one year” rule and the answer format. Using examples that leak an answer too close to the query does not make a meaningful evaluation.
-
-| Approach | Changes parameters? | Main cost | Risk |
+| Method | Changes parameters? | Data needed | Scope |
 | --- | --- | --- | --- |
-| Zero-shot | No | prompt and generation | under-specified instructions |
-| Few-shot | No | extra example tokens | example bias, format overfitting |
-| Fine-tuning | Yes | training and weight upkeep | data and training bias |
+| prompting (zero-shot) | no | an instruction | this request |
+| few-shot | no | a handful of examples | this request |
+| fine-tuning | yes | hundreds or thousands of labelled samples | all later requests |
 
-More examples are not always better, and modern reasoning models do not never need examples. Compare on a fixed evaluation set.
-
-## 5. CoT: step demonstrations and intermediate computation
-
-CoT = Chain-of-Thought. The slides introduce the historical idea of improving multi-step tasks with step-by-step examples. Here a **verifiable short calculation** demonstrates the process:
+### Zero-shot: task and facts only
 
 ```text
-question: 4 years old in 2024, how old in 2025?
-year gap: 2025−2024=1
-answer: 4+1=5 years old
+Known: bear A is 4 years old in 2024.
+Question: how old is bear A in 2025?
+Requirement: output only the age.
 ```
 
-The original subtitle and slides mix “now”, “next year” and different years, which is easy to misread. Fixing 2024→2025 avoids mixing facts that change with the calendar into the computation.
+Expected output 5. Zero-shot means <strong>no task demonstrations</strong>, not "no background information". Facts still belong in the prompt.
 
-Such intermediate computation helps checking, but the explanation a model produces may not faithfully reflect its internal causal process, and it is not a proof of correctness. In practice, ask reasoning models for a short justification, citations and result verification rather than demanding a full internal chain.
+### Few-shot: a few input–output examples
 
-## 6. Self-consistency: sample several times, aggregate answers
+```text
+Example: bear B is 3 in 2024 → 4 in 2025.
+Example: bear C is 6 in 2024 → 7 in 2025.
+Known: bear A is 4 in 2024 → in 2025?
+```
 
-**Definition**: generate several candidate solutions and aggregate the final answers, for example by majority vote. It spends more inference compute to gain performance; it does not train new parameters.
+The examples convey both the rule (add one year) and the output format (digits only).
 
-Teaching samples: `[5,5,4,5,4]` — answer 5 gets 3/5 votes, so 5 is chosen.
+One trap: <strong>if an example is too similar to the query, it leaks the answer</strong>, which is neither a valid demo nor a valid evaluation.
 
-<div class="flow"><span class="chip">same question</span><span class="arrow">→ sample several times →</span><span class="chip">5 / 5 / 4 / 5 / 4</span><span class="arrow">→ aggregate →</span><span class="chip">majority answer: 5</span></div>
+## 6. How to tune the examples
 
-**A vote share is not a calibrated probability of being correct.** If samples are highly correlated or the model has a systematic misunderstanding, the majority can be wrong too. Normalise answer formats, handle ties, and combine with independent computation or fact checking.
+Suppose the model outputs "bear A is 5 years old" and your program wants an integer. Diagnose step by step:
 
-## 7. Keep prompting, decoding and training apart
+1. <strong>Add a format requirement</strong>: append "output only the integer" and retry the same question.
+2. <strong>Change the test item</strong>: alter both years and age to see whether the requirement transfers.
+3. <strong>For JSON</strong>: constrain decoding to the schema, then validate the field values in code.
 
-- Prompting: change the context the model sees.
-- Temperature and sampling: change how a token is chosen from the current distribution.
-- Fine-tuning: change model parameters.
-- Self-consistency: increase the number of samples and aggregate.
-- Guided decoding: restrict the legal output form.
+If the output really is a single integer but the value is wrong — say it copied bear B's age from an example — where do you look?
 
-For example, “add two examples to the age question” is not fine-tuning; “ask for JSON” is not by itself a strict grammar constraint. Tools from different layers combine, but their effect and cost must be verified separately.
+Try <strong>removing bear B's example</strong>, keeping only A's facts, and ask again; then restore the example with everything else unchanged. Comparing the two outputs tells you whether the example interfered.
 
-## Check your understanding
+To judge whether a prompt is more reliable overall, track two metrics separately on held-out questions:
 
-<details><summary>Why does few-shot increase latency and cost?</summary><p>Examples add input tokens, which can increase prefill computation and storage. Cache hits, service billing and generation length also affect the real cost, so you cannot infer a fixed multiple from the example count.</p></details>
-<details><summary>If self-consistency gives 5 in 60% of samples, is the answer 60% likely to be correct?</summary><p>No. That is only the frequency within this sample set; sample independence, model bias and decoding strategy all affect it, so separate calibration or verification is needed.</p></details>
+- format compliance (does it parse?);
+- answer accuracy (is the value right?).
 
-Source: PDF pages 124–137 and the transcript; pages 125 and 137 were visually checked. The window budget and fixed-year example are teaching additions.
+<strong>They measure different things and must not be merged.</strong>
+
+## 7. CoT: writing the intermediate steps
+
+<strong>Chain-of-Thought (CoT)</strong> shows reasoning steps instead of jumping to the answer.
+
+The historical method in the slides uses a few "problem plus worked steps" demonstrations so the model imitates the reasoning path; the authors found multi-step task performance improved.
+
+Show it with a <strong>verifiable short calculation</strong>:
+
+```text
+Problem: 4 years old in 2024, how old in 2025?
+Step: 2025 − 2024 = 1
+Answer: 4 + 1 = 5 years old
+```
+
+Fixing 2024→2025 avoids mixing in facts that change with today's date (the transcript drifts between "now" and "next year", which becomes ambiguous).
+
+<strong>Three boundaries:</strong>
+
+1. The written steps need not faithfully reflect the model's internal computation; they may be post-hoc rationalisation.
+2. Plausible steps do not guarantee a correct answer.
+3. CoT is not the only route. Reasoning models trained with reasoning tokens work differently, covered in a later lecture.
+
+Practical advice: ask for a brief justification, citations and a verification step rather than a full "inner monologue".
+
+## 8. Self-consistency: sample several times, then vote
+
+<strong>Self-consistency</strong> generates several answers to one problem and aggregates them.
+
+```text
+samples: [5, 5, 4, 5, 4]
+answer 5 gets 3 votes → choose 5
+```
+
+<div class="flow"><span class="chip">one problem</span><span class="arrow">→ several samples →</span><span class="chip">5 / 5 / 4 / 5 / 4</span><span class="arrow">→ aggregate →</span><span class="chip">majority: 5</span></div>
+
+It trades <strong>extra inference compute for accuracy</strong>; it does not train a new model.
+
+<strong>Key warning: the vote share is not a calibrated probability.</strong> If five samples are highly correlated (the same misconception), the majority is wrong too. For it to help:
+
+- sampling must be genuinely diverse (temperature not too low);
+- answer formats must be unified or aggregation fails;
+- ties need handling;
+- combine it with independent computation or factual checks.
+
+## 9. Keep the four layers apart
+
+Beginners merge these four, yet each changes something different:
+
+| Layer | What changes | Example |
+| --- | --- | --- |
+| prompting | the context the model sees | add two examples |
+| decoding | how a token is picked from the distribution | lower the temperature |
+| parameters | the model itself | fine-tuning |
+| inference compute | how many samples and how they are aggregated | self-consistency voting |
+
+"Add two examples to the age problem" is not fine-tuning; "require JSON" is not strict grammar constraint by itself. They combine, but validate effect and cost separately.
+
+## 10. Check your understanding
+
+<details><summary>Why does few-shot add latency and cost?</summary><p>Examples add input tokens, increasing prefill work and possibly cache usage. Cache hits, billing and output length also matter, so the multiple cannot be inferred from the example count alone.</p></details>
+<details><summary>Self-consistency gives 5 a 60% vote share. Is the answer 60% likely to be correct?</summary><p>No. That is a frequency within this sample set; sample independence and model bias affect it, so calibration or verification is still required.</p></details>
+<details><summary>Is a longer context always better?</summary><p>No. Capacity for longer input does not imply reliable use of it. Keywords can be diluted, so retrieval, pruning and checking all matter.</p></details>
+
+Source: PDF pages 124–137 and the transcript; pages 125 and 137 were visually checked. The window budget, fixed-year example and diagnostic flow are teaching additions.
